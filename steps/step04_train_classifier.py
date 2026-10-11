@@ -2,30 +2,47 @@
 
 VS Code 터미널에서 프로젝트 폴더를 기준으로 실행한다.
 uv run python steps/step04_train_classifier.py
+uv run python steps/step04_train_classifier.py --lr 1e-5 2e-5 5e-5      # 학습률 비교
+uv run python steps/step04_train_classifier.py --model bert roberta electra-s --lr 1e-5 2e-5 5e-5
+uv run python steps/step04_train_classifier.py --model roberta --lr 2e-5 --seed 42 43 44
+
+모델 이름은 lesson_settings.CLASSIFIER_CANDIDATES의 짧은 이름이나 Hugging Face ID를 쓴다.
+여러 조합을 주면 모델 × 학습률 × seed 순서로 차례로 학습하고, 하나가 실패해도 계속한다.
 """
 
+import argparse
+import gc
 import json
 import math
 import random
-import shutil
 import time
+import traceback
+from itertools import product
 from pathlib import Path
 
 import numpy as np
 import torch
-from lesson_settings import CLASSIFIER_MODEL, DATASET, LEARNER_DIR, ROOT
+from common.metrics import classification_scores, save_errors
+from common.plots import plot_learning_curve
+from common.records import new_run_dir, now_iso, write_json
+from common.resources import (
+    environment_info,
+    gpu_peak_mb,
+    measure_latency,
+    process_rss_mb,
+    reset_gpu_peak,
+)
+from lesson_settings import CLASSIFIER_CANDIDATES, CLASSIFIER_MODEL, DATASET, LEARNER_DIR, ROOT
 from step01_read_data import read_labels, read_rows
 from step02_check_data import check_splits
-from step03_train_baseline import classification_scores, save_errors
+from step06_predict import load_run, predict_text
 from torch.utils.data import DataLoader, Dataset
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, DataCollatorWithPadding
 
-# 두 번째 실험은 RUN_NAME과 LEARNING_RATE를 함께 바꾼다.
-# 다른 조건을 고정해야 학습률에 따른 차이를 비교할 수 있다.
+# 학습률 비교에서는 학습률만 바꾸고 다른 조건은 고정한다.
 DATA_DIR = ROOT / "data" / DATASET
-RUN_NAME = "lr2e5"
 LEARNING_RATE = 2e-5
-EPOCHS = 3
+EPOCHS = 5
 BATCH_SIZE = 4
 ACCUMULATION_STEPS = 4
 MAX_LENGTH = 192
@@ -71,6 +88,14 @@ def preview_training_batch(rows, tokenizer, dataset, collator):
             "shapes": shapes, "labels": batch["labels"].tolist()}
 
 
+def token_length_stats(rows, tokenizer, max_length):
+    # 입력 길이 제한 때문에 잘리는 문장이 얼마나 되는지 기록한다.
+    lengths = [len(ids) for ids in tokenizer([row["text"] for row in rows],
+                                             truncation=False)["input_ids"]]
+    return {"max": max(lengths), "mean": sum(lengths) / len(lengths),
+            "truncated_rows": sum(length > max_length for length in lengths)}
+
+
 def validate_model(model, loader, device, labels):
     model.eval()
     predictions, actual = [], []
@@ -88,17 +113,30 @@ def validate_model(model, loader, device, labels):
     return classification_scores(actual, predictions, labels), total_loss / count, predictions
 
 
-def run_training(data_dir=DATA_DIR, learner_dir=LEARNER_DIR, run_name=RUN_NAME,
+def resolve_model(name):
+    """짧은 이름이면 Hugging Face ID로 바꾼다. 실행 이름에는 짧은 이름을 쓴다."""
+    if name in CLASSIFIER_CANDIDATES:
+        return name, CLASSIFIER_CANDIDATES[name]
+    for alias, model_id in CLASSIFIER_CANDIDATES.items():
+        if model_id == name:
+            return alias, model_id
+    return str(name).split("/")[-1], str(name)
+
+
+def default_run_name(alias, learning_rate, seed):
+    return f"{alias}_lr{learning_rate:.0e}_s{seed}".replace("e-0", "e-")
+
+
+def run_training(data_dir=DATA_DIR, learner_dir=LEARNER_DIR, run_name=None,
                  model_name=CLASSIFIER_MODEL, learning_rate=LEARNING_RATE, epochs=EPOCHS,
                  batch_size=BATCH_SIZE, accumulation_steps=ACCUMULATION_STEPS,
                  max_length=MAX_LENGTH, seed=SEED, device_name=DEVICE,
-                 local_files_only=False):
+                 gradient_checkpointing=True, local_files_only=False):
     data_dir, learner_dir = Path(data_dir), Path(learner_dir)
     if min(epochs, batch_size, accumulation_steps, max_length) < 1 or not 0 < learning_rate < 1:
         raise ValueError("학습 횟수와 크기는 양수, 학습률은 0과 1 사이여야 합니다.")
-    output_dir = learner_dir / run_name
-    if output_dir.exists():
-        raise FileExistsError(f"기존 실험을 덮어쓰지 않습니다. RUN_NAME을 바꾸세요: {output_dir}")
+    model_alias, model_name = resolve_model(model_name)
+    run_name = run_name or default_run_name(model_alias, learning_rate, seed)
     device = torch.device(device_name)
     if device.type == "cuda" and not torch.cuda.is_available():
         raise RuntimeError("CUDA를 사용할 수 없습니다. GPU 환경 또는 DEVICE 설정을 확인하세요.")
@@ -108,9 +146,6 @@ def run_training(data_dir=DATA_DIR, learner_dir=LEARNER_DIR, run_name=RUN_NAME,
     train_rows = read_rows(data_dir / "train.csv")
     validation_rows = read_rows(data_dir / "validation.csv")
     check_splits({"train": train_rows, "validation": validation_rows}, labels)
-    baseline_dir = learner_dir / "baseline"
-    if not (baseline_dir / "baseline.joblib").exists():
-        raise RuntimeError("먼저 step03_train_baseline.py에서 기준 모델을 학습하세요.")
 
     random.seed(seed)
     np.random.seed(seed)
@@ -119,6 +154,8 @@ def run_training(data_dir=DATA_DIR, learner_dir=LEARNER_DIR, run_name=RUN_NAME,
         torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
+    # 모델 가중치, optimizer 상태, 활성값을 모두 포함한 최대 VRAM을 재기 위해 먼저 초기화한다.
+    reset_gpu_peak()
 
     # 2. 토크나이저와 분류 모델을 같은 이름에서 불러온다.
     tokenizer = AutoTokenizer.from_pretrained(model_name, local_files_only=local_files_only)
@@ -129,7 +166,9 @@ def run_training(data_dir=DATA_DIR, learner_dir=LEARNER_DIR, run_name=RUN_NAME,
     # 본체를 고정하지 않는다. optimizer에는 본체와 분류층의 파라미터가 모두 들어간다.
     for parameter in model.parameters():
         parameter.requires_grad_(True)
-    if device.type == "cuda":
+    parameter_count = sum(parameter.numel() for parameter in model.parameters())
+    use_checkpointing = gradient_checkpointing and device.type == "cuda"
+    if use_checkpointing:
         model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
     model.to(device)
 
@@ -155,26 +194,29 @@ def run_training(data_dir=DATA_DIR, learner_dir=LEARNER_DIR, run_name=RUN_NAME,
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, learning_rate_factor)
     use_cuda = device.type == "cuda"
     dtype = torch.bfloat16 if use_cuda and torch.cuda.is_bf16_supported() else torch.float16
+    precision = ("BF16 autocast" if dtype == torch.bfloat16 else "FP16 autocast + GradScaler"
+                 ) if use_cuda else "FP32"
     scaler = torch.amp.GradScaler("cuda", enabled=use_cuda and dtype == torch.float16)
 
-    output_dir.mkdir(parents=True)
-    config = {"dataset": data_dir.name, "learner": learner_dir.name, "run_name": run_name,
-              "model": str(model_name), "learning_rate": learning_rate, "epochs": epochs,
-              "batch_size": batch_size, "accumulation_steps": accumulation_steps,
-              "max_length": max_length, "seed": seed, "device": str(device), "labels": labels}
-    (output_dir / "config.json").write_text(json.dumps(config, ensure_ascii=False, indent=2),
-                                             encoding="utf-8")
-    # 최종 평가에서 같은 기준 모델을 비교할 수 있게 실험 폴더에 함께 보관한다.
-    shutil.copy2(baseline_dir / "baseline.joblib", output_dir / "baseline.joblib")
-    shutil.copy2(baseline_dir / "validation_metrics.json", output_dir / "baseline_validation.json")
+    output_dir = new_run_dir(learner_dir, run_name)
+    config = {"kind": "transformer", "dataset": data_dir.name, "learner": learner_dir.name,
+              "run_name": run_name, "model": model_name, "model_alias": model_alias,
+              "learning_rate": learning_rate,
+              "epochs": epochs, "batch_size": batch_size,
+              "accumulation_steps": accumulation_steps, "max_length": max_length,
+              "seed": seed, "device": str(device), "precision": precision,
+              "gradient_checkpointing": use_checkpointing, "labels": labels}
+    write_json(output_dir / "config.json", config)
 
     # 4. train에서 loss를 계산하고, 누적 구간 끝에서 가중치를 갱신한다.
-    best_score, updates = -1.0, 0
+    best_score, best_record, updates = -1.0, None, 0
+    train_seconds = 0.0
     started = time.perf_counter()
     for epoch in range(1, epochs + 1):
         model.train()
         optimizer.zero_grad(set_to_none=True)
         total_train_loss, count = 0.0, 0
+        epoch_started = time.perf_counter()
         for index, batch in enumerate(train_loader):
             batch = {key: value.to(device) for key, value in batch.items()}
             window_start = (index // accumulation_steps) * accumulation_steps
@@ -195,13 +237,19 @@ def run_training(data_dir=DATA_DIR, learner_dir=LEARNER_DIR, run_name=RUN_NAME,
                 scheduler.step()
                 optimizer.zero_grad(set_to_none=True)
                 updates += 1
+        if use_cuda:
+            torch.cuda.synchronize()
+        train_seconds += time.perf_counter() - epoch_started
 
         # 5. validation으로 현재 모델을 평가한다. 검증 함수에는 backward가 없다.
+        validation_started = time.perf_counter()
         metrics, validation_loss, predictions = validate_model(
             model, validation_loader, device, labels)
+        validation_seconds = time.perf_counter() - validation_started
         record = {"epoch": epoch, "train_loss": total_train_loss / count,
                   "validation_loss": validation_loss,
                   "validation_macro_f1": metrics["macro_f1"], "optimizer_steps": updates,
+                  "validation_seconds": validation_seconds,
                   "elapsed_seconds": time.perf_counter() - started}
         with (output_dir / "epochs.jsonl").open("a", encoding="utf-8") as stream:
             stream.write(json.dumps(record) + "\n")
@@ -209,25 +257,123 @@ def run_training(data_dir=DATA_DIR, learner_dir=LEARNER_DIR, run_name=RUN_NAME,
 
         # 6. 더 높은 validation 점수를 얻었을 때만 가중치를 저장한다.
         if metrics["macro_f1"] > best_score:
-            best_score = metrics["macro_f1"]
+            best_score, best_record = metrics["macro_f1"], record
             checkpoint = output_dir / "checkpoint"
             model.save_pretrained(checkpoint, safe_serialization=True)
             tokenizer.save_pretrained(checkpoint)
             summary = {"method": "full_backbone_and_head_finetuning", "best_epoch": epoch,
                        "optimizer_steps_at_checkpoint": updates,
                        "selection_split": "validation", "max_length": max_length}
-            for filename, value in (("training_summary.json", summary),
-                                    ("validation_metrics.json", metrics)):
-                (output_dir / filename).write_text(
-                    json.dumps(value, ensure_ascii=False, indent=2), encoding="utf-8")
+            write_json(output_dir / "training_summary.json", summary)
+            write_json(output_dir / "validation_metrics.json", metrics)
             save_errors(output_dir / "validation_errors.csv", validation_rows, predictions, labels)
 
+    total_seconds = time.perf_counter() - started
+    peaks = gpu_peak_mb()
+    plot_learning_curve(output_dir / "epochs.jsonl", output_dir / "learning_curve.png",
+                        f"{model_name} lr={learning_rate} ({output_dir.name})")
+
+    # 7. GPU 메모리를 비운 뒤, 서비스와 같은 조건(CPU, 1건씩)으로 추론 시간을 잰다.
+    del model, optimizer, scheduler
+    gc.collect()
+    if use_cuda:
+        torch.cuda.empty_cache()
+    bundle = load_run(output_dir)
+    latency = measure_latency(lambda text: predict_text(text, bundle),
+                              [row["text"] for row in validation_rows])
+    best_metrics = json.loads((output_dir / "validation_metrics.json").read_text(encoding="utf-8"))
+    experiment = {
+        "experiment_id": output_dir.name, "learner": learner_dir.name,
+        "dataset": data_dir.name, "kind": "transformer",
+        "model_info": {
+            "model_id": model_name, "model_alias": model_alias,
+            "model_size_params": parameter_count,
+            "precision": precision, "training_type": "Full Fine-tuning (본체 + 분류층)",
+            "gradient_checkpointing": use_checkpointing,
+            "pretrained_source": f"https://huggingface.co/{model_name}",
+            "tokenizer": type(tokenizer).__name__,
+        },
+        "hyperparameters": {
+            "max_length": max_length, "batch_size": batch_size,
+            "accumulation_steps": accumulation_steps,
+            "effective_batch_size": batch_size * accumulation_steps,
+            "learning_rate": learning_rate, "epochs": epochs, "seed": seed,
+            "optimizer": "AdamW(weight_decay=0.01)",
+            "scheduler": "linear warmup 10% + linear decay", "grad_clip": 1.0,
+        },
+        "token_lengths": {"train": token_length_stats(train_rows, tokenizer, max_length),
+                          "validation": token_length_stats(validation_rows, tokenizer,
+                                                           max_length)},
+        "resource_and_time": {
+            "train_time_sec": train_seconds,
+            "total_time_sec_including_validation": total_seconds,
+            "inference_latency_per_sample_ms": latency["mean_ms"],
+            "inference_latency": {**latency, "device": "cpu"},
+            "gpu_validation_ms_per_sample_at_best_epoch":
+                best_record["validation_seconds"] / len(validation_rows) * 1000,
+            "peak_vram_mb": peaks["peak_vram_allocated_mb"],
+            "peak_vram_reserved_mb": peaks["peak_vram_reserved_mb"],
+            "process_rss_mb": process_rss_mb(),
+        },
+        "evaluation_metrics": {
+            "split": "validation", "best_epoch": best_record["epoch"],
+            "accuracy": best_metrics["accuracy"], "macro_f1": best_metrics["macro_f1"],
+            "weighted_f1": best_metrics["weighted_f1"],
+            "confusion_matrix": best_metrics["confusion_matrix"],
+        },
+        "environment": environment_info(),
+        "timestamp": now_iso(),
+    }
+    write_json(output_dir / "experiment.json", experiment)
+    print(f"최고 validation macro F1 {best_score:.4f} (epoch {best_record['epoch']}), "
+          f"학습 {train_seconds:.1f}초, peak VRAM {peaks['peak_vram_allocated_mb'] or 0:.0f}MB, "
+          f"CPU 1건 추론 {latency['mean_ms']:.1f}ms")
     print("저장 위치:", output_dir)
     return output_dir
 
 
 def main():
-    run_training()
+    parser = argparse.ArgumentParser(description="사전학습 분류 모델 파인튜닝")
+    parser.add_argument("--model", nargs="+", default=[CLASSIFIER_MODEL],
+                        help=f"짧은 이름({', '.join(CLASSIFIER_CANDIDATES)}) 또는 Hugging Face ID")
+    parser.add_argument("--lr", type=float, nargs="+", default=[LEARNING_RATE])
+    parser.add_argument("--seed", type=int, nargs="+", default=[SEED])
+    parser.add_argument("--epochs", type=int, default=EPOCHS)
+    parser.add_argument("--batch-size", type=int, default=BATCH_SIZE)
+    parser.add_argument("--accumulation", type=int, default=ACCUMULATION_STEPS)
+    parser.add_argument("--max-length", type=int, default=MAX_LENGTH)
+    parser.add_argument("--device", default=DEVICE)
+    parser.add_argument("--gradient-checkpointing", action=argparse.BooleanOptionalAction,
+                        default=True, help="끄면 VRAM은 늘고 속도는 빨라진다.")
+    parser.add_argument("--run-name", help="조합이 하나일 때만 쓸 실행 이름")
+    args = parser.parse_args()
+    combos = list(product(args.model, args.lr, args.seed))
+    if args.run_name and len(combos) > 1:
+        parser.error("--run-name은 모델, 학습률, seed 조합이 하나일 때만 쓸 수 있습니다.")
+
+    finished, failed = [], []
+    for index, (model_name, learning_rate, seed) in enumerate(combos, start=1):
+        print(f"\n===== {index}/{len(combos)}: {model_name}, lr={learning_rate}, seed={seed} =====")
+        try:
+            finished.append(run_training(
+                run_name=args.run_name, model_name=model_name, learning_rate=learning_rate,
+                epochs=args.epochs, batch_size=args.batch_size,
+                accumulation_steps=args.accumulation, max_length=args.max_length, seed=seed,
+                device_name=args.device, gradient_checkpointing=args.gradient_checkpointing))
+        except Exception:  # noqa: BLE001 - 한 조합이 실패해도 나머지 실험은 계속한다.
+            # 실패한 실행 폴더에는 experiment.json이 없으므로 step05 후보에서 빠진다.
+            traceback.print_exc()
+            failed.append((model_name, learning_rate, seed))
+        # 다음 실험이 앞 실험의 GPU 메모리에 영향받지 않게 정리한다.
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
+    print(f"\n완료 {len(finished)}개, 실패 {len(failed)}개")
+    for model_name, learning_rate, seed in failed:
+        print(f"  실패: {model_name}, lr={learning_rate}, seed={seed}")
+    if failed:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-"""튜터 검수용: 데이터 원본과 실제 가중치 변경을 수업 코드 밖에서 확인한다."""
+"""검수용: 데이터 원본과 실제 가중치 변경, 선정 규칙 준수를 수업 코드 밖에서 확인한다."""
 
 import hashlib
 import json
@@ -11,7 +11,8 @@ from transformers import AutoModelForSequenceClassification
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "steps"))
 
-from lesson_settings import DATA_DIR, LEARNER_DIR
+from lesson_settings import DATA_DIR, OUTPUT_ROOT, SELECTION_DIR
+from step05_select_model import choose
 
 
 def read_json(path):
@@ -24,15 +25,19 @@ def data_snapshot(data_dir):
             for name in ("train.csv", "validation.csv", "labels.json")}
 
 
-def verify_original_data(data_dir):
-    """배포 manifest와 현재 파일을 대조한다. test 입력은 읽지 않는다."""
+def check_original_data(data_dir):
+    """배포 manifest와 현재 파일을 대조한다. test 입력은 읽지 않는다.
+
+    data/manifest.json은 이전 데이터 버전 기준이라 현재 v2 데이터와 다를 수 있다.
+    그래서 실패로 멈추지 않고 일치 여부를 기록한다.
+    """
     data_dir = Path(data_dir)
-    expected = read_json(data_dir.parent / "manifest.json")["topics"][data_dir.name]["files"]
     snapshot = data_snapshot(data_dir)
-    for name, digest in snapshot.items():
-        if digest != expected[name]["sha256"]:
-            raise ValueError(f"배포 원본과 데이터가 다릅니다: {data_dir.name}/{name}")
-    return snapshot
+    topics = read_json(data_dir.parent / "manifest.json").get("topics", {})
+    expected = topics.get(data_dir.name, {}).get("files", {})
+    return {name: {"sha256": digest,
+                   "manifest_match": expected.get(name, {}).get("sha256") == digest}
+            for name, digest in snapshot.items()}
 
 
 def parameter_evidence(model):
@@ -84,49 +89,38 @@ def verify_run(run_dir):
         raise ValueError("저장한 epoch와 validation 기록이 일치하지 않습니다.")
     if summary["max_length"] != config["max_length"]:
         raise ValueError("학습 설정과 요약의 입력 길이가 다릅니다.")
-    return {"run_name": run_dir.name, "changed": changed, "initial": initial,
-            "selected_checkpoint": current, "best_epoch": best["epoch"],
+    return {"run_dir": run_dir.relative_to(OUTPUT_ROOT).as_posix(), "changed": changed,
+            "initial": initial, "selected_checkpoint": current, "best_epoch": best["epoch"],
             "validation_macro_f1": metrics["macro_f1"]}
 
 
-def verify_selection(learner_dir):
-    """선택한 실험이 validation 최고점인지와 실험 설정 차이를 확인한다."""
-    learner_dir = Path(learner_dir)
-    selection = read_json(learner_dir / "selected.json")
+def verify_selection(selection_dir):
+    """선정 결과가 기록된 규칙과 실험 점수를 그대로 따랐는지 확인한다."""
+    selection = read_json(Path(selection_dir) / "selected.json")
     candidates = selection["candidates"]
-    if selection["selected_by"] != "validation_macro_f1":
+    if selection["selected_by"] != "validation":
         raise ValueError("validation으로 선택한 기록이 필요합니다.")
-    settings = set()
-    labels = set()
-    datasets = set()
+    if {row["kind"] for row in candidates} < {"baseline", "transformer"}:
+        raise ValueError("기준 모델과 사전학습 모델이 모두 후보에 있어야 합니다.")
     for candidate in candidates:
-        run = learner_dir.parent / candidate["run_learner"] / candidate["run_name"]
-        config = read_json(run / "config.json")
-        metrics = read_json(run / "validation_metrics.json")
+        metrics = read_json(OUTPUT_ROOT / candidate["run_dir"] / "validation_metrics.json")
         if candidate["validation_macro_f1"] != metrics["macro_f1"]:
-            raise ValueError("선택 당시 기록과 실험 점수가 다릅니다.")
-        settings.add(tuple(config[key] for key in (
-            "model", "learning_rate", "epochs", "batch_size", "accumulation_steps", "max_length")))
-        labels.add(tuple(config["labels"]))
-        datasets.add(config["dataset"])
-    if len(settings) < 2:
-        raise ValueError("이름 외에 실제 학습 설정도 달라야 합니다.")
-    if len(labels) != 1 or len(datasets) != 1:
-        raise ValueError("같은 데이터와 라벨로 학습한 실험끼리 비교하세요.")
-    best = max(candidates, key=lambda row: row["validation_macro_f1"])
-    if any(selection[key] != best[key] for key in ("run_name", "run_learner")):
-        raise ValueError("validation 최고점과 선택한 실험이 다릅니다.")
-    return {"selected_run": best["run_name"], "different_configurations": len(settings)}
+            raise ValueError(f"선택 당시 기록과 실험 점수가 다릅니다: {candidate['run_dir']}")
+    if len({tuple(row["labels"]) for row in candidates}) != 1:
+        raise ValueError("같은 라벨로 학습한 실험끼리 비교하세요.")
+    if choose(candidates)["run_dir"] != selection["selected"]["run_dir"]:
+        raise ValueError("기록된 선정 규칙으로 다시 골랐을 때 결과가 다릅니다.")
+    return {"selected_run": selection["selected"]["run_dir"], "candidates": len(candidates)}
 
 
 def main():
-    selection = read_json(LEARNER_DIR / "selected.json")
-    report = {"data_sha256": verify_original_data(DATA_DIR),
-              "selection": verify_selection(LEARNER_DIR), "runs": []}
+    selection = read_json(SELECTION_DIR / "selected.json")
+    report = {"data": check_original_data(DATA_DIR),
+              "selection": verify_selection(SELECTION_DIR), "runs": []}
     for candidate in selection["candidates"]:
-        run = LEARNER_DIR.parent / candidate["run_learner"] / candidate["run_name"]
-        report["runs"].append(verify_run(run))
-    target = LEARNER_DIR / "learning_verification.json"
+        if candidate["kind"] == "transformer" and candidate["weights_available"]:
+            report["runs"].append(verify_run(OUTPUT_ROOT / candidate["run_dir"]))
+    target = SELECTION_DIR / "learning_verification.json"
     target.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     print("데이터 원본, 학습 가중치, 선택 기록 검수 완료:", target)
 

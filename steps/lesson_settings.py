@@ -14,16 +14,23 @@ load_dotenv(ROOT / ".env", override=False)
 DATASET = "documents"
 # LEARNER는 "learner_park", "learner_choi", "learner_ro", "learner_su" 중 하나
 LEARNER = "learner_park" 
-CLASSIFIER_MODEL = "klue/bert-base" # 기본 모델
-# CLASSIFIER_MODEL = "klue/roberta-base"
-# CLASSIFIER_MODEL = "monologg/koelectra-small-v3-discriminator"
-# CLASSIFIER_MODEL = "monologg/koelectra-base-v3-discriminator"
-# CLASSIFIER_MODEL = "monologg/distilkobert"
-# CLASSIFIER_MODEL = "team-lucid/deberta-v3-base-korean"
+# 사전학습 분류 후보. 왼쪽 짧은 이름으로 step04에 넘기고 실행 폴더 이름에도 씁니다.
+# 예: uv run python steps/step04_train_classifier.py --model bert roberta --lr 1e-5 2e-5 5e-5
+CLASSIFIER_CANDIDATES = {
+    "bert": "klue/bert-base",  # 필수 후보
+    "roberta": "klue/roberta-base",
+    "electra-s": "monologg/koelectra-small-v3-discriminator",  # 14M, 작고 빠른 후보
+    "electra-b": "monologg/koelectra-base-v3-discriminator",
+    "deberta-ko": "team-lucid/deberta-v3-base-korean",  # 한국어 전용 DeBERTa-v3
+    # "mdeberta": "microsoft/mdeberta-v3-base",  # 다국어. sentencepiece, protobuf 설치 필요
+}
+CLASSIFIER_MODEL = "bert"  # 기본 모델
 
 # 주제와 학습자별 폴더에 학습 결과를 보관합니다.
 OUTPUT_ROOT = ROOT / "artifacts"
 LEARNER_DIR = OUTPUT_ROOT / DATASET / LEARNER
+# 팀 전체 실행 중 서비스에 쓸 분류기 하나를 고른 결과와 test 평가를 보관합니다.
+SELECTION_DIR = OUTPUT_ROOT / DATASET / "selection"
 DATA_DIR = ROOT / "data" / DATASET
 # 생성 코드가 동작하는지만 확인하는 2건짜리 입력. 개발 비교는 DATA_DIR의 15건을 사용합니다.
 DEVELOPMENT_INPUT = ROOT / "steps" / "examples" / "documents_development.jsonl"

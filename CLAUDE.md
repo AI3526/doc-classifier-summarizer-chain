@@ -27,10 +27,10 @@
 |---|---|---|
 | 0 | `check_environment.py` | Python/GPU/Ollama/키 존재 확인 |
 | 1–2 | `step01_read_data.py`, `step02_check_data.py` | 데이터 읽기, 분할 중복·라벨 검사 |
-| 3 | `step03_train_baseline.py` | 문자 TF-IDF + 로지스틱 회귀 (필수 베이스라인) |
-| 4 | `step04_train_classifier.py` | klue/bert-base 등 전체 파인튜닝 (GPU) |
-| 5 | `step05_select_model.py` | validation 기준 분류기 선정 → `selected.json` |
-| 6 | `step06_predict.py` | 선정 분류기 로드·단건 예측 |
+| 3 | `step03_train_baseline.py` | 문자 TF-IDF + 로지스틱 회귀 (필수 베이스라인). `--ngram 2 5` |
+| 4 | `step04_train_classifier.py` | 사전학습 모델 전체 파인튜닝 (GPU). `--model bert roberta --lr 1e-5 2e-5 5e-5 --seed 42` → 모델×학습률×seed 조합을 차례로, 실패해도 계속 |
+| 5 | `step05_select_model.py` | 팀 전체 실행(베이스라인 포함)을 모아 validation 기준 선정 → `selection/` |
+| 6 | `step06_predict.py` | 선정 분류기 로드·단건 예측 (베이스라인/BERT 모두 `load_run`으로) |
 | 7 | `step07_call_models.py` | Ollama / OpenAI 호출 (**OpenAI는 요금 발생**) |
 | 8 | `step08_connect_chain.py` | 분류 → 정책 → 프롬프트 LangChain 체인 |
 | 9 | `step09_compare.py` | 같은 입력으로 생성 모델 비교 기록 (**요금 발생**) |
@@ -40,9 +40,36 @@
 `scripts/verify_learning.py`, `scripts/verify_service.py`는 학습·비교 기록 검수용, `scripts/build_datasets.py`는 데이터 생성 원본(수정하지 않음).
 
 ## 결과 폴더
-- `artifacts/{dataset}/{learner}/...` — 실행별 결과. `steps/lesson_settings.py`의 `DATASET`, `LEARNER`로 결정.
-- 팀원(`learner_park`, `learner_choi`, `learner_ro`, `learner_su`)은 **각자 다른 실험**을 맡고, learner 폴더로 결과가 분리된다.
-- 기존 실험 폴더를 덮어쓰지 않는다(코드가 `FileExistsError`로 막음). 새 실험은 새 이름으로.
+```
+artifacts/{dataset}/
+  {learner}/runs/{YYYYMMDD-HHMMSS}_{run_name}/   # step03/04 실행 하나
+      config.json  experiment.json  validation_metrics.json  validation_errors.csv
+      epochs.jsonl  learning_curve.png  training_summary.json   # BERT 실행만
+      checkpoint/ 또는 baseline.joblib                          # 가중치 (git 제외)
+  selection/                                     # 팀 공통, step05/11
+      selected.json  comparison.md/csv  confusion_*.png  history/
+      test_metrics.json  test_predictions.csv  test_case_review.csv  test_errors.csv
+  {learner}/comparisons/...                      # step09 생성 비교
+```
+- `DATASET`, `LEARNER`는 `steps/lesson_settings.py`에서 정한다. 팀원(`learner_park`, `learner_choi`, `learner_ro`, `learner_su`)은 **각자 다른 실험**을 맡는다.
+- `experiment.json`이 needtocheck의 EXP 형식이며 step05가 이것을 모아 비교한다. 지표 JSON/CSV는 커밋, 가중치는 git 제외.
+- 선정 규칙(step05 `TOLERANCE`): validation macro F1 최고점에서 0.01 이내 후보 중 CPU 1건 추론이 가장 빠른 것. **결과를 본 뒤 바꾸지 않는다.**
+- `selection/test_metrics.json`이 생기면 step05 재선정이 막힌다(test를 본 뒤 재선택 금지).
+- 다른 팀원 실행이 선정되면 가중치가 git에 없으므로 받아 오거나 같은 설정으로 재학습해야 서비스에서 쓸 수 있다.
+- Windows 경로 길이(260자) 제한에 주의: 프로젝트를 깊은 폴더에 두면 체크포인트 저장이 실패할 수 있다.
+
+## 분류 후보 모델 (`lesson_settings.CLASSIFIER_CANDIDATES`)
+- `bert`(klue/bert-base, 필수), `roberta`, `electra-s`(14M), `electra-b`, `deberta-ko`(team-lucid/deberta-v3-base-korean) — 모두 로드·학습 확인됨
+- 제외: distilkobert(구형, remote code + sentencepiece 필요), ModernBERT·NeoBERT(영어 전용 토크나이저 → 한국어 처리 부적합)
+- 보류: mdeberta-v3-base(다국어, sentencepiece·protobuf 설치 필요)
+- 실험 순서: ① 모든 후보 × lr {1e-5, 2e-5, 5e-5}, seed 42 ② 상위 2~3개 설정만 seed 43, 44 추가 → 평균±표준편차 보고
+- 실행 이름 형식: `{alias}_lr{lr}_s{seed}`
+
+## 공통 모듈 (`steps/common/`)
+- `metrics.py`: `classification_scores`(accuracy, macro/weighted F1, 혼동행렬), `save_errors`
+- `records.py`: `new_run_dir`, `write_json`, `read_json`, `now_iso`, `stamp`
+- `resources.py`: `measure_latency`(1건씩, 준비 호출 제외), `reset_gpu_peak`/`gpu_peak_mb`, `environment_info`
+- `plots.py`: `plot_learning_curve`, `plot_confusion_matrix` (축 이름은 영어 — 한글 글꼴 문제 회피)
 
 ## 기록 사양 (needtocheck.md 기준)
 - 분류: 모델 ID·파라미터 수·정밀도·학습 방식, max_length/batch/lr/epochs/seed, 학습 시간(초), 1건당 추론 지연(ms), peak VRAM(`torch.cuda.max_memory_allocated`, MB), Accuracy·Macro-F1·Weighted-F1·혼동행렬, 오분류 사례.
@@ -61,8 +88,8 @@
 
 ## 진행 상태 / 알려진 문제
 - [완료] 0단계 기반 정리: `.gitignore`(가중치만 제외), `pyproject.toml` 정리·의존성(joblib, matplotlib, psutil), 문의용 코드 제거, 프롬프트 분리
-- step05 선정 후보에 베이스라인이 없음 (필수 요건 위반) → 베이스라인 포함 비교로 변경 예정
-- step03/04/11에 시간·VRAM·지연 기록 없음
+- [완료] 1단계 분류: step03/04 자원·시간 기록(`experiment.json`)과 CLI, step05 베이스라인 포함 팀 단위 선정, step06 통합 로더, step11 지연·사례 기록, `verify_learning.py` 새 구조 대응
+- `data/manifest.json` 해시는 이전 데이터 버전 기준이라 현재 v2 데이터와 다름 → `verify_learning.py`는 일치 여부만 기록
 - 출력 스키마(answer/next_steps)가 요약에 맞지 않음 → 라벨별 요약 스키마로 교체 예정
 - step09는 ollama 1개 vs openai 고정 → 여러 로컬 모델 비교, 비용 계산, LLM 채점 + 블라인드 사람 채점 추가 예정
 - `tests/` 폴더 아직 없음 (pytest testpaths = `tests`)
