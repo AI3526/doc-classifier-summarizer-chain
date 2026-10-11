@@ -1,0 +1,147 @@
+{
+  "status": "dummy",
+  "quality_source": "human",
+  "llm_trust_decision": {
+    "usable_positive_ratio": 0.5555555555555556,
+    "skewed": false,
+    "criterion": "cohen_kappa",
+    "value": 0.4782608695652173,
+    "threshold": 0.7,
+    "use_llm_scores": false,
+    "cohen_kappa": 0.4782608695652173,
+    "pabak": 0.4444444444444444
+  },
+  "comparison": "20261011-230905_eval_final",
+  "prompt_version": "document_summary_v4",
+  "structured_output": true,
+  "selected": "openai",
+  "model_type": "cloud",
+  "reason": "품질 하한을 만족하는 로컬 모델이 없어 상용 모델 선택",
+  "cloud_reference": "openai",
+  "local_checks": {
+    "qwen2.5-7b": {
+      "usable_gap": 0.41666666666666663,
+      "hallucination_gap": 0.33333333333333337,
+      "passes": false
+    },
+    "llama3.1-8b": {
+      "usable_gap": 0.3333333333333333,
+      "hallucination_gap": 0.41666666666666663,
+      "passes": false
+    }
+  },
+  "rule": {
+    "local_max_usable_gap": 0.1,
+    "local_max_hallucination_gap": 0.1
+  },
+  "targets": {
+    "qwen2.5-7b": {
+      "n": 12,
+      "usable_rate": 0.25,
+      "coverage_mean": 0.7916666666666666,
+      "hallucination_rate": 0.5833333333333334,
+      "numeric_error_rate": 0.0,
+      "foreign_language_rate": 0.0,
+      "policy_violation_rate": 0.5833333333333334,
+      "awkward_sentence_rate": 0.16666666666666666,
+      "deduction_score_mean": 73.75,
+      "format_fail_rate": 0.0
+    },
+    "llama3.1-8b": {
+      "n": 12,
+      "usable_rate": 0.3333333333333333,
+      "coverage_mean": 0.7777777777777778,
+      "hallucination_rate": 0.6666666666666666,
+      "numeric_error_rate": 0.08333333333333333,
+      "foreign_language_rate": 0.08333333333333333,
+      "policy_violation_rate": 0.6666666666666666,
+      "awkward_sentence_rate": 0.08333333333333333,
+      "deduction_score_mean": 68,
+      "format_fail_rate": 0.0
+    },
+    "openai": {
+      "n": 12,
+      "usable_rate": 0.6666666666666666,
+      "coverage_mean": 1.0,
+      "hallucination_rate": 0.25,
+      "numeric_error_rate": 0.08333333333333333,
+      "foreign_language_rate": 0.0,
+      "policy_violation_rate": 0.16666666666666666,
+      "awkward_sentence_rate": 0.08333333333333333,
+      "deduction_score_mean": 89.58333333333333,
+      "format_fail_rate": 0.0
+    }
+  },
+  "operations": {
+    "llama3.1-8b": {
+      "model": "llama3.1:8b",
+      "model_type": "local",
+      "calls": 48,
+      "errors": 0,
+      "error_rate": 0.0,
+      "format_valid_strict_rate": 1.0,
+      "format_valid_lenient_rate": 1.0,
+      "generation_complete_rate": 1.0,
+      "latency_mean_sec": 2.1966078208351973,
+      "latency_p50_sec": 2.074345299974084,
+      "latency_p95_sec": 3.2750122998841107,
+      "ttft_mean_sec": 0.09501070414747421,
+      "tokens_per_second_mean": 62.84112993744756,
+      "prompt_tokens_mean": 453.0416666666667,
+      "completion_tokens_mean": 132.5,
+      "vram_mb_max": 5027.499999046326,
+      "memory_mb_max": 5027.499999046326,
+      "warmup_load_time_sec": 2.3985621,
+      "api_cost_total_usd": 0.0,
+      "api_cost_per_1000_docs_usd": 0.0,
+      "energy_wh_total_estimate": null
+    },
+    "qwen2.5-7b": {
+      "model": "qwen2.5:7b",
+      "model_type": "local",
+      "calls": 48,
+      "errors": 0,
+      "error_rate": 0.0,
+      "format_valid_strict_rate": 1.0,
+      "format_valid_lenient_rate": 1.0,
+      "generation_complete_rate": 1.0,
+      "latency_mean_sec": 1.8953597000023972,
+      "latency_p50_sec": 1.709829700179398,
+      "latency_p95_sec": 3.3179421997629106,
+      "ttft_mean_sec": 0.08946435623026143,
+      "tokens_per_second_mean": 68.0503724290191,
+      "prompt_tokens_mean": 509.0833333333333,
+      "completion_tokens_mean": 122.64583333333333,
+      "vram_mb_max": 4528.099998474121,
+      "memory_mb_max": 4528.099998474121,
+      "warmup_load_time_sec": 2.4951301,
+      "api_cost_total_usd": 0.0,
+      "api_cost_per_1000_docs_usd": 0.0,
+      "energy_wh_total_estimate": null
+    },
+    "openai": {
+      "model": "gpt-6-luna",
+      "model_type": "cloud",
+      "calls": 48,
+      "errors": 0,
+      "error_rate": 0.0,
+      "format_valid_strict_rate": 1.0,
+      "format_valid_lenient_rate": 1.0,
+      "generation_complete_rate": 1.0,
+      "latency_mean_sec": 1.8354776208580006,
+      "latency_p50_sec": 1.7849663002416492,
+      "latency_p95_sec": 2.5259752003476024,
+      "ttft_mean_sec": 1.0552645395994962,
+      "tokens_per_second_mean": 163.43543292063998,
+      "prompt_tokens_mean": 502.7083333333333,
+      "completion_tokens_mean": 124.6875,
+      "vram_mb_max": null,
+      "memory_mb_max": null,
+      "warmup_load_time_sec": null,
+      "api_cost_total_usd": 0.0054055,
+      "api_cost_per_1000_docs_usd": 0.11261458333333334,
+      "energy_wh_total_estimate": null
+    }
+  },
+  "selected_at": "2026-10-11T23:18:13+09:00"
+}

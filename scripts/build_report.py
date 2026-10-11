@@ -1,7 +1,8 @@
 """실험 기록(JSON)을 모아 보고서용 표와 그림을 만든다. 모델을 학습하거나 호출하지 않는다.
 
 uv run python scripts/build_report.py
-결과: reports/figures/classification/*.png, reports/generated/classification_tables.md
+결과: reports/figures/{classification,generation}/*.png,
+      reports/generated/{classification,generation}_tables.md
 그림의 축 이름은 한글 글꼴 문제를 피하려고 영어로 쓴다.
 """
 
@@ -13,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "steps"))
 
 import matplotlib.pyplot as plt
+import report_generation
 from common.plots import plot_confusion_matrix
 from common.records import now_iso, read_json
 from lesson_settings import DATASET, OUTPUT_ROOT, SELECTION_DIR
@@ -288,6 +290,8 @@ def main():
     write_tables(selection, best_groups, GENERATED / "classification_tables.md")
     print("그림:", FIGURES)
     print("표:", GENERATED / "classification_tables.md")
+    generation = report_generation.build(ROOT / "reports" / "figures" / "generation", GENERATED)
+    print("생성 비교:", generation)
     print(f"규칙 상수: TOLERANCE={TOLERANCE}, MIN_SEEDS={MIN_SEEDS}, "
           f"LATENCY_TIE_RATIO={LATENCY_TIE_RATIO}")
 

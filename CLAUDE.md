@@ -115,6 +115,9 @@ artifacts/{dataset}/
 - `sheet`: 반복 1회분 중 형식 정상 응답에서 모델×문서 유형별 균등 무작위 36건(seed 2026) → `human/human_sheet_rater1~4.csv`(블라인드, 채점자마다 순서 다름), `human_key.json`(채점 끝날 때까지 열지 않음), `README.md`(채점 안내)
 - `aggregate`: 4명 시트 → 항목별 다수결(동률은 보수적으로 문제 있음/부분, `ties`에 남겨 논의), Fleiss' kappa, LLM vs 사람 다수결 일치율·Cohen's kappa·PABAK·감점 점수 상관 → `quality_human.json`. `llm_trust_decision`: 사용 가능 판정 kappa ≥ 0.7(한쪽 판정이 85% 초과면 PABAK ≥ 0.7)이면 LLM 채점 144건으로, 아니면 사람 다수결 36건 우선으로 모델 비교
 - 채점 전 개발 데이터 3~5건으로 기준 맞추기(평가 데이터로 연습 금지)
+- `select`: 평가 기준 7·8장(로컬 우선 + 품질 하한: 상용 대비 사용 가능률 차이 ≤ 0.10, 환각률 차이 ≤ 0.10)으로 생성 모델 선택 → `generation_selected.json`(비교 폴더와 `selection/`). status: final(실제 사람 채점) / provisional(LLM만) / dummy
+- **가상 채점**: `scripts/make_dummy_human_sheets.py` → `human_dummy/`, `aggregate --dummy` → `quality_human_dummy.json`(is_dummy=true), `select --dummy`. 보고서·README에 반드시 "가상 채점(미리보기용)" 표시. 실제 시트 `human/`은 건드리지 않음
+- 2차 결과(eval_final): LLM 채점 기준 gpt-6-luna 0.81 vs 로컬 0.52 → 잠정 선택 gpt-6-luna. 실제 사람 채점 후 `aggregate` → `select`로 확정
 - 1차 완료(development, 프롬프트 v2→v3→v4, v4+구조화 출력): 기록은 `reports/experiment_log_generation.md`
 - 확정: 프롬프트 `document_summary_v4`, **구조화 출력 사용**(`STRUCTURED_OUTPUT=True`, `step09 --structured`, `prompts.response_schema`)
 - 2차: eval 24건 × 2회 × (llama3.1-8b, qwen2.5-7b, openai), `--structured`. eval 결과를 본 뒤 프롬프트·채점 기준을 바꾸지 않는다

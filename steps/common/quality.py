@@ -83,6 +83,40 @@ def summarize_scores(rows):
             "format_fail_rate": 1 - len(parsed) / len(rows)}
 
 
+# 생성 모델 최종 선택 규칙(평가 기준 8장): 로컬 우선 + 품질 하한
+LOCAL_MAX_USABLE_GAP = 0.10  # 로컬 사용 가능률이 상용보다 이만큼까지 낮아도 허용
+LOCAL_MAX_HALLUCINATION_GAP = 0.10  # 로컬 환각률이 상용보다 이만큼까지 높아도 허용
+
+
+def choose_generation_model(targets, model_types, latency):
+    """targets: 모델별 summarize_scores 결과, model_types: local/cloud, latency: 평균 응답 시간(s)."""
+    clouds = [alias for alias in targets if model_types[alias] == "cloud"]
+    locals_ = [alias for alias in targets if model_types[alias] == "local"]
+    if len(clouds) != 1:
+        raise ValueError("상용 기준 모델이 하나 있어야 합니다.")
+    cloud = targets[clouds[0]]
+    checks = {}
+    for alias in locals_:
+        row = targets[alias]
+        usable_gap = cloud["usable_rate"] - row["usable_rate"]
+        hallucination_gap = (row["hallucination_rate"] or 0) - (cloud["hallucination_rate"] or 0)
+        checks[alias] = {"usable_gap": usable_gap, "hallucination_gap": hallucination_gap,
+                         "passes": usable_gap <= LOCAL_MAX_USABLE_GAP
+                         and hallucination_gap <= LOCAL_MAX_HALLUCINATION_GAP}
+    passing = [alias for alias in locals_ if checks[alias]["passes"]]
+    if passing:
+        chosen = min(passing, key=lambda a: (-targets[a]["usable_rate"],
+                                             targets[a]["hallucination_rate"] or 0, latency[a]))
+        reason = "품질 하한을 만족하는 로컬 모델 중 사용 가능률 → 환각률 → 응답 시간 순"
+    else:
+        chosen = clouds[0]
+        reason = "품질 하한을 만족하는 로컬 모델이 없어 상용 모델 선택"
+    return {"selected": chosen, "model_type": model_types[chosen], "reason": reason,
+            "cloud_reference": clouds[0], "local_checks": checks,
+            "rule": {"local_max_usable_gap": LOCAL_MAX_USABLE_GAP,
+                     "local_max_hallucination_gap": LOCAL_MAX_HALLUCINATION_GAP}}
+
+
 def cohen_kappa(a, b):
     """두 채점자의 예/아니오(또는 범주) 일치도. 우연히 일치할 확률을 뺀 값."""
     pairs = [(x, y) for x, y in zip(a, b, strict=True) if x is not None and y is not None]

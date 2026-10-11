@@ -1,0 +1,1096 @@
+{
+  "is_dummy": true,
+  "sheet_dir": "human_dummy",
+  "items": [
+    {
+      "item_id": "H01",
+      "experiment_id": "20261011-230905_eval_final-qwen2.5-7b-documents-v2-generation_eval-manual-03-r1",
+      "alias": "qwen2.5-7b",
+      "human": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 0.8333333333333334,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": true,
+        "deduction_score": 56
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 0.8333333333333334,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": true,
+        "deduction_score": 86
+      }
+    },
+    {
+      "item_id": "H02",
+      "experiment_id": "20261011-230905_eval_final-llama3.1-8b-documents-v2-generation_eval-minutes-05-r1",
+      "alias": "llama3.1-8b",
+      "human": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 95
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 95
+      }
+    },
+    {
+      "item_id": "H03",
+      "experiment_id": "20261011-230905_eval_final-openai-documents-v2-generation_eval-announcement-08-r1",
+      "alias": "openai",
+      "human": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      }
+    },
+    {
+      "item_id": "H04",
+      "experiment_id": "20261011-230905_eval_final-qwen2.5-7b-documents-v2-generation_eval-announcement-06-r1",
+      "alias": "qwen2.5-7b",
+      "human": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 0.5,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": true,
+        "deduction_score": 48
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 0.5,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 53
+      }
+    },
+    {
+      "item_id": "H05",
+      "experiment_id": "20261011-230905_eval_final-llama3.1-8b-documents-v2-generation_eval-minutes-07-r1",
+      "alias": "llama3.1-8b",
+      "human": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      }
+    },
+    {
+      "item_id": "H06",
+      "experiment_id": "20261011-230905_eval_final-openai-documents-v2-generation_eval-manual-04-r1",
+      "alias": "openai",
+      "human": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 95
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      }
+    },
+    {
+      "item_id": "H07",
+      "experiment_id": "20261011-230905_eval_final-llama3.1-8b-documents-v2-generation_eval-minutes-08-r1",
+      "alias": "llama3.1-8b",
+      "human": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 0.8333333333333334,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 61
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 0.8333333333333334,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 61
+      }
+    },
+    {
+      "item_id": "H08",
+      "experiment_id": "20261011-230905_eval_final-openai-documents-v2-generation_eval-minutes-03-r1",
+      "alias": "openai",
+      "human": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 95
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      }
+    },
+    {
+      "item_id": "H09",
+      "experiment_id": "20261011-230905_eval_final-llama3.1-8b-documents-v2-generation_eval-manual-08-r1",
+      "alias": "llama3.1-8b",
+      "human": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 0.8333333333333334,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": true,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 46
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 0.8333333333333334,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 91
+      }
+    },
+    {
+      "item_id": "H10",
+      "experiment_id": "20261011-230905_eval_final-llama3.1-8b-documents-v2-generation_eval-minutes-06-r1",
+      "alias": "llama3.1-8b",
+      "human": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 0.8333333333333334,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 61
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 1.0,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 65
+      }
+    },
+    {
+      "item_id": "H11",
+      "experiment_id": "20261011-230905_eval_final-openai-documents-v2-generation_eval-minutes-01-r1",
+      "alias": "openai",
+      "human": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": true,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 80
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      }
+    },
+    {
+      "item_id": "H12",
+      "experiment_id": "20261011-230905_eval_final-qwen2.5-7b-documents-v2-generation_eval-minutes-04-r1",
+      "alias": "qwen2.5-7b",
+      "human": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      }
+    },
+    {
+      "item_id": "H13",
+      "experiment_id": "20261011-230905_eval_final-llama3.1-8b-documents-v2-generation_eval-announcement-03-r1",
+      "alias": "llama3.1-8b",
+      "human": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 0.3333333333333333,
+        "hallucination": true,
+        "numeric_error": true,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": true,
+        "deduction_score": 24
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 0.3333333333333333,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 49
+      }
+    },
+    {
+      "item_id": "H14",
+      "experiment_id": "20261011-230905_eval_final-qwen2.5-7b-documents-v2-generation_eval-announcement-01-r1",
+      "alias": "qwen2.5-7b",
+      "human": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 0.6666666666666666,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 57
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 0.6666666666666666,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 87
+      }
+    },
+    {
+      "item_id": "H15",
+      "experiment_id": "20261011-230905_eval_final-llama3.1-8b-documents-v2-generation_eval-manual-02-r1",
+      "alias": "llama3.1-8b",
+      "human": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 0.8333333333333334,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 66
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      }
+    },
+    {
+      "item_id": "H16",
+      "experiment_id": "20261011-230905_eval_final-llama3.1-8b-documents-v2-generation_eval-announcement-06-r1",
+      "alias": "llama3.1-8b",
+      "human": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 0.5,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 53
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 0.5,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 53
+      }
+    },
+    {
+      "item_id": "H17",
+      "experiment_id": "20261011-230905_eval_final-llama3.1-8b-documents-v2-generation_eval-announcement-05-r1",
+      "alias": "llama3.1-8b",
+      "human": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 1.0,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 65
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 1.0,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 70
+      }
+    },
+    {
+      "item_id": "H18",
+      "experiment_id": "20261011-230905_eval_final-llama3.1-8b-documents-v2-generation_eval-announcement-02-r1",
+      "alias": "llama3.1-8b",
+      "human": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 0.16666666666666666,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 45
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 0.16666666666666666,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 45
+      }
+    },
+    {
+      "item_id": "H19",
+      "experiment_id": "20261011-230905_eval_final-qwen2.5-7b-documents-v2-generation_eval-manual-02-r1",
+      "alias": "qwen2.5-7b",
+      "human": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      }
+    },
+    {
+      "item_id": "H20",
+      "experiment_id": "20261011-230905_eval_final-openai-documents-v2-generation_eval-announcement-05-r1",
+      "alias": "openai",
+      "human": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      }
+    },
+    {
+      "item_id": "H21",
+      "experiment_id": "20261011-230905_eval_final-openai-documents-v2-generation_eval-minutes-04-r1",
+      "alias": "openai",
+      "human": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 1.0,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 70
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      }
+    },
+    {
+      "item_id": "H22",
+      "experiment_id": "20261011-230905_eval_final-openai-documents-v2-generation_eval-announcement-04-r1",
+      "alias": "openai",
+      "human": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      }
+    },
+    {
+      "item_id": "H23",
+      "experiment_id": "20261011-230905_eval_final-qwen2.5-7b-documents-v2-generation_eval-announcement-07-r1",
+      "alias": "qwen2.5-7b",
+      "human": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 0.8333333333333334,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 61
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 0.8333333333333334,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 61
+      }
+    },
+    {
+      "item_id": "H24",
+      "experiment_id": "20261011-230905_eval_final-openai-documents-v2-generation_eval-manual-05-r1",
+      "alias": "openai",
+      "human": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      }
+    },
+    {
+      "item_id": "H25",
+      "experiment_id": "20261011-230905_eval_final-openai-documents-v2-generation_eval-announcement-07-r1",
+      "alias": "openai",
+      "human": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 1.0,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 70
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      }
+    },
+    {
+      "item_id": "H26",
+      "experiment_id": "20261011-230905_eval_final-openai-documents-v2-generation_eval-manual-01-r1",
+      "alias": "openai",
+      "human": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      }
+    },
+    {
+      "item_id": "H27",
+      "experiment_id": "20261011-230905_eval_final-qwen2.5-7b-documents-v2-generation_eval-announcement-04-r1",
+      "alias": "qwen2.5-7b",
+      "human": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 0.5,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 53
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 0.5,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 83
+      }
+    },
+    {
+      "item_id": "H28",
+      "experiment_id": "20261011-230905_eval_final-openai-documents-v2-generation_eval-manual-07-r1",
+      "alias": "openai",
+      "human": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 1.0,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 70
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 1.0,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 70
+      }
+    },
+    {
+      "item_id": "H29",
+      "experiment_id": "20261011-230905_eval_final-qwen2.5-7b-documents-v2-generation_eval-manual-04-r1",
+      "alias": "qwen2.5-7b",
+      "human": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      }
+    },
+    {
+      "item_id": "H30",
+      "experiment_id": "20261011-230905_eval_final-qwen2.5-7b-documents-v2-generation_eval-minutes-05-r1",
+      "alias": "qwen2.5-7b",
+      "human": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 1.0,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 70
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      }
+    },
+    {
+      "item_id": "H31",
+      "experiment_id": "20261011-230905_eval_final-qwen2.5-7b-documents-v2-generation_eval-manual-06-r1",
+      "alias": "qwen2.5-7b",
+      "human": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 1.0,
+        "hallucination": true,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 70
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      }
+    },
+    {
+      "item_id": "H32",
+      "experiment_id": "20261011-230905_eval_final-llama3.1-8b-documents-v2-generation_eval-manual-05-r1",
+      "alias": "llama3.1-8b",
+      "human": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      }
+    },
+    {
+      "item_id": "H33",
+      "experiment_id": "20261011-230905_eval_final-qwen2.5-7b-documents-v2-generation_eval-minutes-03-r1",
+      "alias": "qwen2.5-7b",
+      "human": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 0.6666666666666666,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 87
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 0.8333333333333334,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 91
+      }
+    },
+    {
+      "item_id": "H34",
+      "experiment_id": "20261011-230905_eval_final-qwen2.5-7b-documents-v2-generation_eval-minutes-06-r1",
+      "alias": "qwen2.5-7b",
+      "human": {
+        "format_ok": true,
+        "usable": false,
+        "coverage": 0.5,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 83
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 0.8333333333333334,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": true,
+        "awkward_sentence": false,
+        "deduction_score": 91
+      }
+    },
+    {
+      "item_id": "H35",
+      "experiment_id": "20261011-230905_eval_final-openai-documents-v2-generation_eval-minutes-02-r1",
+      "alias": "openai",
+      "human": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": true,
+        "deduction_score": 95
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      }
+    },
+    {
+      "item_id": "H36",
+      "experiment_id": "20261011-230905_eval_final-llama3.1-8b-documents-v2-generation_eval-manual-06-r1",
+      "alias": "llama3.1-8b",
+      "human": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      },
+      "llm": {
+        "format_ok": true,
+        "usable": true,
+        "coverage": 1.0,
+        "hallucination": false,
+        "numeric_error": false,
+        "foreign_language": false,
+        "policy_violation": false,
+        "awkward_sentence": false,
+        "deduction_score": 100
+      }
+    }
+  ],
+  "agreement": {
+    "raters": [
+      "rater1",
+      "rater2",
+      "rater3",
+      "rater4"
+    ],
+    "items": 36,
+    "ties": [
+      "H01 hallucination",
+      "H06 policy_violation",
+      "H08 policy_violation",
+      "H09 hallucination",
+      "H09 foreign_language",
+      "H10 rp3",
+      "H13 numeric_error",
+      "H13 awkward_sentence",
+      "H15 rp2",
+      "H15 hallucination",
+      "H17 policy_violation",
+      "H21 hallucination",
+      "H25 hallucination",
+      "H27 hallucination",
+      "H30 hallucination",
+      "H31 hallucination",
+      "H33 rp1"
+    ],
+    "problems": [],
+    "fleiss_kappa": {
+      "hallucination": 0.40336808340016034,
+      "numeric_error": 0.04400185270958812,
+      "foreign_language": 0.029411764705882477,
+      "policy_violation": 0.6643356643356645,
+      "awkward_sentence": 0.34193548387096717
+    },
+    "llm_vs_human": {
+      "hallucination": {
+        "agreement": 0.75,
+        "cohen_kappa": 0.5,
+        "pabak": 0.5
+      },
+      "numeric_error": {
+        "agreement": 0.9444444444444444,
+        "cohen_kappa": 0.0,
+        "pabak": 0.8888888888888888
+      },
+      "foreign_language": {
+        "agreement": 0.9722222222222222,
+        "cohen_kappa": 0.0,
+        "pabak": 0.9444444444444444
+      },
+      "policy_violation": {
+        "agreement": 0.9166666666666666,
+        "cohen_kappa": 0.8312499999999999,
+        "pabak": 0.8333333333333333
+      },
+      "awkward_sentence": {
+        "agreement": 0.9166666666666666,
+        "cohen_kappa": 0.37209302325581384,
+        "pabak": 0.8333333333333333
+      },
+      "usable": {
+        "agreement": 0.7222222222222222,
+        "cohen_kappa": 0.4782608695652173,
+        "pabak": 0.4444444444444444
+      },
+      "deduction_score_pearson": 0.7641774359990409
+    },
+    "llm_trust_decision": {
+      "usable_positive_ratio": 0.5555555555555556,
+      "skewed": false,
+      "criterion": "cohen_kappa",
+      "value": 0.4782608695652173,
+      "threshold": 0.7,
+      "use_llm_scores": false,
+      "cohen_kappa": 0.4782608695652173,
+      "pabak": 0.4444444444444444
+    }
+  },
+  "targets": {
+    "qwen2.5-7b": {
+      "n": 12,
+      "usable_rate": 0.25,
+      "coverage_mean": 0.7916666666666666,
+      "hallucination_rate": 0.5833333333333334,
+      "numeric_error_rate": 0.0,
+      "foreign_language_rate": 0.0,
+      "policy_violation_rate": 0.5833333333333334,
+      "awkward_sentence_rate": 0.16666666666666666,
+      "deduction_score_mean": 73.75,
+      "format_fail_rate": 0.0
+    },
+    "llama3.1-8b": {
+      "n": 12,
+      "usable_rate": 0.3333333333333333,
+      "coverage_mean": 0.7777777777777778,
+      "hallucination_rate": 0.6666666666666666,
+      "numeric_error_rate": 0.08333333333333333,
+      "foreign_language_rate": 0.08333333333333333,
+      "policy_violation_rate": 0.6666666666666666,
+      "awkward_sentence_rate": 0.08333333333333333,
+      "deduction_score_mean": 68,
+      "format_fail_rate": 0.0
+    },
+    "openai": {
+      "n": 12,
+      "usable_rate": 0.6666666666666666,
+      "coverage_mean": 1.0,
+      "hallucination_rate": 0.25,
+      "numeric_error_rate": 0.08333333333333333,
+      "foreign_language_rate": 0.0,
+      "policy_violation_rate": 0.16666666666666666,
+      "awkward_sentence_rate": 0.08333333333333333,
+      "deduction_score_mean": 89.58333333333333,
+      "format_fail_rate": 0.0
+    }
+  },
+  "updated_at": "2026-10-11T23:18:09+09:00"
+}

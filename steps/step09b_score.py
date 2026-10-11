@@ -8,6 +8,11 @@ VS Code 터미널에서 프로젝트 폴더를 기준으로 실행한다.
 uv run python steps/step09b_score.py judge                 # 가장 최근 비교 폴더
 uv run python steps/step09b_score.py sheet --dir <비교 폴더>
 uv run python steps/step09b_score.py aggregate --dir <비교 폴더>
+uv run python steps/step09b_score.py aggregate --dummy        # 가상 채점(미리보기) 집계
+uv run python steps/step09b_score.py select [--dummy]         # 서비스 생성 모델 선택(평가 기준 8장)
+
+--dummy는 human_dummy/의 가상 채점 시트를 집계해 quality_human_dummy.json에 is_dummy=true로 남긴다.
+실제 사람 채점 결과(quality_human.json)와 섞이지 않는다.
 """
 
 import argparse
@@ -21,6 +26,7 @@ from pathlib import Path
 import lesson_settings as lesson
 from common.quality import (
     BINARY_FIELDS,
+    choose_generation_model,
     cohen_kappa,
     detect_foreign,
     fleiss_kappa,
@@ -287,9 +293,9 @@ def majority(values, tie):
     return counts[0][0], False
 
 
-def aggregate(directory):
+def aggregate(directory, dummy=False):
     directory = Path(directory)
-    sheet_dir = directory / "human"
+    sheet_dir = directory / ("human_dummy" if dummy else "human")
     key = json.loads((sheet_dir / "human_key.json").read_text(encoding="utf-8"))
     records = {row["experiment_id"]: row for row in read_records(directory)}
     references = [records[eid]["scoring_reference"] for eid in key["items"].values()]
@@ -370,18 +376,56 @@ def aggregate(directory):
     by_alias = {}
     for item in items:
         by_alias.setdefault(item["alias"], []).append(item["human"])
-    write_json(directory / "quality_human.json",
-               {"items": items, "agreement": agreement,
+    write_json(directory / ("quality_human_dummy.json" if dummy else "quality_human.json"),
+               {"is_dummy": dummy, "sheet_dir": sheet_dir.name,
+                "items": items, "agreement": agreement,
                 "targets": {alias: summarize_scores(rows) for alias, rows in by_alias.items()},
                 "updated_at": now_iso()})
     print(json.dumps(agreement, ensure_ascii=False, indent=2))
     return agreement
 
 
+def select_generation(directory, dummy=False):
+    """평가 기준 7·8장대로 품질 지표의 출처를 정하고 서비스에 쓸 생성 모델을 고른다.
+
+    status: final(실제 사람 채점 반영) / provisional(사람 채점 전, LLM 채점만) / dummy(가상 채점 미리보기)
+    """
+    directory = Path(directory)
+    summary = json.loads((directory / "summary.json").read_text(encoding="utf-8"))
+    llm = json.loads((directory / "quality_llm.json").read_text(encoding="utf-8"))
+    human_path = directory / ("quality_human_dummy.json" if dummy else "quality_human.json")
+    human = json.loads(human_path.read_text(encoding="utf-8")) if human_path.exists() else None
+    if human is None:
+        status, source, trust = "provisional", "llm", None
+    else:
+        trust = human["agreement"]["llm_trust_decision"]
+        source = "llm" if trust["use_llm_scores"] else "human"
+        status = "dummy" if human.get("is_dummy") else "final"
+    targets = llm["targets"] if source == "llm" else human["targets"]
+    decision = choose_generation_model(
+        targets, {alias: row["model_type"] for alias, row in summary["targets"].items()},
+        {alias: row["latency_mean_sec"] for alias, row in summary["targets"].items()})
+    result = {"status": status, "quality_source": source, "llm_trust_decision": trust,
+              "comparison": directory.name, "prompt_version": summary["prompt_version"],
+              "structured_output": summary.get("structured_output"), **decision,
+              "targets": targets, "operations": summary["targets"], "selected_at": now_iso()}
+    name = "generation_selected_dummy.json" if dummy else "generation_selected.json"
+    write_json(directory / name, result)
+    lesson.SELECTION_DIR.mkdir(parents=True, exist_ok=True)
+    write_json(lesson.SELECTION_DIR / name, result)
+    print(f"[{status}] 품질 출처 {source} → 선택: {decision['selected']} ({decision['reason']})")
+    for alias, check in decision["local_checks"].items():
+        print(f"  {alias}: 사용 가능률 차이 {check['usable_gap']:+.3f}, "
+              f"환각률 차이 {check['hallucination_gap']:+.3f}, 통과 {check['passes']}")
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description="생성 요약 품질 채점")
-    parser.add_argument("action", choices=["judge", "sheet", "aggregate"])
+    parser.add_argument("action", choices=["judge", "sheet", "aggregate", "select"])
     parser.add_argument("--dir", type=Path, help="비교 폴더. 생략하면 가장 최근 폴더")
+    parser.add_argument("--dummy", action="store_true",
+                        help="aggregate: human_dummy/의 가상 채점 시트를 집계(미리보기용)")
     args = parser.parse_args()
     directory = args.dir or latest_comparison()
     print("비교 폴더:", directory)
@@ -389,8 +433,10 @@ def main():
         print(json.dumps(run_judge(directory), ensure_ascii=False, indent=2))
     elif args.action == "sheet":
         make_sheets(directory)
+    elif args.action == "aggregate":
+        aggregate(directory, dummy=args.dummy)
     else:
-        aggregate(directory)
+        select_generation(directory, dummy=args.dummy)
 
 
 if __name__ == "__main__":

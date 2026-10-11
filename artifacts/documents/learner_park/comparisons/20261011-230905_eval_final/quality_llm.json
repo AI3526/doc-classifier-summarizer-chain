@@ -1,0 +1,46 @@
+{
+  "judge_version": "summary_checklist_v1",
+  "judge_target": "openai",
+  "judged": 144,
+  "judge_errors": 0,
+  "judge_cost_total_usd": 0.015992,
+  "targets": {
+    "llama3.1-8b": {
+      "n": 48,
+      "usable_rate": 0.5208333333333334,
+      "coverage_mean": 0.84375,
+      "hallucination_rate": 0.4583333333333333,
+      "numeric_error_rate": 0.0,
+      "foreign_language_rate": 0.0,
+      "policy_violation_rate": 0.6041666666666666,
+      "awkward_sentence_rate": 0.0,
+      "deduction_score_mean": 79.47916666666667,
+      "format_fail_rate": 0.0
+    },
+    "qwen2.5-7b": {
+      "n": 48,
+      "usable_rate": 0.5208333333333334,
+      "coverage_mean": 0.8055555555555556,
+      "hallucination_rate": 0.25,
+      "numeric_error_rate": 0.0,
+      "foreign_language_rate": 0.0,
+      "policy_violation_rate": 0.5833333333333334,
+      "awkward_sentence_rate": 0.0625,
+      "deduction_score_mean": 84.60416666666667,
+      "format_fail_rate": 0.0
+    },
+    "openai": {
+      "n": 48,
+      "usable_rate": 0.8125,
+      "coverage_mean": 0.9861111111111112,
+      "hallucination_rate": 0.14583333333333334,
+      "numeric_error_rate": 0.0,
+      "foreign_language_rate": 0.0,
+      "policy_violation_rate": 0.0625,
+      "awkward_sentence_rate": 0.0,
+      "deduction_score_mean": 94.97916666666667,
+      "format_fail_rate": 0.0
+    }
+  },
+  "updated_at": "2026-10-11T23:17:50+09:00"
+}
