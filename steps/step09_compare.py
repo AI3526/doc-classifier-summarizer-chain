@@ -3,7 +3,7 @@
 개발 입력 두 개로 코드를 확인한 뒤 최종 비교 시 INPUT_PATH를 변경한다.
 최종 생성 평가 데이터의 답변을 보며 프롬프트를 고치지 않는다.
 
-VS Code 터미널에서 project2-kit 폴더를 기준으로 실행한다.
+VS Code 터미널에서 프로젝트 폴더를 기준으로 실행한다.
 uv run python steps/step09_compare.py
 """
 

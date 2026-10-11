@@ -6,7 +6,9 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 *.py[cod]
-artifacts/
+.DS_Store
+# 실험 결과의 지표 JSON/CSV는 커밋하고, 큰 가중치 파일만 제외한다.
+artifacts/**/checkpoint/
 *.safetensors
 *.pt
 *.pth

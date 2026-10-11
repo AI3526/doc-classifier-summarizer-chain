@@ -1,7 +1,7 @@
 [project]
-name = "project2-kit"
+name = "doc-classifier-summarizer-chain"
 version = "0.1.0"
-description = "고객 문의 분류와 답변 생성을 단계별 Python 파일로 학습하는 실습 자료"
+description = "학습한 문서 분류기와 생성 LLM을 연결해 문서 유형별 요약을 제공하는 서비스"
 requires-python = ">=3.12,<3.13"
 dependencies = [
   "torch>=2.7,<3",
@@ -16,6 +16,9 @@ dependencies = [
   "python-dotenv>=1.0,<2",
   "langchain-core>=0.3.60,<2",
   "openai>=2,<3",
+  "joblib>=1.4,<2",
+  "matplotlib>=3.9,<4",
+  "psutil>=6,<8",
 ]
 
 [dependency-groups]
@@ -33,7 +36,7 @@ url = "https://download.pytorch.org/whl/cu128"
 explicit = true
 
 [tool.pytest.ini_options]
-testpaths = ["tests/test_lesson_training.py", "tests/test_lesson_service.py"]
+testpaths = ["tests"]
 pythonpath = ["steps"]
 
 [tool.ruff]

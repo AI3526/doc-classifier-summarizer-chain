@@ -1,6 +1,6 @@
 """선택한 분류기의 토크나이저와 가중치를 불러와 새 문장을 분류한다.
 
-VS Code 터미널에서 project2-kit 폴더를 기준으로 실행한다.
+VS Code 터미널에서 프로젝트 폴더를 기준으로 실행한다.
 uv run python steps/step06_predict.py
 """
 
@@ -8,13 +8,10 @@ import json
 from pathlib import Path
 
 import torch
-from lesson_settings import DATASET, LEARNER_DIR, MAX_INPUT_CHARS
+from lesson_settings import LEARNER_DIR, MAX_INPUT_CHARS
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-SAMPLE_TEXT = {
-    "inquiries": "배송 현황을 확인하고 싶어요.",
-    "documents": "다음 주 월요일 오전 10시에 시스템 점검을 진행합니다. 점검 중에는 로그인이 제한됩니다.",
-}[DATASET]
+SAMPLE_TEXT = "다음 주 월요일 오전 10시에 시스템 점검을 진행합니다. 점검 중에는 로그인이 제한됩니다."
 
 
 def load_classifier(learner_dir=LEARNER_DIR) -> dict:

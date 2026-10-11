@@ -1,6 +1,6 @@
 """학습과 검증 데이터의 빈 값, 라벨, 상황 묶음 중복을 확인한다.
 
-VS Code 터미널에서 project2-kit 폴더를 기준으로 실행한다.
+VS Code 터미널에서 프로젝트 폴더를 기준으로 실행한다.
 uv run python steps/step02_check_data.py
 """
 

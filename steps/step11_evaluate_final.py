@@ -1,6 +1,6 @@
 """모델 선택을 마친 뒤 남겨 둔 test로 분류 성능을 한 번 평가한다.
 
-VS Code 터미널에서 project2-kit 폴더를 기준으로 실행한다.
+VS Code 터미널에서 프로젝트 폴더를 기준으로 실행한다.
 uv run python steps/step11_evaluate_final.py
 """
 

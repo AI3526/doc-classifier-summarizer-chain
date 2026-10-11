@@ -2,7 +2,7 @@
 
 PROVIDER를 openai로 바꾸면 .env의 OPENAI_API_KEY를 사용하며 요금이 발생한다.
 
-VS Code 터미널에서 project2-kit 폴더를 기준으로 실행한다.
+VS Code 터미널에서 프로젝트 폴더를 기준으로 실행한다.
 uv run python steps/step07_call_models.py
 """
 
@@ -13,41 +13,22 @@ import time
 import httpx
 import lesson_settings as lesson
 from openai import OpenAI
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from prompts.document_policies import build_prompt, valid_output
 
 # 먼저 ollama로 실행한 뒤 provider만 바꾸어 같은 입력을 확인한다.
 PROVIDER = "ollama"
-SAMPLE_INPUTS = {
-    "inquiries": "배송 현황을 확인하는 방법을 알려 주세요.",
-    "documents": (
-        "교육장 이용 공지: 10월 8일 오후 2시부터 3시까지 3층 실습실을 점검합니다. "
-        "해당 시간에 예약한 수강생은 2층 실습실을 이용해 주세요."
-    ),
-}
-INPUT_TEXT = SAMPLE_INPUTS[lesson.DATASET]
+# 이 단계는 분류기 없이 호출만 연습하므로 라벨을 직접 정한다.
+INPUT_LABEL = "announcement"
+INPUT_TEXT = (
+    "교육장 이용 공지: 10월 8일 오후 2시부터 3시까지 3층 실습실을 점검합니다. "
+    "해당 시간에 예약한 수강생은 2층 실습실을 이용해 주세요."
+)
 OLLAMA_URL = lesson.OLLAMA_URL
 OLLAMA_MODEL = lesson.OLLAMA_MODEL
 OPENAI_MODEL = lesson.OPENAI_MODEL
 MAX_OUTPUT_TOKENS = lesson.MAX_OUTPUT_TOKENS
 TIMEOUT_SECONDS = lesson.TIMEOUT_SECONDS
 TEMPERATURE = 0.2
-
-
-class AnswerPayload(BaseModel):
-    """응답 문자열이 가져야 할 필드와 타입을 정한다."""
-
-    model_config = ConfigDict(extra="forbid")
-    answer: str = Field(min_length=1)
-    next_steps: list[str]
-
-
-def valid_output(text):
-    # JSON 문법과 타입만 검사한다. 답변의 근거는 사람이 따로 읽는다.
-    try:
-        AnswerPayload.model_validate_json(text)
-        return True
-    except ValidationError:
-        return False
 
 
 def call_ollama(prompt):
@@ -164,34 +145,9 @@ def generation_config():
     }
 
 
-def build_prompt(text, dataset=lesson.DATASET):
-    instructions = {
-        "inquiries": (
-            "한국어로 배송 확인 방법을 안내한다. 주문 조회 도구는 없다.\n"
-            "배송 날짜나 조회 완료를 지어내지 않는다.\n"
-            "주문번호는 공식 보안 문의창에서 확인하도록 안내한다. "
-            "이 대화창에 주문번호를 보내 달라고 요구하지 않는다.\n"
-        ),
-        "documents": (
-            "한국어 공지를 대상, 일정, 해야 할 일을 중심으로 요약한다.\n"
-            "원문에 없는 날짜, 장소, 담당자를 만들지 않는다.\n"
-        ),
-    }
-    return (
-        instructions[dataset]
-        + "출력은 Markdown 없이 JSON 객체 하나이며 필드는 answer와 next_steps뿐이다.\n"
-        + "answer는 한국어 답변 문자열이고 next_steps는 문자열 배열이다.\n"
-        + "next_steps에는 사용자가 앞으로 실행할 구체적인 행동만 적는다. "
-        + "각 항목은 사용자에게 직접 안내하는 정중한 명령형 문장으로 쓴다. "
-        + "모델이 요약하거나 검토했다는 작업 보고, 정책을 준수한다는 설명은 넣지 않는다. "
-        + "입력과 근거에 없는 행동을 추가하지 않으며, 사용자가 할 행동이 없으면 빈 배열을 쓴다.\n"
-        + "사용자 입력: " + json.dumps(text, ensure_ascii=False)
-    )
-
-
 def main():
     # 이 단계는 호출 자체를 연습한다. 실제 분류 모델은 다음 단계에서 연결한다.
-    prompt = build_prompt(INPUT_TEXT)
+    prompt = build_prompt(INPUT_TEXT, INPUT_LABEL)
     result = call_model(PROVIDER, prompt)
     print(json.dumps(result, ensure_ascii=False, indent=2))
     if result["error"]:

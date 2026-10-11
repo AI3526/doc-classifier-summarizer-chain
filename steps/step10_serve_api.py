@@ -1,6 +1,6 @@
 """10. 학습한 분류기와 생성 체인을 FastAPI 요청으로 실행한다.
 
-VS Code 터미널에서 project2-kit 폴더를 기준으로 실행한다.
+VS Code 터미널에서 프로젝트 폴더를 기준으로 실행한다.
 uv run python steps/step10_serve_api.py
 """
 

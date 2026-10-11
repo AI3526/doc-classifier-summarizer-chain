@@ -1,6 +1,6 @@
 """저장된 실험의 validation 점수를 비교해 사용할 모델 하나를 고른다.
 
-VS Code 터미널에서 project2-kit 폴더를 기준으로 실행한다.
+VS Code 터미널에서 프로젝트 폴더를 기준으로 실행한다.
 uv run python steps/step05_select_model.py
 """
 

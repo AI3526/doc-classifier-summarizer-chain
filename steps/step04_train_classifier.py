@@ -1,6 +1,6 @@
 """토큰화부터 BERT 본체와 분류층 학습, 검증, 저장까지 차례로 실행한다.
 
-VS Code 터미널에서 project2-kit 폴더를 기준으로 실행한다.
+VS Code 터미널에서 프로젝트 폴더를 기준으로 실행한다.
 uv run python steps/step04_train_classifier.py
 """
 

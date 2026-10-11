@@ -1,6 +1,6 @@
 """문자 TF-IDF와 로지스틱 회귀로 비교 기준 모델을 학습한다.
 
-VS Code 터미널에서 project2-kit 폴더를 기준으로 실행한다.
+VS Code 터미널에서 프로젝트 폴더를 기준으로 실행한다.
 uv run python steps/step03_train_baseline.py
 """
 

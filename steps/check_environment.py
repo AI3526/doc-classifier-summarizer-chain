@@ -1,6 +1,6 @@
 """uv가 사용하는 Python과 학습 준비 상태를 확인합니다.
 
-VS Code 터미널에서 project2-kit 폴더를 기준으로 실행한다.
+VS Code 터미널에서 프로젝트 폴더를 기준으로 실행한다.
 uv run python steps/check_environment.py
 """
 

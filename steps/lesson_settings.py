@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 ROOT = Path(__file__).resolve().parents[1]
 load_dotenv(ROOT / ".env", override=False)
 
-# 문의는 inquiries, 문서는 documents입니다. 한 주제를 골라 끝까지 사용합니다.
+# 필수 실험은 documents, 긴 문서 선택 실험은 documents_advanced를 사용합니다.
 DATASET = "documents"
 # LEARNER는 "learner_park", "learner_choi", "learner_ro", "learner_su" 중 하나
 LEARNER = "learner_park" 
@@ -25,7 +25,8 @@ CLASSIFIER_MODEL = "klue/bert-base" # 기본 모델
 OUTPUT_ROOT = ROOT / "artifacts"
 LEARNER_DIR = OUTPUT_ROOT / DATASET / LEARNER
 DATA_DIR = ROOT / "data" / DATASET
-DEVELOPMENT_INPUT = ROOT / "steps" / "examples" / f"{DATASET}_development.jsonl"
+# 생성 코드가 동작하는지만 확인하는 2건짜리 입력. 개발 비교는 DATA_DIR의 15건을 사용합니다.
+DEVELOPMENT_INPUT = ROOT / "steps" / "examples" / "documents_development.jsonl"
 
 # OpenAI 키는 읽어서 클라이언트에 전달하며 화면이나 결과 파일에 출력하지 않습니다.
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3:4b-instruct-2507-q4_K_M") # 모델 더 비교?
