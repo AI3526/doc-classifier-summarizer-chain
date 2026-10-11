@@ -24,6 +24,8 @@ from common.quality import (
     cohen_kappa,
     detect_foreign,
     fleiss_kappa,
+    llm_trust_decision,
+    pabak,
     pearson,
     score_checklist,
     summarize_scores,
@@ -358,7 +360,10 @@ def aggregate(directory):
         agreement["llm_vs_human"][field] = {
             "agreement": sum(h == m for h, m in zip(humans, llms, strict=True)) / len(paired)
             if paired else None,
-            "cohen_kappa": cohen_kappa(humans, llms)}
+            "cohen_kappa": cohen_kappa(humans, llms), "pabak": pabak(humans, llms)}
+    # 평가 기준 7장: 이 판정으로 LLM 채점(전체)과 사람 다수결(36건) 중 무엇을 우선할지 정한다.
+    agreement["llm_trust_decision"] = llm_trust_decision(
+        [item["human"]["usable"] for item in paired], [item["llm"]["usable"] for item in paired])
     agreement["llm_vs_human"]["deduction_score_pearson"] = pearson(
         [item["human"]["deduction_score"] for item in paired],
         [item["llm"]["deduction_score"] for item in paired])

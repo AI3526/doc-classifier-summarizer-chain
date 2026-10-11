@@ -11,9 +11,14 @@ import statistics
 # 사용 가능 기준: 형식 정상, 환각·수치 오류·외국어 없음, 핵심 포함률이 이 값 이상
 USABLE_MIN_COVERAGE = 0.67
 POINT_VALUE = {"included": 1.0, "partial": 0.5, "missing": 0.0}
-DEDUCTIONS = {"hallucination": 40, "numeric_error": 30, "foreign_language": 20,
-              "policy_violation": 10, "awkward_sentence": 10,
-              "missing_point": 10, "partial_point": 5, "coverage_cap": 30}
+# 모든 항목이 최대로 감점되면 정확히 100이 되도록 맞췄다(30+20+15+5+5+25).
+DEDUCTIONS = {"hallucination": 30, "numeric_error": 20, "foreign_language": 15,
+              "policy_violation": 5, "awkward_sentence": 5,
+              "missing_point": 8, "partial_point": 4, "coverage_cap": 25}
+# LLM 채점을 믿고 쓸지 정하는 기준: 사람 다수결과의 사용 가능 판정 일치도.
+# 판정이 한쪽으로 SKEW_RATIO보다 많이 몰리면 kappa가 낮게 나오는 문제가 있어 PABAK으로 판단한다.
+AGREEMENT_THRESHOLD = 0.7
+SKEW_RATIO = 0.85
 BINARY_FIELDS = ("hallucination", "numeric_error", "foreign_language", "policy_violation",
                  "awkward_sentence")
 
@@ -88,6 +93,27 @@ def cohen_kappa(a, b):
     expected = sum((sum(x == label for x, _ in pairs) / len(pairs))
                    * (sum(y == label for _, y in pairs) / len(pairs)) for label in labels)
     return 1.0 if expected == 1 else (observed - expected) / (1 - expected)
+
+
+def pabak(a, b):
+    """한쪽 판정이 많을 때 덜 흔들리는 일치도. 2 × 관측 일치율 − 1 (예/아니오 판정)."""
+    pairs = [(x, y) for x, y in zip(a, b, strict=True) if x is not None and y is not None]
+    if not pairs:
+        return None
+    return 2 * sum(x == y for x, y in pairs) / len(pairs) - 1
+
+
+def llm_trust_decision(human, llm):
+    """사용 가능 판정의 사람-LLM 일치도로 LLM 채점을 믿고 쓸지 정한다(평가 기준 7장)."""
+    pooled = [value for value in (*human, *llm) if value is not None]
+    positive = sum(pooled) / len(pooled) if pooled else None
+    skewed = positive is not None and max(positive, 1 - positive) > SKEW_RATIO
+    kappa, adjusted = cohen_kappa(human, llm), pabak(human, llm)
+    criterion, value = ("pabak", adjusted) if skewed else ("cohen_kappa", kappa)
+    return {"usable_positive_ratio": positive, "skewed": skewed, "criterion": criterion,
+            "value": value, "threshold": AGREEMENT_THRESHOLD,
+            "use_llm_scores": value is not None and value >= AGREEMENT_THRESHOLD,
+            "cohen_kappa": kappa, "pabak": adjusted}
 
 
 def fleiss_kappa(ratings):

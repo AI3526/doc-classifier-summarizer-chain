@@ -110,10 +110,10 @@ artifacts/{dataset}/
 ## 요약 품질 채점 (step09b, `common/quality.py`, `prompts/judge_prompt.py`)
 - **기준 원문은 `reports/evaluation_rubric.md`**. 채점 규칙을 바꾸면 이 문서·코드 상수·`JUDGE_VERSION`을 함께 바꾼다(eval 결과를 본 뒤에는 바꾸지 않음)
 - 사람과 LLM이 **같은 체크리스트**를 채움: required_points별 포함/부분/누락, forbidden_claims별 위반, 그 외 근거 없는 주장, 수치·날짜 오류, 외국어 섞임, 정책 위반, 어색한 문장
-- **주 지표 = 사용 가능률**: 형식 정상 + 환각 없음 + 수치 오류 없음 + 외국어 없음 + 핵심 포함률 ≥ 0.67. 함께 보고: 핵심 포함률(포함 1/부분 0.5), 환각률, 100점 감점 점수(환각 −40, 수치 −30, 외국어 −20, 정책 −10, 어색 −10, 누락 −10/부분 −5 최대 −30, 최저 0). 형식 실패는 0점·사용 불가. 외국어는 자동 탐지(원문에 없는 한자·가나·영문)와 OR
+- **주 지표 = 사용 가능률**: 형식 정상 + 환각 없음 + 수치 오류 없음 + 외국어 없음 + 핵심 포함률 ≥ 0.67. 함께 보고: 핵심 포함률(포함 1/부분 0.5), 환각률, 100점 감점 점수(환각 −30, 수치 −20, 외국어 −15, 정책 −5, 어색 −5, 누락 −8/부분 −4 최대 −25, 최대 감점 합계 정확히 100). 형식 실패는 0점·사용 불가. 외국어는 자동 탐지(원문에 없는 한자·가나·영문)와 OR
 - `judge`: `JUDGE_TARGET`(openai, 요금 발생, temperature 0)로 전체 응답 채점 → `judge.jsonl`, `quality_llm.json`. 이어서 실행하면 성공한 항목은 건너뜀. OpenAI도 후보라 자기 답변 편향 가능성을 한계로 적음
 - `sheet`: 반복 1회분 중 형식 정상 응답에서 모델×문서 유형별 균등 무작위 36건(seed 2026) → `human/human_sheet_rater1~4.csv`(블라인드, 채점자마다 순서 다름), `human_key.json`(채점 끝날 때까지 열지 않음), `README.md`(채점 안내)
-- `aggregate`: 4명 시트 → 항목별 다수결(동률은 보수적으로 문제 있음/부분, `ties`에 남겨 논의), Fleiss' kappa, LLM vs 사람 다수결 일치율·Cohen's kappa·감점 점수 상관 → `quality_human.json`
+- `aggregate`: 4명 시트 → 항목별 다수결(동률은 보수적으로 문제 있음/부분, `ties`에 남겨 논의), Fleiss' kappa, LLM vs 사람 다수결 일치율·Cohen's kappa·PABAK·감점 점수 상관 → `quality_human.json`. `llm_trust_decision`: 사용 가능 판정 kappa ≥ 0.7(한쪽 판정이 85% 초과면 PABAK ≥ 0.7)이면 LLM 채점 144건으로, 아니면 사람 다수결 36건 우선으로 모델 비교
 - 채점 전 개발 데이터 3~5건으로 기준 맞추기(평가 데이터로 연습 금지)
 - 계획: 1차 development 15건 × 로컬 5개 → 2차 eval 24건 × 2회 × (상위 로컬 2 + openai)
 
