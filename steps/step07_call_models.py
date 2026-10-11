@@ -72,10 +72,10 @@ def ollama_unload(model):
         pass
 
 
-def call_ollama(model, prompt):
+def call_ollama(model, prompt, temperature, max_tokens):
     # stream=True로 받아 첫 글자가 도착한 시각(TTFT)을 잰다.
     body = {"model": model, "prompt": prompt, "stream": True, "keep_alive": "5m",
-            "options": {"temperature": lesson.TEMPERATURE, "num_predict": lesson.MAX_OUTPUT_TOKENS,
+            "options": {"temperature": temperature, "num_predict": max_tokens,
                         "num_ctx": lesson.OLLAMA_NUM_CTX}}
     started = time.perf_counter()
     first_token, pieces, final = None, [], {}
@@ -113,7 +113,7 @@ def call_ollama(model, prompt):
     }
 
 
-def call_openai(model, prompt):
+def call_openai(model, prompt, temperature, max_tokens):
     # 키의 존재만 확인한다. 키 값이나 요청 헤더를 출력하지 않는다.
     if not os.getenv("OPENAI_API_KEY"):
         raise RuntimeError(".env에 OPENAI_API_KEY를 설정하세요.")
@@ -123,7 +123,7 @@ def call_openai(model, prompt):
     with OpenAI(timeout=lesson.TIMEOUT_SECONDS, max_retries=0) as client:
         stream = client.responses.create(
             model=model, input=prompt, reasoning={"effort": lesson.OPENAI_REASONING_EFFORT},
-            temperature=lesson.TEMPERATURE, max_output_tokens=lesson.MAX_OUTPUT_TOKENS,
+            temperature=temperature, max_output_tokens=max_tokens,
             store=False, stream=True)
         for event in stream:
             if event.type == "response.output_text.delta":
@@ -204,8 +204,13 @@ def _safe_message(exc):
     return re.sub(r"sk-[A-Za-z0-9_\-]{6,}", "sk-***", str(exc))[:300]
 
 
-def call_model(target, prompt):
-    """생성 호출의 결과와 실패를 같은 필드로 반환한다. 실패도 호출 기록이다."""
+def call_model(target, prompt, temperature=None, max_tokens=None):
+    """생성 호출의 결과와 실패를 같은 필드로 반환한다. 실패도 호출 기록이다.
+
+    temperature, max_tokens를 생략하면 lesson_settings의 비교용 값을 쓴다(채점은 0으로 호출).
+    """
+    temperature = lesson.TEMPERATURE if temperature is None else temperature
+    max_tokens = lesson.MAX_OUTPUT_TOKENS if max_tokens is None else max_tokens
     if not isinstance(prompt, str) or not prompt.strip():
         raise ValueError("프롬프트는 내용이 있는 문자열이어야 합니다.")
     target = resolve_target(target) if isinstance(target, str) else target
@@ -217,9 +222,9 @@ def call_model(target, prompt):
     error = message = None
     try:
         if target["provider"] == "ollama":
-            output = call_ollama(target["model"], prompt)
+            output = call_ollama(target["model"], prompt, temperature, max_tokens)
         elif target["provider"] == "openai":
-            output = call_openai(target["model"], prompt)
+            output = call_openai(target["model"], prompt, temperature, max_tokens)
         else:
             raise ValueError(f"지원하지 않는 provider: {target['provider']}")
     except Exception as exc:  # noqa: BLE001 - 어떤 실패든 기록으로 남기고 다음 호출을 계속한다.

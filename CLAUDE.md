@@ -33,7 +33,8 @@
 | 6 | `step06_predict.py` | 선정 분류기 로드·단건 예측 (베이스라인/BERT 모두 `load_run`으로) |
 | 7 | `step07_call_models.py` | Ollama / OpenAI 호출 (**OpenAI는 요금 발생**) |
 | 8 | `step08_connect_chain.py` | 분류 → 정책 → 프롬프트 LangChain 체인 |
-| 9 | `step09_compare.py` | 같은 입력으로 생성 모델 비교 기록 (**요금 발생**) |
+| 9 | `step09_compare.py` | 같은 입력으로 생성 모델 비교 기록 (openai 포함 시 **요금 발생**) |
+| 9b | `step09b_score.py` | 요약 품질 채점: `judge`(LLM, **요금 발생**) / `sheet`(사람 시트) / `aggregate`(집계) |
 | 10 | `step10_serve_api.py` | FastAPI (`/health`, `/generate`, `/compare`) |
 | 11 | `step11_evaluate_final.py` | 고정된 분류기로 test 1회 평가 |
 
@@ -105,6 +106,14 @@ artifacts/{dataset}/
 - step08: `create_chain`(분류→프롬프트), `create_service_chain`(분류→프롬프트→생성), `generate_prepared`(호출+형식 검사)
 - step09: `--split smoke|development|eval --targets ... --repeats N` → `artifacts/{dataset}/{learner}/comparisons/{시각}_{split}/`(config, warmup, results.jsonl, summary.json/md). 모델별로 준비 호출 후 측정, 끝나면 언로드. 기록은 needtocheck의 GEN 형식
 - 검수: `uv run python scripts/verify_service.py [폴더]` (호출 수, 프롬프트 공유, 채점 기준 비노출, 요약 일치)
+
+## 요약 품질 채점 (step09b, `common/quality.py`, `prompts/judge_prompt.py`)
+- 사람과 LLM이 **같은 체크리스트**를 채움: required_points별 포함/부분/누락, forbidden_claims별 위반, 그 외 근거 없는 주장, 수치·날짜 오류, 외국어 섞임, 정책 위반, 어색한 문장
+- **주 지표 = 사용 가능률**: 형식 정상 + 환각 없음 + 수치 오류 없음 + 외국어 없음 + 핵심 포함률 ≥ 0.67. 함께 보고: 핵심 포함률(포함 1/부분 0.5), 환각률, 100점 감점 점수(환각 −40, 수치 −30, 외국어 −20, 정책 −10, 어색 −10, 누락 −10/부분 −5 최대 −30, 최저 0). 형식 실패는 0점·사용 불가. 외국어는 자동 탐지(원문에 없는 한자·가나·영문)와 OR
+- `judge`: `JUDGE_TARGET`(openai, 요금 발생, temperature 0)로 전체 응답 채점 → `judge.jsonl`, `quality_llm.json`. 이어서 실행하면 성공한 항목은 건너뜀. OpenAI도 후보라 자기 답변 편향 가능성을 한계로 적음
+- `sheet`: 반복 1회분 중 형식 정상 응답에서 모델×문서 유형별 균등 무작위 36건(seed 2026) → `human/human_sheet_rater1~4.csv`(블라인드, 채점자마다 순서 다름), `human_key.json`(채점 끝날 때까지 열지 않음), `README.md`(채점 안내)
+- `aggregate`: 4명 시트 → 항목별 다수결(동률은 보수적으로 문제 있음/부분, `ties`에 남겨 논의), Fleiss' kappa, LLM vs 사람 다수결 일치율·Cohen's kappa·감점 점수 상관 → `quality_human.json`
+- 채점 전 개발 데이터 3~5건으로 기준 맞추기(평가 데이터로 연습 금지)
 - 계획: 1차 development 15건 × 로컬 5개 → 2차 eval 24건 × 2회 × (상위 로컬 2 + openai)
 
 ## 진행 상태 / 알려진 문제

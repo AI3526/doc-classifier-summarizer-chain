@@ -53,6 +53,8 @@ GENERATION_CANDIDATES = {
     "openai": {"provider": "openai", "model": OPENAI_MODEL},  # 요금 발생
 }
 GENERATION_DEFAULT = "qwen3-4b"  # 생성 모델 비교 전 서비스 기본값
+# 요약 품질 LLM 채점 모델. 후보이기도 해서 자기 답변을 후하게 볼 수 있음을 한계로 적는다.
+JUDGE_TARGET = "openai"
 TEMPERATURE = 0.2
 OLLAMA_NUM_CTX = 4096
 OPENAI_REASONING_EFFORT = os.getenv("OPENAI_REASONING_EFFORT", "none")
