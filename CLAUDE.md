@@ -115,7 +115,9 @@ artifacts/{dataset}/
 - `sheet`: 반복 1회분 중 형식 정상 응답에서 모델×문서 유형별 균등 무작위 36건(seed 2026) → `human/human_sheet_rater1~4.csv`(블라인드, 채점자마다 순서 다름), `human_key.json`(채점 끝날 때까지 열지 않음), `README.md`(채점 안내)
 - `aggregate`: 4명 시트 → 항목별 다수결(동률은 보수적으로 문제 있음/부분, `ties`에 남겨 논의), Fleiss' kappa, LLM vs 사람 다수결 일치율·Cohen's kappa·PABAK·감점 점수 상관 → `quality_human.json`. `llm_trust_decision`: 사용 가능 판정 kappa ≥ 0.7(한쪽 판정이 85% 초과면 PABAK ≥ 0.7)이면 LLM 채점 144건으로, 아니면 사람 다수결 36건 우선으로 모델 비교
 - 채점 전 개발 데이터 3~5건으로 기준 맞추기(평가 데이터로 연습 금지)
-- 계획: 1차 development 15건 × 로컬 5개 → 2차 eval 24건 × 2회 × (상위 로컬 2 + openai)
+- 1차 완료(development, 프롬프트 v2→v3→v4, v4+구조화 출력): 기록은 `reports/experiment_log_generation.md`
+- 확정: 프롬프트 `document_summary_v4`, **구조화 출력 사용**(`STRUCTURED_OUTPUT=True`, `step09 --structured`, `prompts.response_schema`)
+- 2차: eval 24건 × 2회 × (llama3.1-8b, qwen2.5-7b, openai), `--structured`. eval 결과를 본 뒤 프롬프트·채점 기준을 바꾸지 않는다
 
 ## 진행 상태 / 알려진 문제
 - [완료] 0단계 기반 정리: `.gitignore`(가중치만 제외), `pyproject.toml` 정리·의존성(joblib, matplotlib, psutil), 문의용 코드 제거, 프롬프트 분리

@@ -1,0 +1,107 @@
+{
+  "split": "development",
+  "cases": 15,
+  "repeats": 1,
+  "prompt_version": "document_summary_v2",
+  "classifier_run": "20261011-210721_roberta_lr1e-5_s42",
+  "targets": [
+    {
+      "alias": "qwen3-4b",
+      "provider": "ollama",
+      "model": "qwen3:4b-instruct-2507-q4_K_M"
+    },
+    {
+      "alias": "gemma3-4b",
+      "provider": "ollama",
+      "model": "gemma3:4b"
+    },
+    {
+      "alias": "qwen2.5-7b",
+      "provider": "ollama",
+      "model": "qwen2.5:7b"
+    },
+    {
+      "alias": "exaone3.5-7.8b",
+      "provider": "ollama",
+      "model": "exaone3.5:7.8b"
+    },
+    {
+      "alias": "llama3.1-8b",
+      "provider": "ollama",
+      "model": "llama3.1:8b"
+    }
+  ],
+  "execution_conditions": {
+    "qwen3-4b": {
+      "prompt_version": "document_summary_v2",
+      "temperature": 0.2,
+      "max_tokens": 512,
+      "timeout_sec": 120.0,
+      "stream": true,
+      "quantization": "Q4_K_M",
+      "parameter_size": "4.0B",
+      "family": "qwen3",
+      "num_ctx": 4096,
+      "keep_alive": "5m",
+      "hardware": "NVIDIA GeForce RTX 5060 Laptop GPU / RAM 31.4GB",
+      "measurement": "로컬 HTTP 호출, 모델 적재 후(준비 호출 제외) 시간"
+    },
+    "gemma3-4b": {
+      "prompt_version": "document_summary_v2",
+      "temperature": 0.2,
+      "max_tokens": 512,
+      "timeout_sec": 120.0,
+      "stream": true,
+      "quantization": "Q4_K_M",
+      "parameter_size": "4.3B",
+      "family": "gemma3",
+      "num_ctx": 4096,
+      "keep_alive": "5m",
+      "hardware": "NVIDIA GeForce RTX 5060 Laptop GPU / RAM 31.4GB",
+      "measurement": "로컬 HTTP 호출, 모델 적재 후(준비 호출 제외) 시간"
+    },
+    "qwen2.5-7b": {
+      "prompt_version": "document_summary_v2",
+      "temperature": 0.2,
+      "max_tokens": 512,
+      "timeout_sec": 120.0,
+      "stream": true,
+      "quantization": "Q4_K_M",
+      "parameter_size": "7.6B",
+      "family": "qwen2",
+      "num_ctx": 4096,
+      "keep_alive": "5m",
+      "hardware": "NVIDIA GeForce RTX 5060 Laptop GPU / RAM 31.4GB",
+      "measurement": "로컬 HTTP 호출, 모델 적재 후(준비 호출 제외) 시간"
+    },
+    "exaone3.5-7.8b": {
+      "prompt_version": "document_summary_v2",
+      "temperature": 0.2,
+      "max_tokens": 512,
+      "timeout_sec": 120.0,
+      "stream": true,
+      "quantization": "Q4_K_M",
+      "parameter_size": "7.8B",
+      "family": "exaone",
+      "num_ctx": 4096,
+      "keep_alive": "5m",
+      "hardware": "NVIDIA GeForce RTX 5060 Laptop GPU / RAM 31.4GB",
+      "measurement": "로컬 HTTP 호출, 모델 적재 후(준비 호출 제외) 시간"
+    },
+    "llama3.1-8b": {
+      "prompt_version": "document_summary_v2",
+      "temperature": 0.2,
+      "max_tokens": 512,
+      "timeout_sec": 120.0,
+      "stream": true,
+      "quantization": "Q4_K_M",
+      "parameter_size": "8.0B",
+      "family": "llama",
+      "num_ctx": 4096,
+      "keep_alive": "5m",
+      "hardware": "NVIDIA GeForce RTX 5060 Laptop GPU / RAM 31.4GB",
+      "measurement": "로컬 HTTP 호출, 모델 적재 후(준비 호출 제외) 시간"
+    }
+  },
+  "started_at": "2026-10-11T22:36:25+09:00"
+}

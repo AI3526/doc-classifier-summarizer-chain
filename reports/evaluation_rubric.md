@@ -107,6 +107,10 @@
 
 1차 결과로 프롬프트를 고칠 수 있지만, 2차(eval) 결과를 본 뒤에는 프롬프트와 이 문서를 바꾸지 않는다.
 
+1차 결과로 정한 2차 조건(자세한 근거는 [생성 모델 실험 기록](experiment_log_generation.md) 3장):
+- 프롬프트 `document_summary_v4`, 구조화 출력 사용
+- 로컬 모델 llama3.1-8b, qwen2.5-7b + OpenAI gpt-6-luna
+
 ### 6.2 LLM 채점
 
 | 항목 | 값 |

@@ -13,6 +13,7 @@ VS Code 터미널에서 프로젝트 폴더를 기준으로 실행한다.
 uv run python steps/step09_compare.py --split smoke
 uv run python steps/step09_compare.py --split development
 uv run python steps/step09_compare.py --split eval --targets qwen2.5-7b exaone3.5-7.8b openai --repeats 2
+uv run python steps/step09_compare.py --split development --structured   # 구조화 출력
 """
 
 import argparse
@@ -22,7 +23,7 @@ from pathlib import Path
 
 import lesson_settings as lesson
 from common.records import new_run_dir, now_iso, write_json
-from prompts.document_policies import PROMPT_VERSION, build_prompt
+from prompts.document_policies import PROMPT_VERSION, build_prompt, response_schema
 from step01_read_data import read_jsonl, read_rows
 from step06_predict import load_classifier
 from step07_call_models import call_model, execution_conditions, ollama_unload, resolve_target
@@ -58,14 +59,15 @@ def validate_cases(cases):
             raise ValueError("비교 입력의 text와 길이를 확인하세요.")
 
 
-def warm_up(target):
+def warm_up(target, structured=False):
     """측정 전에 모델을 메모리에 올린다.
 
     비교 입력과 겹치지 않게 train 첫 문장을 쓰고, 결과는 warmup.json에만 남기며 요약 지표에서 뺀다.
     적재 시간(콜드 스타트)은 운영 조건 비교용으로 따로 보고한다.
     """
     row = read_rows(lesson.DATA_DIR / "train.csv")[0]
-    result = call_model(target, build_prompt(row["text"], row["label"]))
+    result = call_model(target, build_prompt(row["text"], row["label"]),
+                        response_format=response_schema(row["label"]) if structured else None)
     return {"alias": target["alias"], "sample_id": row["id"], "excluded_from_metrics": True,
             "status": result["status"], "error": result["error"],
             "error_message": result["error_message"],
@@ -172,7 +174,9 @@ def write_summary_md(path, summary):
             f"{value:.1f}" if isinstance(value, float) else str(value))
 
     lines = [f"# 생성 모델 비교 ({summary['split']}, {summary['cases']}건 × {summary['repeats']}회)",
-             "", f"- 프롬프트: `{summary['prompt_version']}`, 분류기: `{summary['classifier_run']}`",
+             "", (f"- 프롬프트: `{summary['prompt_version']}`, "
+                  f"구조화 출력: {'사용' if summary.get('structured_output') else '미사용'}, "
+                  f"분류기: `{summary['classifier_run']}`"),
              (f"- 분류 오답 입력: {len(summary['misclassified_cases'])}건 "
               f"{summary['misclassified_cases'] or ''}"), "",
              "| 모델 | " + " | ".join(name for _, name in columns) + " |",
@@ -183,15 +187,17 @@ def write_summary_md(path, summary):
     Path(path).write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def run_comparison(chain, cases, targets, output_dir, split, repeats=1, classifier_run=None):
+def run_comparison(chain, cases, targets, output_dir, split, repeats=1, classifier_run=None,
+                   structured=False):
     validate_cases(cases)
     if repeats < 1:
         raise ValueError("--repeats는 1 이상이어야 합니다.")
     targets = [resolve_target(name) for name in targets]
     prepared = [chain.invoke(case["text"]) for case in cases]  # text만 넘긴다.
-    conditions = {target["alias"]: execution_conditions(target) for target in targets}
+    conditions = {target["alias"]: execution_conditions(target, structured) for target in targets}
     write_json(output_dir / "config.json", {
         "split": split, "cases": len(cases), "repeats": repeats, "prompt_version": PROMPT_VERSION,
+        "structured_output": structured,
         "classifier_run": classifier_run, "targets": targets,
         "execution_conditions": conditions, "started_at": now_iso()})
 
@@ -199,12 +205,12 @@ def run_comparison(chain, cases, targets, output_dir, split, repeats=1, classifi
     with (output_dir / "results.jsonl").open("w", encoding="utf-8") as stream:
         # 모델을 바깥 반복에 두어 모델마다 한 번만 메모리에 올린다.
         for target in targets:
-            warmups[target["alias"]] = warm_up(target)
+            warmups[target["alias"]] = warm_up(target, structured)
             print(f"\n[{target['alias']}] 준비 호출 {warmups[target['alias']]['status']}, "
                   f"적재 {warmups[target['alias']]['load_time_sec']}")
             for repeat in range(1, repeats + 1):
                 for case, fixed in zip(cases, prepared, strict=True):
-                    generated = generate_prepared(fixed, target)
+                    generated = generate_prepared(fixed, target, structured)
                     record = build_record(output_dir.name, case, fixed, target,
                                           conditions[target["alias"]], generated, repeat)
                     # 실패한 호출도 저장한다. 중단되더라도 끝난 호출 기록은 남긴다.
@@ -223,8 +229,8 @@ def run_comparison(chain, cases, targets, output_dir, split, repeats=1, classifi
                             and row["input_data"]["predicted_label"]
                             != row["scoring_reference"]["expected_label"]})
     summary = {"split": split, "cases": len(cases), "repeats": repeats,
-               "prompt_version": PROMPT_VERSION, "classifier_run": classifier_run,
-               "misclassified_cases": misclassified, "quality_scored": False,
+               "prompt_version": PROMPT_VERSION, "structured_output": structured,
+               "classifier_run": classifier_run, "misclassified_cases": misclassified, "quality_scored": False,
                "targets": {target["alias"]: summarize_target(records, target["alias"],
                                                              warmups[target["alias"]])
                            for target in targets},
@@ -241,6 +247,8 @@ def main():
                         help=f"후보: {', '.join(lesson.GENERATION_CANDIDATES)}")
     parser.add_argument("--repeats", type=int, default=1)
     parser.add_argument("--name", default="", help="결과 폴더 이름에 붙일 메모")
+    parser.add_argument("--structured", action="store_true",
+                        help="출력 스키마로 구조화 출력을 요청한다(Ollama format, OpenAI json_schema)")
     args = parser.parse_args()
     cases = read_cases(SPLITS[args.split])
     classifier = load_classifier()
@@ -248,7 +256,8 @@ def main():
     output_dir = new_run_dir(lesson.LEARNER_DIR, "_".join(filter(None, [args.split, args.name])),
                              subdir="comparisons")
     summary = run_comparison(create_chain(classifier), cases, args.targets, output_dir,
-                             args.split, args.repeats, classifier["identity"]["run_name"])
+                             args.split, args.repeats, classifier["identity"]["run_name"],
+                             args.structured)
     print(json.dumps(summary["targets"], ensure_ascii=False, indent=2))
     print("저장 위치:", output_dir)
 

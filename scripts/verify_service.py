@@ -54,10 +54,13 @@ def verify_comparison(directory):
 
     for row in records:
         result = row["result"]
-        # 채점 기준이 프롬프트에 섞이지 않았는지 확인한다.
+        # 채점 기준이 프롬프트에 섞이지 않았는지 확인한다. 핵심 내용이 원문 문구와 같을 수 있어
+        # 프롬프트에 들어간 원문(JSON 문자열)을 빼고 나머지 지시문만 검사한다.
+        source = row["input_data"]["source_text"]
+        instructions = row["prompt"].replace(json.dumps(source, ensure_ascii=False), "")
         for point in (row["scoring_reference"].get("required_points") or []) + \
                 (row["scoring_reference"].get("forbidden_claims") or []):
-            assert point not in row["prompt"], "채점 기준이 프롬프트에 들어갔습니다."
+            assert point not in instructions, "채점 기준이 프롬프트 지시문에 들어갔습니다."
         parsed = parse_output(result["generated_text"], row["input_data"]["predicted_label"])
         assert result["format_valid_strict"] == parsed["strict"]
         assert result["format_valid_lenient"] == parsed["lenient"]

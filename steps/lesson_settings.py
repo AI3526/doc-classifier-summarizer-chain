@@ -53,6 +53,9 @@ GENERATION_CANDIDATES = {
     "openai": {"provider": "openai", "model": OPENAI_MODEL},  # 요금 발생
 }
 GENERATION_DEFAULT = "qwen3-4b"  # 생성 모델 비교 전 서비스 기본값
+# 구조화 출력(스키마에 맞는 토큰만 생성) 사용 여부. 1차 비교 결과로 서비스 기본값을 사용으로 정했다.
+# step09는 --structured로 따로 정한다(2차 비교는 사용).
+STRUCTURED_OUTPUT = True
 # 요약 품질 LLM 채점 모델. 후보이기도 해서 자기 답변을 후하게 볼 수 있음을 한계로 적는다.
 JUDGE_TARGET = "openai"
 TEMPERATURE = 0.2

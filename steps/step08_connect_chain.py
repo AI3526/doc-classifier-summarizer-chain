@@ -13,7 +13,13 @@ import json
 
 import lesson_settings as lesson
 from langchain_core.runnables import RunnableLambda
-from prompts.document_policies import POLICIES, PROMPT_VERSION, build_prompt, parse_output
+from prompts.document_policies import (
+    POLICIES,
+    PROMPT_VERSION,
+    build_prompt,
+    parse_output,
+    response_schema,
+)
 from step01_read_data import read_jsonl
 from step06_predict import load_classifier, predict_text
 from step07_call_models import call_model, resolve_target
@@ -41,30 +47,36 @@ def create_chain(classifier):
     return RunnableLambda(classify) | RunnableLambda(apply_policy)
 
 
-def generate_prepared(prepared, target):
-    """체인에서 만든 프롬프트를 그대로 생성 모델에 보내고, 예측 라벨의 형식으로 검사한다."""
-    result = call_model(target, prepared["prompt"])
-    parsed = parse_output(result["text"], prepared["classification"]["label"])
+def generate_prepared(prepared, target, structured=False):
+    """체인에서 만든 프롬프트를 그대로 생성 모델에 보내고, 예측 라벨의 형식으로 검사한다.
+
+    structured=True면 예측 라벨의 출력 스키마로 구조화 출력을 요청한다.
+    """
+    label = prepared["classification"]["label"]
+    result = call_model(target, prepared["prompt"],
+                        response_format=response_schema(label) if structured else None)
+    parsed = parse_output(result["text"], label)
     return {**result, "format_valid_strict": parsed["strict"],
             "format_valid_lenient": parsed["lenient"], "format_error": parsed["error"],
             "parsed": parsed["data"]}
 
 
-def create_service_chain(classifier, target):
+def create_service_chain(classifier, target, structured=lesson.STRUCTURED_OUTPUT):
     """분류 → 정책·프롬프트 → 생성 전체 체인. 서비스는 이 체인 하나를 호출한다."""
     target = resolve_target(target) if isinstance(target, str) else target
 
     def generate(item):
-        return {**item, "generation": generate_prepared(item, target)}
+        return {**item, "generation": generate_prepared(item, target, structured)}
 
     return create_chain(classifier) | RunnableLambda(generate)
 
 
-def compare_prepared(prepared, targets):
+def compare_prepared(prepared, targets, structured=lesson.STRUCTURED_OUTPUT):
     # 같은 분류 결과와 프롬프트를 모든 생성 모델이 공유한다.
     return {"classification": prepared["classification"],
             "prompt_version": prepared["prompt_version"],
-            "results": [generate_prepared(prepared, target) for target in targets]}
+            "results": [generate_prepared(prepared, target, structured)
+                        for target in targets]}
 
 
 def main():
