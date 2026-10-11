@@ -47,13 +47,13 @@ artifacts/{dataset}/
       epochs.jsonl  learning_curve.png  training_summary.json   # BERT 실행만
       checkpoint/ 또는 baseline.joblib                          # 가중치 (git 제외)
   selection/                                     # 팀 공통, step05/11
-      selected.json  comparison.md/csv  confusion_*.png  history/
+      selected.json  comparison.md/csv  comparison_by_config.csv  confusion_*.png  history/
       test_metrics.json  test_predictions.csv  test_case_review.csv  test_errors.csv
   {learner}/comparisons/...                      # step09 생성 비교
 ```
 - `DATASET`, `LEARNER`는 `steps/lesson_settings.py`에서 정한다. 팀원(`learner_park`, `learner_choi`, `learner_ro`, `learner_su`)은 **각자 다른 실험**을 맡는다.
 - `experiment.json`이 needtocheck의 EXP 형식이며 step05가 이것을 모아 비교한다. 지표 JSON/CSV는 커밋, 가중치는 git 제외.
-- 선정 규칙(step05 `TOLERANCE`): validation macro F1 최고점에서 0.01 이내 후보 중 CPU 1건 추론이 가장 빠른 것. **결과를 본 뒤 바꾸지 않는다.**
+- 선정 규칙(step05 `TOLERANCE`): seed만 다른 실행을 한 설정으로 묶어(`CONFIG_KEYS`) 평균 macro F1을 구하고, 최고 평균에서 0.01 이내 설정 중 CPU 1건 추론이 가장 빠른 설정 → 그 안에서 macro F1이 가장 높은 seed의 가중치를 사용. **결과를 본 뒤 바꾸지 않는다.**
 - `selection/test_metrics.json`이 생기면 step05 재선정이 막힌다(test를 본 뒤 재선택 금지).
 - 다른 팀원 실행이 선정되면 가중치가 git에 없으므로 받아 오거나 같은 설정으로 재학습해야 서비스에서 쓸 수 있다.
 - Windows 경로 길이(260자) 제한에 주의: 프로젝트를 깊은 폴더에 두면 체크포인트 저장이 실패할 수 있다.
@@ -62,7 +62,8 @@ artifacts/{dataset}/
 - `bert`(klue/bert-base, 필수), `roberta`, `electra-s`(14M), `electra-b`, `deberta-ko`(team-lucid/deberta-v3-base-korean) — 모두 로드·학습 확인됨
 - 제외: distilkobert(구형, remote code + sentencepiece 필요), ModernBERT·NeoBERT(영어 전용 토크나이저 → 한국어 처리 부적합)
 - 보류: mdeberta-v3-base(다국어, sentencepiece·protobuf 설치 필요)
-- 실험 순서: ① 모든 후보 × lr {1e-5, 2e-5, 5e-5}, seed 42 ② 상위 2~3개 설정만 seed 43, 44 추가 → 평균±표준편차 보고
+- 실험 순서: ① `--model bert roberta electra-s electra-b deberta-ko --lr 1e-5 2e-5 5e-5` (seed 42) ② `--top-k 3 --extra-seeds 43 44` → 상위 설정에 없는 seed만 학습 ③ step05 → 평균±표준편차 표
+- `--top-k`는 매번 그 시점의 평균 순위로 고르므로, seed가 추가되며 순위가 바뀌면 다시 실행했을 때 다른 설정이 반복 대상이 될 수 있다(상위 설정이 모두 같은 seed 수를 갖게 됨).
 - 실행 이름 형식: `{alias}_lr{lr}_s{seed}`
 
 ## 공통 모듈 (`steps/common/`)

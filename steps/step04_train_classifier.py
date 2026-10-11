@@ -5,9 +5,11 @@ uv run python steps/step04_train_classifier.py
 uv run python steps/step04_train_classifier.py --lr 1e-5 2e-5 5e-5      # 학습률 비교
 uv run python steps/step04_train_classifier.py --model bert roberta electra-s --lr 1e-5 2e-5 5e-5
 uv run python steps/step04_train_classifier.py --model roberta --lr 2e-5 --seed 42 43 44
+uv run python steps/step04_train_classifier.py --top-k 3 --extra-seeds 43 44   # 상위 설정 반복
 
 모델 이름은 lesson_settings.CLASSIFIER_CANDIDATES의 짧은 이름이나 Hugging Face ID를 쓴다.
 여러 조합을 주면 모델 × 학습률 × seed 순서로 차례로 학습하고, 하나가 실패해도 계속한다.
+--top-k는 팀 전체 결과에서 validation 평균이 높은 설정 K개를 골라, 아직 없는 seed만 학습한다.
 """
 
 import argparse
@@ -32,9 +34,17 @@ from common.resources import (
     process_rss_mb,
     reset_gpu_peak,
 )
-from lesson_settings import CLASSIFIER_CANDIDATES, CLASSIFIER_MODEL, DATASET, LEARNER_DIR, ROOT
+from lesson_settings import (
+    CLASSIFIER_CANDIDATES,
+    CLASSIFIER_MODEL,
+    DATASET,
+    LEARNER_DIR,
+    OUTPUT_ROOT,
+    ROOT,
+)
 from step01_read_data import read_labels, read_rows
 from step02_check_data import check_splits
+from step05_select_model import collect_candidates, group_candidates
 from step06_predict import load_run, predict_text
 from torch.utils.data import DataLoader, Dataset
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, DataCollatorWithPadding
@@ -332,6 +342,27 @@ def run_training(data_dir=DATA_DIR, learner_dir=LEARNER_DIR, run_name=None,
     return output_dir
 
 
+def top_config_jobs(top_k, extra_seeds, dataset_dir=OUTPUT_ROOT / DATASET):
+    """validation 평균 상위 설정을 골라, 그 설정에 아직 없는 seed의 학습 목록을 만든다."""
+    candidates = [row for row in collect_candidates(dataset_dir) if row["kind"] == "transformer"]
+    if not candidates:
+        raise RuntimeError("반복할 사전학습 모델 실행이 없습니다. 먼저 --model, --lr로 학습하세요.")
+    groups = sorted(group_candidates(candidates), key=lambda group: -group["macro_f1_mean"])
+    jobs = []
+    for group in groups[:top_k]:
+        row = next(item for item in candidates if item["run_dir"] == group["runs"][0])
+        missing = [seed for seed in extra_seeds if seed not in group["seeds"]]
+        print(f"상위 설정: {group['model_alias']} lr={row['learning_rate']} "
+              f"평균 macro F1 {group['macro_f1_mean']:.4f}, 기존 seed {group['seeds']}, "
+              f"추가 seed {missing}")
+        # seed 외의 설정은 원래 실행과 똑같이 맞춘다.
+        jobs += [{"model_name": row["model"], "learning_rate": row["learning_rate"],
+                  "epochs": row["epochs"], "batch_size": row["batch_size"],
+                  "accumulation_steps": row["accumulation_steps"],
+                  "max_length": row["max_length"], "seed": seed} for seed in missing]
+    return jobs
+
+
 def main():
     parser = argparse.ArgumentParser(description="사전학습 분류 모델 파인튜닝")
     parser.add_argument("--model", nargs="+", default=[CLASSIFIER_MODEL],
@@ -346,32 +377,42 @@ def main():
     parser.add_argument("--gradient-checkpointing", action=argparse.BooleanOptionalAction,
                         default=True, help="끄면 VRAM은 늘고 속도는 빨라진다.")
     parser.add_argument("--run-name", help="조합이 하나일 때만 쓸 실행 이름")
+    parser.add_argument("--top-k", type=int,
+                        help="validation 평균 상위 K개 설정을 --extra-seeds로 다시 학습한다.")
+    parser.add_argument("--extra-seeds", type=int, nargs="+", default=[43, 44])
     args = parser.parse_args()
-    combos = list(product(args.model, args.lr, args.seed))
-    if args.run_name and len(combos) > 1:
+
+    if args.top_k:
+        # 상위 설정 반복에서는 --model, --lr, --seed와 학습 설정을 기존 실행에서 가져온다.
+        jobs = top_config_jobs(args.top_k, args.extra_seeds)
+    else:
+        jobs = [{"model_name": model_name, "learning_rate": learning_rate, "seed": seed,
+                 "epochs": args.epochs, "batch_size": args.batch_size,
+                 "accumulation_steps": args.accumulation, "max_length": args.max_length}
+                for model_name, learning_rate, seed in product(args.model, args.lr, args.seed)]
+    if args.run_name and len(jobs) > 1:
         parser.error("--run-name은 모델, 학습률, seed 조합이 하나일 때만 쓸 수 있습니다.")
 
     finished, failed = [], []
-    for index, (model_name, learning_rate, seed) in enumerate(combos, start=1):
-        print(f"\n===== {index}/{len(combos)}: {model_name}, lr={learning_rate}, seed={seed} =====")
+    for index, job in enumerate(jobs, start=1):
+        label = f"{job['model_name']}, lr={job['learning_rate']}, seed={job['seed']}"
+        print(f"\n===== {index}/{len(jobs)}: {label} =====")
         try:
-            finished.append(run_training(
-                run_name=args.run_name, model_name=model_name, learning_rate=learning_rate,
-                epochs=args.epochs, batch_size=args.batch_size,
-                accumulation_steps=args.accumulation, max_length=args.max_length, seed=seed,
-                device_name=args.device, gradient_checkpointing=args.gradient_checkpointing))
+            finished.append(run_training(run_name=args.run_name, device_name=args.device,
+                                         gradient_checkpointing=args.gradient_checkpointing,
+                                         **job))
         except Exception:  # noqa: BLE001 - 한 조합이 실패해도 나머지 실험은 계속한다.
             # 실패한 실행 폴더에는 experiment.json이 없으므로 step05 후보에서 빠진다.
             traceback.print_exc()
-            failed.append((model_name, learning_rate, seed))
+            failed.append(label)
         # 다음 실험이 앞 실험의 GPU 메모리에 영향받지 않게 정리한다.
         gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
 
     print(f"\n완료 {len(finished)}개, 실패 {len(failed)}개")
-    for model_name, learning_rate, seed in failed:
-        print(f"  실패: {model_name}, lr={learning_rate}, seed={seed}")
+    for label in failed:
+        print(f"  실패: {label}")
     if failed:
         raise SystemExit(1)
 
