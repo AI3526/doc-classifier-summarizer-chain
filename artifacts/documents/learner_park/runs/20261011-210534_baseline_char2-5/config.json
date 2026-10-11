@@ -1,0 +1,17 @@
+{
+  "kind": "baseline",
+  "dataset": "documents",
+  "learner": "learner_park",
+  "run_name": "baseline_char2-5",
+  "model": "tfidf-char+logistic-regression",
+  "labels": [
+    "announcement",
+    "manual",
+    "minutes"
+  ],
+  "ngram_range": [
+    2,
+    5
+  ],
+  "seed": 42
+}

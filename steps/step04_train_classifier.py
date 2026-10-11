@@ -6,6 +6,7 @@ uv run python steps/step04_train_classifier.py --lr 1e-5 2e-5 5e-5      # 학습
 uv run python steps/step04_train_classifier.py --model bert roberta electra-s --lr 1e-5 2e-5 5e-5
 uv run python steps/step04_train_classifier.py --model roberta --lr 2e-5 --seed 42 43 44
 uv run python steps/step04_train_classifier.py --top-k 3 --extra-seeds 43 44   # 상위 설정 반복
+uv run python steps/step04_train_classifier.py --band --extra-seeds 43 44      # 후보 범위 전체 반복
 
 모델 이름은 lesson_settings.CLASSIFIER_CANDIDATES의 짧은 이름이나 Hugging Face ID를 쓴다.
 여러 조합을 주면 모델 × 학습률 × seed 순서로 차례로 학습하고, 하나가 실패해도 계속한다.
@@ -44,7 +45,7 @@ from lesson_settings import (
 )
 from step01_read_data import read_labels, read_rows
 from step02_check_data import check_splits
-from step05_select_model import collect_candidates, group_candidates
+from step05_select_model import collect_candidates, group_candidates, tolerance_band
 from step06_predict import load_run, predict_text
 from torch.utils.data import DataLoader, Dataset
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, DataCollatorWithPadding
@@ -342,14 +343,23 @@ def run_training(data_dir=DATA_DIR, learner_dir=LEARNER_DIR, run_name=None,
     return output_dir
 
 
-def top_config_jobs(top_k, extra_seeds, dataset_dir=OUTPUT_ROOT / DATASET):
-    """validation 평균 상위 설정을 골라, 그 설정에 아직 없는 seed의 학습 목록을 만든다."""
-    candidates = [row for row in collect_candidates(dataset_dir) if row["kind"] == "transformer"]
+def top_config_jobs(top_k, extra_seeds, dataset_dir=OUTPUT_ROOT / DATASET, band=False):
+    """반복할 설정을 골라, 그 설정에 아직 없는 seed의 학습 목록을 만든다.
+
+    band=True면 step05의 후보 범위(평균 최고점에서 TOLERANCE 이내) 안의 설정을 모두 고르고,
+    아니면 validation 평균 상위 top_k개를 고른다.
+    """
+    all_candidates = collect_candidates(dataset_dir)
+    candidates = [row for row in all_candidates if row["kind"] == "transformer"]
     if not candidates:
         raise RuntimeError("반복할 사전학습 모델 실행이 없습니다. 먼저 --model, --lr로 학습하세요.")
-    groups = sorted(group_candidates(candidates), key=lambda group: -group["macro_f1_mean"])
+    if band:
+        chosen = tolerance_band(group_candidates(all_candidates))
+    else:
+        chosen = sorted(group_candidates(candidates),
+                        key=lambda group: -group["macro_f1_mean"])[:top_k]
     jobs = []
-    for group in groups[:top_k]:
+    for group in (group for group in chosen if group["kind"] == "transformer"):
         row = next(item for item in candidates if item["run_dir"] == group["runs"][0])
         missing = [seed for seed in extra_seeds if seed not in group["seeds"]]
         print(f"상위 설정: {group['model_alias']} lr={row['learning_rate']} "
@@ -379,12 +389,14 @@ def main():
     parser.add_argument("--run-name", help="조합이 하나일 때만 쓸 실행 이름")
     parser.add_argument("--top-k", type=int,
                         help="validation 평균 상위 K개 설정을 --extra-seeds로 다시 학습한다.")
+    parser.add_argument("--band", action="store_true",
+                        help="step05 후보 범위 안의 설정을 모두 --extra-seeds로 다시 학습한다.")
     parser.add_argument("--extra-seeds", type=int, nargs="+", default=[43, 44])
     args = parser.parse_args()
 
-    if args.top_k:
-        # 상위 설정 반복에서는 --model, --lr, --seed와 학습 설정을 기존 실행에서 가져온다.
-        jobs = top_config_jobs(args.top_k, args.extra_seeds)
+    if args.top_k or args.band:
+        # 반복 학습에서는 --model, --lr, --seed와 학습 설정을 기존 실행에서 가져온다.
+        jobs = top_config_jobs(args.top_k, args.extra_seeds, band=args.band)
     else:
         jobs = [{"model_name": model_name, "learning_rate": learning_rate, "seed": seed,
                  "epochs": args.epochs, "batch_size": args.batch_size,

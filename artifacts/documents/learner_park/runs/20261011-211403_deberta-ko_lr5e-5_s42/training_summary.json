@@ -1,0 +1,7 @@
+{
+  "method": "full_backbone_and_head_finetuning",
+  "best_epoch": 5,
+  "optimizer_steps_at_checkpoint": 115,
+  "selection_split": "validation",
+  "max_length": 192
+}

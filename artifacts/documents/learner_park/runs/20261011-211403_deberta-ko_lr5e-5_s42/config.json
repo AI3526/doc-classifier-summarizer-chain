@@ -1,0 +1,22 @@
+{
+  "kind": "transformer",
+  "dataset": "documents",
+  "learner": "learner_park",
+  "run_name": "deberta-ko_lr5e-5_s42",
+  "model": "team-lucid/deberta-v3-base-korean",
+  "model_alias": "deberta-ko",
+  "learning_rate": 5e-05,
+  "epochs": 5,
+  "batch_size": 4,
+  "accumulation_steps": 4,
+  "max_length": 192,
+  "seed": 42,
+  "device": "cuda",
+  "precision": "BF16 autocast",
+  "gradient_checkpointing": true,
+  "labels": [
+    "announcement",
+    "manual",
+    "minutes"
+  ]
+}

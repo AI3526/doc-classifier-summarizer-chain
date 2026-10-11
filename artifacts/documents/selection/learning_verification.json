@@ -1,0 +1,863 @@
+{
+  "data": {
+    "train.csv": {
+      "sha256": "1fd431ea10292e25170411cc7a2554a2d5ca326cb87059e6843ca76132ce381b",
+      "manifest_match": false
+    },
+    "validation.csv": {
+      "sha256": "161e99db5e292d123d9865f79bb00d4e7773fd86f49d0fe43430039dd2770b5a",
+      "manifest_match": false
+    },
+    "labels.json": {
+      "sha256": "de705c249063b62c6ed3bad6bda03d20338050cc3f886d42a8c3487c48223fe9",
+      "manifest_match": false
+    }
+  },
+  "selection": {
+    "selected_run": "documents/learner_park/runs/20261011-210721_roberta_lr1e-5_s42",
+    "candidates": 30
+  },
+  "runs": [
+    {
+      "run_dir": "documents/learner_park/runs/20261011-210546_bert_lr1e-5_s42",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "42ee40c98cb910d52dd346b8d33169f11614617a5b946eeab889beef499a1923",
+          "parameters": 110617344
+        },
+        "head": {
+          "sha256": "d1af660cf1accf8d6aa4a6c4b757523aed848d642d59fdfe44de45f9b9ece877",
+          "parameters": 2307
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "6e6c3b4b6e45c68974b99738ac825f22fb96fd363292289484d1175b2c471a89",
+          "parameters": 110617344
+        },
+        "head": {
+          "sha256": "1668c7ed49d4a574c40c179a0f58412a933d6325ae8a43a9aa0eb752edb40a67",
+          "parameters": 2307
+        }
+      },
+      "best_epoch": 4,
+      "validation_macro_f1": 0.9833229101521784
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-210617_bert_lr2e-5_s42",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "42ee40c98cb910d52dd346b8d33169f11614617a5b946eeab889beef499a1923",
+          "parameters": 110617344
+        },
+        "head": {
+          "sha256": "d1af660cf1accf8d6aa4a6c4b757523aed848d642d59fdfe44de45f9b9ece877",
+          "parameters": 2307
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "86ea1d9b4aa45d559512484a91e4f246452ab4f05bad8933bed434fdf67fbe59",
+          "parameters": 110617344
+        },
+        "head": {
+          "sha256": "8e8b25846367d9c0dee47df0e6cb570a57a5b532392eb78445efc90d3dbc81a3",
+          "parameters": 2307
+        }
+      },
+      "best_epoch": 3,
+      "validation_macro_f1": 0.991665364379851
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-210649_bert_lr5e-5_s42",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "42ee40c98cb910d52dd346b8d33169f11614617a5b946eeab889beef499a1923",
+          "parameters": 110617344
+        },
+        "head": {
+          "sha256": "d1af660cf1accf8d6aa4a6c4b757523aed848d642d59fdfe44de45f9b9ece877",
+          "parameters": 2307
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "0c960b1e49005ef581c8ccc67624fe1b4f481d558df1b6afccfd98c2c3a3e1dd",
+          "parameters": 110617344
+        },
+        "head": {
+          "sha256": "d7f6f7cd2d2a099fb42cb540caf2b7bcbfacfa269406c3d42711ef80ed98cb7a",
+          "parameters": 2307
+        }
+      },
+      "best_epoch": 3,
+      "validation_macro_f1": 1.0
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-210721_roberta_lr1e-5_s42",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "1cdad2db727464d61af8b6bdea290b5cf997fc266547dbb4fb31296f2977a90c",
+          "parameters": 110027520
+        },
+        "head": {
+          "sha256": "99dbd996ce7461f542e30b18b56f1c000eda36786f4515d1cbd989c80cc02598",
+          "parameters": 592899
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "60cbc17c2630641f5fd45e03dac4f3d56266e4a65e96da10bef4fed720d67594",
+          "parameters": 110027520
+        },
+        "head": {
+          "sha256": "877198bcdc80c4369f4feb3f36c1990b8fa459caf1bb1c6ee3775f7b7d28411a",
+          "parameters": 592899
+        }
+      },
+      "best_epoch": 4,
+      "validation_macro_f1": 1.0
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-210752_roberta_lr2e-5_s42",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "1cdad2db727464d61af8b6bdea290b5cf997fc266547dbb4fb31296f2977a90c",
+          "parameters": 110027520
+        },
+        "head": {
+          "sha256": "99dbd996ce7461f542e30b18b56f1c000eda36786f4515d1cbd989c80cc02598",
+          "parameters": 592899
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "5d8f8485c6c9f52d26c6f073b323e00e0605bff58f0a1cfb224aa86c474ef387",
+          "parameters": 110027520
+        },
+        "head": {
+          "sha256": "5d82f0bbefa3f94141c11488fe208e0b7bfadd872f40345b8c03ce71e99268d8",
+          "parameters": 592899
+        }
+      },
+      "best_epoch": 2,
+      "validation_macro_f1": 0.991665364379851
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-210823_roberta_lr5e-5_s42",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "1cdad2db727464d61af8b6bdea290b5cf997fc266547dbb4fb31296f2977a90c",
+          "parameters": 110027520
+        },
+        "head": {
+          "sha256": "99dbd996ce7461f542e30b18b56f1c000eda36786f4515d1cbd989c80cc02598",
+          "parameters": 592899
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "4c41cba2ddf0d9cd84943d08c21813d49ba04c87e8e156a96917aeb64b8e14cc",
+          "parameters": 110027520
+        },
+        "head": {
+          "sha256": "4be6a7ebbb522fb8b9e96675d710c666dc41ea5f74c357cf7aa7330043d78628",
+          "parameters": 592899
+        }
+      },
+      "best_epoch": 2,
+      "validation_macro_f1": 1.0
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-210854_electra-s_lr1e-5_s42",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "b2e004faf7627892f80b6aa52dc9e737fcea6c7af5f6d5abb617d2f2a59bc307",
+          "parameters": 14056192
+        },
+        "head": {
+          "sha256": "1bf70737ea8ecceb81b9c5ea42fe898278aacdf236e8b4beb1817bc1fa985cdc",
+          "parameters": 66563
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "fb22744277ad597bf050c1daee0f49ddb45dd483f2ef2c9814b28e2ed711ccbc",
+          "parameters": 14056192
+        },
+        "head": {
+          "sha256": "da41ace9a453c44ae5a531762dd29d6c5b5f59e5b0c4bd95f704632a5d33f45d",
+          "parameters": 66563
+        }
+      },
+      "best_epoch": 5,
+      "validation_macro_f1": 0.8289601092115498
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-210922_electra-s_lr2e-5_s42",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "b2e004faf7627892f80b6aa52dc9e737fcea6c7af5f6d5abb617d2f2a59bc307",
+          "parameters": 14056192
+        },
+        "head": {
+          "sha256": "1bf70737ea8ecceb81b9c5ea42fe898278aacdf236e8b4beb1817bc1fa985cdc",
+          "parameters": 66563
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "42d66c3397623b9529f400f6dfabcd2a9015e5ce246e8955bbfc80af92379397",
+          "parameters": 14056192
+        },
+        "head": {
+          "sha256": "3d74e3e198dc1a4075f753def78dd9327e6352277a2d50e9105802c483cc80af",
+          "parameters": 66563
+        }
+      },
+      "best_epoch": 5,
+      "validation_macro_f1": 0.899749373433584
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-210951_electra-s_lr5e-5_s42",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "b2e004faf7627892f80b6aa52dc9e737fcea6c7af5f6d5abb617d2f2a59bc307",
+          "parameters": 14056192
+        },
+        "head": {
+          "sha256": "1bf70737ea8ecceb81b9c5ea42fe898278aacdf236e8b4beb1817bc1fa985cdc",
+          "parameters": 66563
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "50b0aca4e550adab9056c90027d165bf9b60ceb6dde528a3a200915f768e480d",
+          "parameters": 14056192
+        },
+        "head": {
+          "sha256": "964a7bc3190d1db3ef85c4ae27d12001c060ff99631278d2e1257b7e473d25dc",
+          "parameters": 66563
+        }
+      },
+      "best_epoch": 4,
+      "validation_macro_f1": 0.9833229101521784
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-211020_electra-b_lr1e-5_s42",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "d76f7922748f89b0265f48487f0c0a29fe2ef16c66505f0af33a0898cd5e5cea",
+          "parameters": 112330752
+        },
+        "head": {
+          "sha256": "99dbd996ce7461f542e30b18b56f1c000eda36786f4515d1cbd989c80cc02598",
+          "parameters": 592899
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "abb153f675537d9c107d16e460df5c0a3c505b866451eb2126d6a982a53f7294",
+          "parameters": 112330752
+        },
+        "head": {
+          "sha256": "d895da8eaf1a01527768db6ffda862c7ffed150fcbbcfae8f76446db356aa829",
+          "parameters": 592899
+        }
+      },
+      "best_epoch": 3,
+      "validation_macro_f1": 0.9833229101521784
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-211056_electra-b_lr2e-5_s42",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "d76f7922748f89b0265f48487f0c0a29fe2ef16c66505f0af33a0898cd5e5cea",
+          "parameters": 112330752
+        },
+        "head": {
+          "sha256": "99dbd996ce7461f542e30b18b56f1c000eda36786f4515d1cbd989c80cc02598",
+          "parameters": 592899
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "754073e9945e3ddaba3b8e0b7b0199b3296ded2ea98d3d0fbd62fd162fe1d1e1",
+          "parameters": 112330752
+        },
+        "head": {
+          "sha256": "762c627565b432b15c13d72a66c0dc04dcb5d20d3dd25a77853049af16f5c24e",
+          "parameters": 592899
+        }
+      },
+      "best_epoch": 2,
+      "validation_macro_f1": 0.9833229101521784
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-211132_electra-b_lr5e-5_s42",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "d76f7922748f89b0265f48487f0c0a29fe2ef16c66505f0af33a0898cd5e5cea",
+          "parameters": 112330752
+        },
+        "head": {
+          "sha256": "99dbd996ce7461f542e30b18b56f1c000eda36786f4515d1cbd989c80cc02598",
+          "parameters": 592899
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "1adf7225166495b0e6619cc75b2550d921e4ba7f84c04ffa93fa8a296e91ed9e",
+          "parameters": 112330752
+        },
+        "head": {
+          "sha256": "133eac02f8d26c7c6375bca5bf64f2914ea2132f02d70b44b2f15739f8ac6227",
+          "parameters": 592899
+        }
+      },
+      "best_epoch": 3,
+      "validation_macro_f1": 1.0
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-211208_deberta-ko_lr1e-5_s42",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "f3ca2be0ed9eafbfef3ade96018ec46c3acc0e2bfe6eb67b1581d3d1b28e88f5",
+          "parameters": 134679552
+        },
+        "head": {
+          "sha256": "7a752d566a281fceb31e25f3dd0a897fe3a7c25f215e7d2666c87c5ee4d423e0",
+          "parameters": 592899
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "949d67f571ac4b0e9350a11d5188c930edd225135cfd695aaf164e4bf6708be8",
+          "parameters": 134679552
+        },
+        "head": {
+          "sha256": "050b2c9e1c32b3fd8cee7196fa157246de3986adb298ad2d77eb70649f3ce29b",
+          "parameters": 592899
+        }
+      },
+      "best_epoch": 3,
+      "validation_macro_f1": 0.4369497283489581
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-211304_deberta-ko_lr2e-5_s42",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "f3ca2be0ed9eafbfef3ade96018ec46c3acc0e2bfe6eb67b1581d3d1b28e88f5",
+          "parameters": 134679552
+        },
+        "head": {
+          "sha256": "7a752d566a281fceb31e25f3dd0a897fe3a7c25f215e7d2666c87c5ee4d423e0",
+          "parameters": 592899
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "d1399450025b3f4741a5596f22003a0f28bbeddcc8199999d40caa07dffb9e1e",
+          "parameters": 134679552
+        },
+        "head": {
+          "sha256": "d81cbca597c1137e8bb1d36ab08db9ceb955f00e6162dc75941922bb5d3a6e92",
+          "parameters": 592899
+        }
+      },
+      "best_epoch": 5,
+      "validation_macro_f1": 0.5693836425543742
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-211403_deberta-ko_lr5e-5_s42",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "f3ca2be0ed9eafbfef3ade96018ec46c3acc0e2bfe6eb67b1581d3d1b28e88f5",
+          "parameters": 134679552
+        },
+        "head": {
+          "sha256": "7a752d566a281fceb31e25f3dd0a897fe3a7c25f215e7d2666c87c5ee4d423e0",
+          "parameters": 592899
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "77d19984996fa2d7e638b7705b53922c4fb11ff383b7fa2d162386b969a38173",
+          "parameters": 134679552
+        },
+        "head": {
+          "sha256": "15f34ae5ec25dad9461411c45429dd4ce7038d087194c1cf7a10a512a0188cf2",
+          "parameters": 592899
+        }
+      },
+      "best_epoch": 5,
+      "validation_macro_f1": 0.991665364379851
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-211515_bert_lr5e-5_s43",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "42ee40c98cb910d52dd346b8d33169f11614617a5b946eeab889beef499a1923",
+          "parameters": 110617344
+        },
+        "head": {
+          "sha256": "054ed7952169c419c0cb02e68ef5523c1fcc97315b772bb3fec79092d9bad026",
+          "parameters": 2307
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "16146263a652ff1794ef4fe47d71fadd52ec0f278192264872850a0580d26d0f",
+          "parameters": 110617344
+        },
+        "head": {
+          "sha256": "62b350c3deb0b78e95d60dd559f3f6d43b7070317f32079dcf968135732ecb94",
+          "parameters": 2307
+        }
+      },
+      "best_epoch": 2,
+      "validation_macro_f1": 0.9833229101521784
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-211546_bert_lr5e-5_s44",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "42ee40c98cb910d52dd346b8d33169f11614617a5b946eeab889beef499a1923",
+          "parameters": 110617344
+        },
+        "head": {
+          "sha256": "4ae5924df043cf22a4feb13911aca19c65d61d2d59deac3fb49f24c29ccfbf1b",
+          "parameters": 2307
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "741763071057f3a02df113ab804110441f15e51d340dee6defa39873b53dc656",
+          "parameters": 110617344
+        },
+        "head": {
+          "sha256": "b14ff13f5fa2452a50d7b6f814396a378331cf31333c3dcf6fe903a4a750d1ef",
+          "parameters": 2307
+        }
+      },
+      "best_epoch": 1,
+      "validation_macro_f1": 0.9833229101521784
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-211617_roberta_lr1e-5_s43",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "1cdad2db727464d61af8b6bdea290b5cf997fc266547dbb4fb31296f2977a90c",
+          "parameters": 110027520
+        },
+        "head": {
+          "sha256": "5ddc38a51bdcebf7e1ea9b49275e1425df69b7a69ed4147cada73c1218eeb8e4",
+          "parameters": 592899
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "f0df9f4a4672b1f49982a345fbe1f0576a310ff82dbf0584d66089e37b394e55",
+          "parameters": 110027520
+        },
+        "head": {
+          "sha256": "f3c20c3bee95fe78f44cae17cd196dda6734c125f579fa139128d249400ac510",
+          "parameters": 592899
+        }
+      },
+      "best_epoch": 3,
+      "validation_macro_f1": 1.0
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-211648_roberta_lr1e-5_s44",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "1cdad2db727464d61af8b6bdea290b5cf997fc266547dbb4fb31296f2977a90c",
+          "parameters": 110027520
+        },
+        "head": {
+          "sha256": "01fbcb75730537fe34d06199186e02feb9d947a41e2bd5b0c1a29bf489519f8b",
+          "parameters": 592899
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "608e8a5ebf845c27b6c5343a2601e85dc736d28307342ff60f58f8ac1d9fd3fe",
+          "parameters": 110027520
+        },
+        "head": {
+          "sha256": "8d0562a88cc299a9e65b9f25d93e085b551a087e6bd3b43d1e5501eb409e64c1",
+          "parameters": 592899
+        }
+      },
+      "best_epoch": 4,
+      "validation_macro_f1": 1.0
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-211720_roberta_lr5e-5_s43",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "1cdad2db727464d61af8b6bdea290b5cf997fc266547dbb4fb31296f2977a90c",
+          "parameters": 110027520
+        },
+        "head": {
+          "sha256": "5ddc38a51bdcebf7e1ea9b49275e1425df69b7a69ed4147cada73c1218eeb8e4",
+          "parameters": 592899
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "87308ac1e21cdedf8935a1308e10b29268b3b017754b47ceab591a505abdc095",
+          "parameters": 110027520
+        },
+        "head": {
+          "sha256": "e56c34f2e07f68048213037ebab1a5780fe82a330251f354094b3c1f6346aa9a",
+          "parameters": 592899
+        }
+      },
+      "best_epoch": 4,
+      "validation_macro_f1": 1.0
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-211752_roberta_lr5e-5_s44",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "1cdad2db727464d61af8b6bdea290b5cf997fc266547dbb4fb31296f2977a90c",
+          "parameters": 110027520
+        },
+        "head": {
+          "sha256": "01fbcb75730537fe34d06199186e02feb9d947a41e2bd5b0c1a29bf489519f8b",
+          "parameters": 592899
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "58cc049b0e266651ba479e7fbbc5f27253e1b0586c1fd5eb8fa87e327688f647",
+          "parameters": 110027520
+        },
+        "head": {
+          "sha256": "4afce3a6f6df72f1865bd5c7b1b013ad89973ecf3ffd6da955e9d4e9db2b2864",
+          "parameters": 592899
+        }
+      },
+      "best_epoch": 3,
+      "validation_macro_f1": 1.0
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-211823_electra-b_lr5e-5_s43",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "d76f7922748f89b0265f48487f0c0a29fe2ef16c66505f0af33a0898cd5e5cea",
+          "parameters": 112330752
+        },
+        "head": {
+          "sha256": "5ddc38a51bdcebf7e1ea9b49275e1425df69b7a69ed4147cada73c1218eeb8e4",
+          "parameters": 592899
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "13f4862435d4ffc60138262658b1789a162f57d9c3953b317d43cd8b1b533dc0",
+          "parameters": 112330752
+        },
+        "head": {
+          "sha256": "7703bac6bacf6df05fa9d09227bbd2dfb73f8e6249ed5e933308c75f4a4d66e5",
+          "parameters": 592899
+        }
+      },
+      "best_epoch": 2,
+      "validation_macro_f1": 1.0
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-211858_electra-b_lr5e-5_s44",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "d76f7922748f89b0265f48487f0c0a29fe2ef16c66505f0af33a0898cd5e5cea",
+          "parameters": 112330752
+        },
+        "head": {
+          "sha256": "01fbcb75730537fe34d06199186e02feb9d947a41e2bd5b0c1a29bf489519f8b",
+          "parameters": 592899
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "fd986a0cd26de1bf96a5f797346f79af27f679149b3fd6903d5dddf695162e41",
+          "parameters": 112330752
+        },
+        "head": {
+          "sha256": "d76898f0fb7ebc9ad0c001a9c22b237ebde2acc5b3301b4d1c6f4344cf10057b",
+          "parameters": 592899
+        }
+      },
+      "best_epoch": 3,
+      "validation_macro_f1": 1.0
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-212837_bert_lr2e-5_s43",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "42ee40c98cb910d52dd346b8d33169f11614617a5b946eeab889beef499a1923",
+          "parameters": 110617344
+        },
+        "head": {
+          "sha256": "054ed7952169c419c0cb02e68ef5523c1fcc97315b772bb3fec79092d9bad026",
+          "parameters": 2307
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "e42d75dd8400b9471dc5c060984eccece5ee2b1659e759c79269c29800f00cf9",
+          "parameters": 110617344
+        },
+        "head": {
+          "sha256": "8cfd03c75711f712536e0afac15167ee2fc5c1d3e4cd245d4fd8dd9935af771d",
+          "parameters": 2307
+        }
+      },
+      "best_epoch": 2,
+      "validation_macro_f1": 0.991665364379851
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-212906_bert_lr2e-5_s44",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "42ee40c98cb910d52dd346b8d33169f11614617a5b946eeab889beef499a1923",
+          "parameters": 110617344
+        },
+        "head": {
+          "sha256": "4ae5924df043cf22a4feb13911aca19c65d61d2d59deac3fb49f24c29ccfbf1b",
+          "parameters": 2307
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "94a9ed8bf9ddd1965517c0fe303b648822a61fceb392054268b03550be059689",
+          "parameters": 110617344
+        },
+        "head": {
+          "sha256": "0308b461a5c9ac94643e51029bac02d88be66226f876c9391b4856552590bc69",
+          "parameters": 2307
+        }
+      },
+      "best_epoch": 3,
+      "validation_macro_f1": 0.991665364379851
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-212934_roberta_lr2e-5_s43",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "1cdad2db727464d61af8b6bdea290b5cf997fc266547dbb4fb31296f2977a90c",
+          "parameters": 110027520
+        },
+        "head": {
+          "sha256": "5ddc38a51bdcebf7e1ea9b49275e1425df69b7a69ed4147cada73c1218eeb8e4",
+          "parameters": 592899
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "259129d6fb089892bd0120c501d15af749bccfe20e2eafbba2442d5ba90f4762",
+          "parameters": 110027520
+        },
+        "head": {
+          "sha256": "d1b9badd7bc1cb4c26ecf939714717e5d516f59e6c3244dedea1b9610769c321",
+          "parameters": 592899
+        }
+      },
+      "best_epoch": 4,
+      "validation_macro_f1": 0.991665364379851
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-213005_roberta_lr2e-5_s44",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "1cdad2db727464d61af8b6bdea290b5cf997fc266547dbb4fb31296f2977a90c",
+          "parameters": 110027520
+        },
+        "head": {
+          "sha256": "01fbcb75730537fe34d06199186e02feb9d947a41e2bd5b0c1a29bf489519f8b",
+          "parameters": 592899
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "b93481949e8eab69988a7794ec407f6557c64e1a9badc42cbc02507ed78e2f2d",
+          "parameters": 110027520
+        },
+        "head": {
+          "sha256": "19c170346df769f2ecc9f3dd73690ed4617bfd4954e0cf773476cbc0369840a6",
+          "parameters": 592899
+        }
+      },
+      "best_epoch": 2,
+      "validation_macro_f1": 1.0
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-213036_deberta-ko_lr5e-5_s43",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "f3ca2be0ed9eafbfef3ade96018ec46c3acc0e2bfe6eb67b1581d3d1b28e88f5",
+          "parameters": 134679552
+        },
+        "head": {
+          "sha256": "d71f6fa810616a1ea514e7fd48c33d1cd252fde3a63e09702f19ebcd57368153",
+          "parameters": 592899
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "94bd2b91356bde2c7054272f51029ffa5938b112197685d9dc0c6dc4b1063cba",
+          "parameters": 134679552
+        },
+        "head": {
+          "sha256": "b629bf68d5512b9be3e06e07ea52837900e45a1ed05a9192c398702f2506959b",
+          "parameters": 592899
+        }
+      },
+      "best_epoch": 4,
+      "validation_macro_f1": 0.991665364379851
+    },
+    {
+      "run_dir": "documents/learner_park/runs/20261011-213134_deberta-ko_lr5e-5_s44",
+      "changed": {
+        "backbone": true,
+        "head": true
+      },
+      "initial": {
+        "backbone": {
+          "sha256": "f3ca2be0ed9eafbfef3ade96018ec46c3acc0e2bfe6eb67b1581d3d1b28e88f5",
+          "parameters": 134679552
+        },
+        "head": {
+          "sha256": "1b84ba2f66eaeb87d6253845752538b76c1a0464203b1c09f902b804f7669e8f",
+          "parameters": 592899
+        }
+      },
+      "selected_checkpoint": {
+        "backbone": {
+          "sha256": "027537f56090cfb05d51883a669714238de83edc89a05b9f7a17e9c544cf50e4",
+          "parameters": 134679552
+        },
+        "head": {
+          "sha256": "0a79ccc9c8cc8c39689d7ff4e69941729fe8c2ab3039ffd7b021ad1be9c62c49",
+          "parameters": 592899
+        }
+      },
+      "best_epoch": 5,
+      "validation_macro_f1": 0.9833229101521784
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+﻿id,text,actual,predicted,group_id
+documents-v2-announcement-validation-011-v2,전시 자료 중 복제본에는 다음 주부터 회색 표식을 붙입니다. 원본의 표기 방식은 변경 없이 유지합니다. 이전에 배부한 안내 카드도 표식 설명에 맞춰 고칩니다.,announcement,manual,documents-v2-announcement-validation-011
+documents-v2-announcement-validation-011-v1,"복제 자료 구분
+- 전시 자료 중 복제본에는 다음 주부터 회색 표식을 붙인다.
+- 원본의 표기 방식은 그대로 유지한다.
+- 이전에 배부한 안내 카드도 표식 설명에 맞춰 고친다.",announcement,manual,documents-v2-announcement-validation-011

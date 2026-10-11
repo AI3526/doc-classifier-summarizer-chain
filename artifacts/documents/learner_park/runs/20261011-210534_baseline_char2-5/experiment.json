@@ -1,0 +1,77 @@
+{
+  "experiment_id": "20261011-210534_baseline_char2-5",
+  "learner": "learner_park",
+  "dataset": "documents",
+  "kind": "baseline",
+  "model_info": {
+    "model_id": "TF-IDF(char) + LogisticRegression",
+    "model_size_params": 118710,
+    "vocabulary_size": 39570,
+    "model_file_mb": 1.8084449768066406,
+    "precision": "FP64",
+    "training_type": "train 데이터로 처음부터 학습",
+    "pretrained_source": null
+  },
+  "hyperparameters": {
+    "ngram_range": [
+      2,
+      5
+    ],
+    "analyzer": "char",
+    "class_weight": "balanced",
+    "max_iter": 1000,
+    "seed": 42
+  },
+  "resource_and_time": {
+    "train_time_sec": 0.17990480037406087,
+    "inference_latency_per_sample_ms": 0.3321816329844296,
+    "inference_latency": {
+      "mean_ms": 0.3321816329844296,
+      "p50_ms": 0.32979995012283325,
+      "p95_ms": 0.36949990317225456,
+      "samples": 120,
+      "warmup_calls": 3,
+      "scope": "1건씩 전처리부터 예측 라벨까지, 모델 로딩 제외",
+      "device": "cpu"
+    },
+    "peak_vram_mb": null,
+    "process_rss_mb": 675.8984375
+  },
+  "evaluation_metrics": {
+    "split": "validation",
+    "accuracy": 0.95,
+    "macro_f1": 0.9499687304565354,
+    "weighted_f1": 0.9499687304565353,
+    "confusion_matrix": [
+      [
+        36,
+        4,
+        0
+      ],
+      [
+        2,
+        38,
+        0
+      ],
+      [
+        0,
+        0,
+        40
+      ]
+    ]
+  },
+  "environment": {
+    "python": "3.12.13",
+    "os": "Windows-11-10.0.26200-SP0",
+    "cpu": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel",
+    "cpu_threads_torch": 24,
+    "ram_total_gb": 31.4,
+    "gpu": "NVIDIA GeForce RTX 5060 Laptop GPU",
+    "packages": {
+      "torch": "2.11.0+cu128",
+      "transformers": "4.57.6",
+      "scikit-learn": "1.9.1"
+    }
+  },
+  "timestamp": "2026-10-11T21:05:34+09:00"
+}

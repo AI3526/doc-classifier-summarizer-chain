@@ -1,0 +1,26 @@
+﻿id,text,actual,predicted,group_id
+documents-v2-announcement-validation-012-v2,무거운 교구를 옮길 바퀴 달린 상자 세 개를 새로 마련했다. 이용자는 상자를 반납할 때 내부가 비었는지 확인한다. 상자에 표시된 적재 한도를 넘겨 싣지 않는다.,announcement,manual,documents-v2-announcement-validation-012
+documents-v2-announcement-validation-011-v2,전시 자료 중 복제본에는 다음 주부터 회색 표식을 붙입니다. 원본의 표기 방식은 변경 없이 유지합니다. 이전에 배부한 안내 카드도 표식 설명에 맞춰 고칩니다.,announcement,manual,documents-v2-announcement-validation-011
+documents-v2-announcement-validation-011-v1,"복제 자료 구분
+- 전시 자료 중 복제본에는 다음 주부터 회색 표식을 붙인다.
+- 원본의 표기 방식은 그대로 유지한다.
+- 이전에 배부한 안내 카드도 표식 설명에 맞춰 고친다.",announcement,manual,documents-v2-announcement-validation-011
+documents-v2-manual-validation-007-v1,"예약 명의 이전
+- 예약자가 참석하지 못해 명의를 옮기려면 원래 예약자의 요청부터 확인한다.
+- 새 이용자가 같은 이용 조건을 충족하는지 담당자가 확인한다.
+- 이름을 고친 뒤 원래 예약자에게 변경 결과를 알린다.",manual,announcement,documents-v2-manual-validation-007
+documents-v2-manual-validation-020-v2,행사 뒤 들어온 질문은 답변할 담당이 정해진 건과 미배정 건으로 나눈다. 미배정 건은 담당 지정부터 요청한다. 접수되었다는 이유만으로 답변 완료로 표시하지 않는다.,manual,announcement,documents-v2-manual-validation-020
+documents-v2-announcement-validation-004-v1,"- 공동 일지의 개인 경험 부분은 작성자의 열람 동의를 받은 뒤 공개합니다.
+- 동의 요청은 다음 주에 개별 전달합니다.
+- 응답하지 않았다는 이유만으로 공개에 동의한 것으로 처리하지 않습니다.",announcement,manual,documents-v2-announcement-validation-004
+documents-v2-manual-validation-020-v1,"- 행사 뒤 들어온 질문은 답변할 담당이 정해진 건과 미배정 건으로 나눕니다.
+- 미배정 건은 담당 지정부터 요청합니다.
+- 접수되었다는 이유만으로 답변 완료로 표시하지 않습니다.",manual,announcement,documents-v2-manual-validation-020
+documents-v2-announcement-validation-017-v1,작품 촬영 공간의 예약 확정 알림에 다음 주부터 색상 표식을 추가한다. 접수 상태와 확정 상태를 다른 색으로 표시한다. 색만 보지 말고 알림의 상태 문구도 함께 확인한다.,announcement,manual,documents-v2-announcement-validation-017
+documents-v2-manual-validation-012-v2,체험 신청의 동반인 수를 고치려면 접수 번호로 원래 신청을 찾는다. 바꿀 인원과 함께 필요한 준비물 수량도 확인한다. 수정 결과를 확인한 뒤 같은 사람의 새 신청을 중복으로 만들지 않는다.,manual,announcement,documents-v2-manual-validation-012
+documents-v2-announcement-validation-014-v2,"- 12월 체험에서는 분진이 많은 개인 재료의 반입을 제한한다.
+- 이미 구입한 재료는 사용 가능 여부를 행사 전에 문의할 수 있다.
+- 제한 대상의 예시는 신청 안내에 덧붙였다.",announcement,manual,documents-v2-announcement-validation-014
+documents-v2-announcement-validation-017-v2,"예약 확인 표식
+작품 촬영 공간의 예약 확정 알림에 다음 주부터 색상 표식을 추가합니다. 접수 상태와 확정 상태를 다른 색으로 표시합니다. 색만 보지 말고 알림의 상태 문구도 같이 확인합니다.",announcement,manual,documents-v2-announcement-validation-017
+documents-v2-announcement-validation-004-v2,공동 일지의 개인 경험 부분은 작성자의 열람 동의를 받은 뒤 공개한다. 동의 요청은 다음 주에 개별 전달한다. 응답하지 않았다는 이유만으로 공개에 동의한 것으로 처리하지 않는다.,announcement,manual,documents-v2-announcement-validation-004

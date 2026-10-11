@@ -1,0 +1,22 @@
+{
+  "kind": "transformer",
+  "dataset": "documents",
+  "learner": "learner_park",
+  "run_name": "bert_lr2e-5_s43",
+  "model": "klue/bert-base",
+  "model_alias": "bert",
+  "learning_rate": 2e-05,
+  "epochs": 5,
+  "batch_size": 4,
+  "accumulation_steps": 4,
+  "max_length": 192,
+  "seed": 43,
+  "device": "cuda",
+  "precision": "BF16 autocast",
+  "gradient_checkpointing": true,
+  "labels": [
+    "announcement",
+    "manual",
+    "minutes"
+  ]
+}

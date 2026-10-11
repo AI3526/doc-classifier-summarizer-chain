@@ -1,0 +1,22 @@
+{
+  "kind": "transformer",
+  "dataset": "documents",
+  "learner": "learner_park",
+  "run_name": "electra-b_lr2e-5_s42",
+  "model": "monologg/koelectra-base-v3-discriminator",
+  "model_alias": "electra-b",
+  "learning_rate": 2e-05,
+  "epochs": 5,
+  "batch_size": 4,
+  "accumulation_steps": 4,
+  "max_length": 192,
+  "seed": 42,
+  "device": "cuda",
+  "precision": "BF16 autocast",
+  "gradient_checkpointing": true,
+  "labels": [
+    "announcement",
+    "manual",
+    "minutes"
+  ]
+}

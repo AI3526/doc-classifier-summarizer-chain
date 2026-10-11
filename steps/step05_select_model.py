@@ -2,7 +2,7 @@
 
 artifacts/{dataset}/*/runs/*/experiment.json을 모두 모아 기준 모델과 사전학습 모델을
 같은 표로 비교한다. seed만 다른 실행은 한 설정으로 묶어 평균으로 비교한다.
-선정 규칙은 결과를 보기 전에 정한 아래 규칙을 그대로 쓴다.
+선정 규칙은 아래와 같다. test를 본 뒤에는 바꾸지 않는다.
 
 VS Code 터미널에서 프로젝트 폴더를 기준으로 실행한다.
 uv run python steps/step05_select_model.py
@@ -18,13 +18,21 @@ from common.plots import plot_confusion_matrix
 from common.records import now_iso, read_json, stamp, write_json
 from lesson_settings import DATASET, OUTPUT_ROOT, SELECTION_DIR
 
-# 선정 규칙: 설정별 validation macro F1 평균(seed 평균)이 가장 높은 설정을 기준으로,
-# 그보다 TOLERANCE 이내인 설정 중 CPU 1건 추론 시간이 가장 짧은 설정을 고른다.
-# 고른 설정 안에서는 validation macro F1이 가장 높은 seed의 가중치를 쓴다.
-# validation 120건에서 1건은 약 0.008이다. 결과를 본 뒤 이 값을 바꾸지 않는다.
+# 선정 규칙
+# 1. 설정별 validation macro F1 평균(seed 평균)의 최고점에서 TOLERANCE 이내인 설정을 후보로 둔다.
+#    validation 120건에서 1건은 약 0.008이므로 이 범위의 차이는 동점으로 본다.
+# 2. 후보 설정은 모두 seed가 MIN_SEEDS개 이상이어야 한다. seed 하나의 점수는 우연히 높을 수 있다.
+#    기준 모델은 같은 데이터에서 결과가 늘 같으므로 seed 반복이 필요 없다.
+# 3. CPU 1건 추론 시간은 가장 빠른 후보보다 LATENCY_TIE_RATIO배 이내면 같은 속도로 본다.
+#    같은 크기 모델끼리의 차이는 측정 오차 수준이기 때문이다.
+# 4. 같은 속도 그룹 안에서 평균 macro F1 → 작은 표준편차 → 적은 파라미터 순으로 고르고,
+#    고른 설정 안에서는 validation macro F1이 가장 높은 seed의 가중치를 쓴다.
 TOLERANCE = 0.01
-RULE = (f"설정별 validation macro F1 평균의 최고점에서 {TOLERANCE} 이내인 설정 중 "
-        "CPU 1건 추론 시간이 가장 짧은 설정, 그 안에서 macro F1이 가장 높은 seed")
+MIN_SEEDS = 3
+LATENCY_TIE_RATIO = 1.2
+RULE = (f"설정별 validation macro F1 평균의 최고점에서 {TOLERANCE} 이내이고 seed {MIN_SEEDS}개 이상인 "
+        f"설정 중, 가장 빠른 CPU 추론 시간의 {LATENCY_TIE_RATIO}배 이내 설정에서 평균 macro F1 → "
+        "표준편차 → 파라미터 수 순으로 선택, 그 안에서 macro F1이 가장 높은 seed")
 # seed를 제외하고 이 값이 모두 같으면 같은 설정으로 본다.
 CONFIG_KEYS = ("kind", "model", "learning_rate", "epochs", "batch_size",
                "accumulation_steps", "max_length", "ngram_range")
@@ -101,13 +109,28 @@ def best_run(group, candidates):
     return max(rows, key=lambda row: (row["validation_macro_f1"], -row["seed"]))
 
 
-def choose_group(candidates):
-    groups = group_candidates(candidates)
+def tolerance_band(groups):
+    """평균 macro F1 최고점에서 TOLERANCE 이내인 설정들."""
     best_f1 = max(group["macro_f1_mean"] for group in groups)
-    close = [group for group in groups if best_f1 - group["macro_f1_mean"] <= TOLERANCE]
-    # 동점이면 평균 macro F1이 높은 쪽, 그다음 설정 이름 순으로 정한다.
-    return min(close, key=lambda group: (group["cpu_latency_ms_mean"],
-                                         -group["macro_f1_mean"], group["config_key"]))
+    return [group for group in groups if best_f1 - group["macro_f1_mean"] <= TOLERANCE]
+
+
+def choose_group(candidates):
+    close = tolerance_band(group_candidates(candidates))
+    short = [group for group in close
+             if group["kind"] != "baseline" and group["n_seeds"] < MIN_SEEDS]
+    if short:
+        names = ", ".join(f"{group['model_alias']} lr={cell(group['learning_rate'])} "
+                          f"(seed {group['n_seeds']}개)" for group in short)
+        raise ValueError(f"후보 범위 안에 seed가 {MIN_SEEDS}개 미만인 설정이 있습니다: {names}\n"
+                         "step04_train_classifier.py --band로 seed를 채운 뒤 다시 실행하세요.")
+    fastest = min(group["cpu_latency_ms_mean"] for group in close)
+    same_speed = [group for group in close
+                  if group["cpu_latency_ms_mean"] <= fastest * LATENCY_TIE_RATIO]
+    # 마지막으로 설정 이름 순을 둬서 완전히 같아도 결과가 늘 같게 한다.
+    return min(same_speed, key=lambda group: (-group["macro_f1_mean"],
+                                              group["macro_f1_std"] or 0.0,
+                                              group["params"], group["config_key"]))
 
 
 def choose(candidates):

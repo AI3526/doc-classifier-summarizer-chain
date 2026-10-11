@@ -1,0 +1,96 @@
+{
+  "experiment_id": "20261011-210649_bert_lr5e-5_s42",
+  "learner": "learner_park",
+  "dataset": "documents",
+  "kind": "transformer",
+  "model_info": {
+    "model_id": "klue/bert-base",
+    "model_alias": "bert",
+    "model_size_params": 110619651,
+    "precision": "BF16 autocast",
+    "training_type": "Full Fine-tuning (본체 + 분류층)",
+    "gradient_checkpointing": true,
+    "pretrained_source": "https://huggingface.co/klue/bert-base",
+    "tokenizer": "BertTokenizerFast"
+  },
+  "hyperparameters": {
+    "max_length": 192,
+    "batch_size": 4,
+    "accumulation_steps": 4,
+    "effective_batch_size": 16,
+    "learning_rate": 5e-05,
+    "epochs": 5,
+    "seed": 42,
+    "optimizer": "AdamW(weight_decay=0.01)",
+    "scheduler": "linear warmup 10% + linear decay",
+    "grad_clip": 1.0
+  },
+  "token_lengths": {
+    "train": {
+      "max": 69,
+      "mean": 53.352777777777774,
+      "truncated_rows": 0
+    },
+    "validation": {
+      "max": 65,
+      "mean": 53.4,
+      "truncated_rows": 0
+    }
+  },
+  "resource_and_time": {
+    "train_time_sec": 25.934356600046158,
+    "total_time_sec_including_validation": 28.278678300324827,
+    "inference_latency_per_sample_ms": 19.489196691817295,
+    "inference_latency": {
+      "mean_ms": 19.489196691817295,
+      "p50_ms": 19.164699595421553,
+      "p95_ms": 26.302999816834927,
+      "samples": 120,
+      "warmup_calls": 3,
+      "scope": "1건씩 전처리부터 예측 라벨까지, 모델 로딩 제외",
+      "device": "cpu"
+    },
+    "gpu_validation_ms_per_sample_at_best_epoch": 2.4442374977904064,
+    "peak_vram_mb": 2131.42041015625,
+    "peak_vram_reserved_mb": 2338.0,
+    "process_rss_mb": 2593.38671875
+  },
+  "evaluation_metrics": {
+    "split": "validation",
+    "best_epoch": 3,
+    "accuracy": 1.0,
+    "macro_f1": 1.0,
+    "weighted_f1": 1.0,
+    "confusion_matrix": [
+      [
+        40,
+        0,
+        0
+      ],
+      [
+        0,
+        40,
+        0
+      ],
+      [
+        0,
+        0,
+        40
+      ]
+    ]
+  },
+  "environment": {
+    "python": "3.12.13",
+    "os": "Windows-11-10.0.26200-SP0",
+    "cpu": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel",
+    "cpu_threads_torch": 24,
+    "ram_total_gb": 31.4,
+    "gpu": "NVIDIA GeForce RTX 5060 Laptop GPU",
+    "packages": {
+      "torch": "2.11.0+cu128",
+      "transformers": "4.57.6",
+      "scikit-learn": "1.9.1"
+    }
+  },
+  "timestamp": "2026-10-11T21:07:20+09:00"
+}

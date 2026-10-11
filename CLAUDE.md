@@ -53,7 +53,9 @@ artifacts/{dataset}/
 ```
 - `DATASET`, `LEARNER`는 `steps/lesson_settings.py`에서 정한다. 팀원(`learner_park`, `learner_choi`, `learner_ro`, `learner_su`)은 **각자 다른 실험**을 맡는다.
 - `experiment.json`이 needtocheck의 EXP 형식이며 step05가 이것을 모아 비교한다. 지표 JSON/CSV는 커밋, 가중치는 git 제외.
-- 선정 규칙(step05 `TOLERANCE`): seed만 다른 실행을 한 설정으로 묶어(`CONFIG_KEYS`) 평균 macro F1을 구하고, 최고 평균에서 0.01 이내 설정 중 CPU 1건 추론이 가장 빠른 설정 → 그 안에서 macro F1이 가장 높은 seed의 가중치를 사용. **결과를 본 뒤 바꾸지 않는다.**
+- 선정 규칙(step05 상단 상수): seed만 다른 실행을 한 설정으로 묶어(`CONFIG_KEYS`) 평균 macro F1을 구한다.
+  최고 평균에서 `TOLERANCE`(0.01) 이내 설정은 동점 → 모두 seed `MIN_SEEDS`(3)개 이상이어야 함(기준 모델 제외, 부족하면 step05가 멈추고 `--band` 안내)
+  → CPU 추론이 가장 빠른 후보의 `LATENCY_TIE_RATIO`(1.2)배 이내는 같은 속도 → 평균 F1 → 표준편차 → 파라미터 수 순 → 그 설정에서 F1 최고 seed의 가중치 사용. **test를 본 뒤에는 바꾸지 않는다.**
 - `selection/test_metrics.json`이 생기면 step05 재선정이 막힌다(test를 본 뒤 재선택 금지).
 - 다른 팀원 실행이 선정되면 가중치가 git에 없으므로 받아 오거나 같은 설정으로 재학습해야 서비스에서 쓸 수 있다.
 - Windows 경로 길이(260자) 제한에 주의: 프로젝트를 깊은 폴더에 두면 체크포인트 저장이 실패할 수 있다.
@@ -62,7 +64,8 @@ artifacts/{dataset}/
 - `bert`(klue/bert-base, 필수), `roberta`, `electra-s`(14M), `electra-b`, `deberta-ko`(team-lucid/deberta-v3-base-korean) — 모두 로드·학습 확인됨
 - 제외: distilkobert(구형, remote code + sentencepiece 필요), ModernBERT·NeoBERT(영어 전용 토크나이저 → 한국어 처리 부적합)
 - 보류: mdeberta-v3-base(다국어, sentencepiece·protobuf 설치 필요)
-- 실험 순서: ① `--model bert roberta electra-s electra-b deberta-ko --lr 1e-5 2e-5 5e-5` (seed 42) ② `--top-k 3 --extra-seeds 43 44` → 상위 설정에 없는 seed만 학습 ③ step05 → 평균±표준편차 표
+- 실험 순서: ① `--model bert roberta electra-s electra-b deberta-ko --lr 1e-5 2e-5 5e-5` (seed 42) ② `--band --extra-seeds 43 44` → 후보 범위 안 설정에 없는 seed만 학습 (`--top-k K`는 상위 K개 기준) ③ step05 → 평균±표준편차 표. seed가 늘며 평균이 바뀌면 범위가 달라질 수 있으니 step05가 멈추면 ②를 다시 실행
+- 학습률·에포크는 모든 모델에 같은 조건(lr 3개 × 5에포크)으로 고정하고 추가 조정하지 않는다. 한계로 기록할 것: deberta-ko·electra-s는 lr 1e-5/2e-5에서 5에포크 안에 수렴하지 못했고 5e-5에서야 0.98~0.99, deberta-ko는 5e-5에서도 마지막 epoch가 최고점(덜 학습됐을 가능성). validation이 4개 설정에서 1.0으로 포화되어 상위 모델 간 변별력이 낮음
 - `--top-k`는 매번 그 시점의 평균 순위로 고르므로, seed가 추가되며 순위가 바뀌면 다시 실행했을 때 다른 설정이 반복 대상이 될 수 있다(상위 설정이 모두 같은 seed 수를 갖게 됨).
 - 실행 이름 형식: `{alias}_lr{lr}_s{seed}`
 

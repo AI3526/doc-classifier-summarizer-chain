@@ -1,0 +1,46 @@
+﻿id,text,actual,predicted,group_id
+documents-v2-manual-validation-014-v2,"- 전시 교대 때에는 위치를 바꾼 작품 번호와 새 위치를 전달한다.
+- 다음 담당자가 현장에서 작품을 확인한 뒤 인계표를 닫는다.
+- 위치가 확인되지 않은 작품은 인계 완료로 표시하지 않는다.",manual,announcement,documents-v2-manual-validation-014
+documents-v2-announcement-validation-007-v1,"안내 책자 오기
+- 신규 이용 안내 책자의 물품 대여 전화번호에 오기가 확인되었다.
+- 수정 번호는 오늘 배부하는 정정표에서 확인할 수 있다.
+- 책자에 적힌 운영 시간에는 변경이 없다.",announcement,minutes,documents-v2-announcement-validation-007
+documents-v2-announcement-validation-010-v2,"- 새 교구의 모의 운영에 참여할 진행자 여섯 명을 모집한다.
+- 이번에는 사용 경험이 없는 사람의 의견을 우선 받는다.
+- 모의 운영의 평가 결과는 개인 성적에 반영하지 않는다.",announcement,minutes,documents-v2-announcement-validation-010
+documents-v2-announcement-validation-011-v2,전시 자료 중 복제본에는 다음 주부터 회색 표식을 붙입니다. 원본의 표기 방식은 변경 없이 유지합니다. 이전에 배부한 안내 카드도 표식 설명에 맞춰 고칩니다.,announcement,manual,documents-v2-announcement-validation-011
+documents-v2-announcement-validation-007-v2,신규 이용 안내 책자의 물품 대여 전화번호에 오기가 확인되었습니다. 수정 번호는 오늘 배부하는 정정표에서 확인할 수 있습니다. 책자에 적힌 운영 시간에는 변경이 없습니다.,announcement,minutes,documents-v2-announcement-validation-007
+documents-v2-manual-validation-007-v1,"예약 명의 이전
+- 예약자가 참석하지 못해 명의를 옮기려면 원래 예약자의 요청부터 확인한다.
+- 새 이용자가 같은 이용 조건을 충족하는지 담당자가 확인한다.
+- 이름을 고친 뒤 원래 예약자에게 변경 결과를 알린다.",manual,minutes,documents-v2-manual-validation-007
+documents-v2-manual-validation-009-v2,"음량 기준 기록
+같은 장소에서 재생 음량을 비교하려면 기기 설정과 측정 위치를 고정합니다. 파일을 바꿔도 기기 음량을 마음대로 조절하지 않습니다. 조건이 바뀐 측정은 같은 비교 묶음에 합치지 않습니다.",manual,announcement,documents-v2-manual-validation-009
+documents-v2-announcement-validation-010-v1,새 교구의 모의 운영에 참여할 진행자 여섯 명을 모집합니다. 이번에는 사용 경험이 없는 사람의 의견을 우선 받습니다. 모의 운영의 평가 결과는 개인 성적에 반영하지 않습니다.,announcement,minutes,documents-v2-announcement-validation-010
+documents-v2-manual-validation-020-v2,행사 뒤 들어온 질문은 답변할 담당이 정해진 건과 미배정 건으로 나눈다. 미배정 건은 담당 지정부터 요청한다. 접수되었다는 이유만으로 답변 완료로 표시하지 않는다.,manual,announcement,documents-v2-manual-validation-020
+documents-v2-manual-validation-009-v1,같은 장소에서 재생 음량을 비교하려면 기기 설정과 측정 위치를 고정한다. 파일을 바꿔도 기기 음량을 임의로 조절하지 않는다. 조건이 바뀐 측정은 같은 비교 묶음에 합치지 않는다.,manual,announcement,documents-v2-manual-validation-009
+documents-v2-manual-validation-003-v1,"비품 배치도 수정
+- 책상을 이동한 뒤에는 실제 위치를 먼저 재고 배치도에 반영한다.
+- 출입문이 열리는 범위는 빈 공간으로 남긴다.
+- 수정본을 현장과 대조한 뒤 이전 배치도와 구분해 보관한다.",manual,announcement,documents-v2-manual-validation-003
+documents-v2-manual-validation-017-v1,읽기 모임 자료를 줄일 때에는 토론 질문에 필요한 문단을 먼저 고른다. 문단 사이를 생략한 곳은 생략 표시를 남긴다. 서로 떨어진 문장을 이어 저자의 한 문장처럼 보이게 만들지 않는다.,manual,minutes,documents-v2-manual-validation-017
+documents-v2-manual-validation-010-v2,"- 모형을 붙이기 전에는 접합면을 맞대어 위치가 맞는지 확인한다.
+- 맞지 않으면 접착제를 바르기 전에 모양을 조정한다.
+- 붙인 뒤에는 재료 안내에 적힌 고정 시간을 지킨다.",manual,announcement,documents-v2-manual-validation-010
+documents-v2-announcement-validation-004-v1,"- 공동 일지의 개인 경험 부분은 작성자의 열람 동의를 받은 뒤 공개합니다.
+- 동의 요청은 다음 주에 개별 전달합니다.
+- 응답하지 않았다는 이유만으로 공개에 동의한 것으로 처리하지 않습니다.",announcement,manual,documents-v2-announcement-validation-004
+documents-v2-manual-validation-020-v1,"- 행사 뒤 들어온 질문은 답변할 담당이 정해진 건과 미배정 건으로 나눕니다.
+- 미배정 건은 담당 지정부터 요청합니다.
+- 접수되었다는 이유만으로 답변 완료로 표시하지 않습니다.",manual,announcement,documents-v2-manual-validation-020
+documents-v2-manual-validation-002-v2,"- 건조가 필요한 작업물은 재료와 예상 건조 시간을 적어 선반을 예약한다.
+- 다른 작업물에 닿지 않을 간격을 확인한다.
+- 시간이 더 필요하면 만료 전에 다음 예약과 겹치는지 담당자에게 문의한다.",manual,announcement,documents-v2-manual-validation-002
+documents-v2-announcement-validation-003-v2,공연 연습용 대본의 수정판을 목요일부터 배부합니다. 이전 판의 4장과 5장만 바뀌었으며 나머지 장면 번호는 같습니다. 이전 대본은 교환할 때 가져오지 않아도 됩니다.,announcement,minutes,documents-v2-announcement-validation-003
+documents-v2-manual-validation-008-v1,"- 수령표에 서명이 빠졌다면 물품이 실제로 전달되었는지 먼저 확인합니다.
+- 수령 사실이 확인된 경우에만 당사자에게 기록 보완을 요청합니다.
+- 담당자가 수령자 이름으로 대신 서명하지 않습니다.",manual,announcement,documents-v2-manual-validation-008
+documents-v2-manual-validation-017-v2,"읽기 모임 발췌
+읽기 모임 자료를 줄일 때에는 토론 질문에 필요한 문단을 먼저 고릅니다. 문단 사이를 생략한 곳은 생략 표시를 남깁니다. 서로 떨어진 문장을 이어 저자의 한 문장처럼 보이게 만들지 않습니다.",manual,minutes,documents-v2-manual-validation-017
+documents-v2-manual-validation-008-v2,수령표에 서명이 빠졌다면 물품이 실제로 전달되었는지 먼저 확인한다. 수령 사실이 확인된 경우에만 당사자에게 기록 보완을 요청한다. 담당자가 수령자 이름으로 대신 서명하지 않는다.,manual,announcement,documents-v2-manual-validation-008
