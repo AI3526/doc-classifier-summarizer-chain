@@ -10,6 +10,7 @@ from typing import Literal
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from lesson_settings import GENERATION_CANDIDATES, GENERATION_DEFAULT
 from pydantic import BaseModel, Field, field_validator
 from step06_predict import load_classifier
 from step08_connect_chain import (
@@ -18,6 +19,8 @@ from step08_connect_chain import (
     create_chain,
     generate_prepared,
 )
+
+TargetName = Literal[tuple(GENERATION_CANDIDATES)]
 
 HOST = "127.0.0.1"
 PORT = 8000
@@ -35,7 +38,11 @@ class TextRequest(BaseModel):
 
 
 class GenerateRequest(TextRequest):
-    provider: Literal["ollama", "openai"] = "ollama"
+    target: TargetName = GENERATION_DEFAULT
+
+
+class CompareRequest(TextRequest):
+    targets: list[TargetName] = Field(default_factory=lambda: [GENERATION_DEFAULT], min_length=1)
 
 
 @asynccontextmanager
@@ -59,17 +66,17 @@ def health():
 def generate(body: GenerateRequest, request: Request):
     # 요청 검증에 실패하면 함수 실행 전 422를 반환한다.
     prepared = request.app.state.chain.invoke(body.text)
-    result = generate_prepared(prepared, body.provider)
+    result = generate_prepared(prepared, body.target)
     response = {"classification": prepared["classification"], "result": result}
     # 200이어도 답변의 완료 여부, 형식, 내용은 별도로 확인해야 한다.
     return JSONResponse(response, status_code=502 if result["error"] else 200)
 
 
 @app.post("/compare")
-def compare(body: TextRequest, request: Request):
-    # 한 번 분류해서 만든 프롬프트를 두 생성 모델이 공유한다.
+def compare(body: CompareRequest, request: Request):
+    # 한 번 분류해서 만든 프롬프트를 여러 생성 모델이 공유한다.
     prepared = request.app.state.chain.invoke(body.text)
-    result = compare_prepared(prepared)
+    result = compare_prepared(prepared, body.targets)
     failed = any(row["error"] for row in result["results"])
     return JSONResponse(result, status_code=502 if failed else 200)
 

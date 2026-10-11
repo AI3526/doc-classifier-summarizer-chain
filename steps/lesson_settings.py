@@ -36,9 +36,43 @@ DATA_DIR = ROOT / "data" / DATASET
 DEVELOPMENT_INPUT = ROOT / "steps" / "examples" / "documents_development.jsonl"
 
 # OpenAI 키는 읽어서 클라이언트에 전달하며 화면이나 결과 파일에 출력하지 않습니다.
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3:4b-instruct-2507-q4_K_M") # 모델 더 비교?
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3:4b-instruct-2507-q4_K_M")
 OLLAMA_URL = os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 MAX_OUTPUT_TOKENS = int(os.getenv("MAX_OUTPUT_TOKENS", "512"))
 TIMEOUT_SECONDS = float(os.getenv("GENERATION_TIMEOUT_SECONDS", "120"))
 MAX_INPUT_CHARS = int(os.getenv("MAX_INPUT_CHARS", "4000"))
+
+# 생성 모델 후보. 왼쪽 짧은 이름으로 step07~10에 넘깁니다. 모든 후보에 같은 프롬프트와 설정을 씁니다.
+GENERATION_CANDIDATES = {
+    "qwen3-4b": {"provider": "ollama", "model": OLLAMA_MODEL},
+    "gemma3-4b": {"provider": "ollama", "model": "gemma3:4b"},
+    "qwen2.5-7b": {"provider": "ollama", "model": "qwen2.5:7b"},
+    "exaone3.5-7.8b": {"provider": "ollama", "model": "exaone3.5:7.8b"},
+    "llama3.1-8b": {"provider": "ollama", "model": "llama3.1:8b"},  # 한국어 약세 대조군
+    "openai": {"provider": "openai", "model": OPENAI_MODEL},  # 요금 발생
+}
+GENERATION_DEFAULT = "qwen3-4b"  # 생성 모델 비교 전 서비스 기본값
+TEMPERATURE = 0.2
+OLLAMA_NUM_CTX = 4096
+OPENAI_REASONING_EFFORT = os.getenv("OPENAI_REASONING_EFFORT", "none")
+
+def _optional_float(name, default=None):
+    value = os.getenv(name, "").strip()
+    return float(value) if value else default
+
+
+# OpenAI 비용 계산용 단가(USD, 100만 토큰당). gpt-6-luna Standard 처리 기준, 2026-10-11 확인.
+# - 캐시된 입력은 입력 단가의 10%, 캐시 쓰기는 1.25배
+# - 한 요청의 입력이 272K 토큰을 넘으면 요청 전체에 입력·캐시 2배, 출력 1.5배
+# - 지역 처리 +10%, Batch·Flex 50%, Fast 2배는 이 프로젝트에서 쓰지 않으므로 반영하지 않음
+# 모델이나 가격이 바뀌면 .env에서 같은 이름으로 덮어씁니다.
+OPENAI_INPUT_PRICE_PER_1M = _optional_float("OPENAI_INPUT_PRICE_PER_1M", 0.10)
+OPENAI_CACHED_INPUT_PRICE_PER_1M = _optional_float("OPENAI_CACHED_INPUT_PRICE_PER_1M", 0.01)
+OPENAI_CACHE_WRITE_PRICE_PER_1M = _optional_float("OPENAI_CACHE_WRITE_PRICE_PER_1M", 0.125)
+OPENAI_OUTPUT_PRICE_PER_1M = _optional_float("OPENAI_OUTPUT_PRICE_PER_1M", 0.50)
+OPENAI_LONG_PROMPT_TOKENS = 272_000
+OPENAI_LONG_PROMPT_MULTIPLIER = {"input": 2.0, "output": 1.5}
+OPENAI_PRICE_CHECKED_AT = os.getenv("OPENAI_PRICE_CHECKED_AT", "2026-10-11")
+# 로컬 추론 전력 추정용 소비 전력(W). 비워 두면 전력량을 추정하지 않습니다.
+LOCAL_POWER_WATTS = _optional_float("LOCAL_POWER_WATTS")

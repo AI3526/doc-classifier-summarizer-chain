@@ -1,36 +1,46 @@
-"""09. 같은 입력과 프롬프트로 두 모델을 호출하고 비교 기록을 저장한다.
+"""09. 같은 입력과 프롬프트로 여러 생성 모델을 호출하고 비교 기록을 저장한다.
 
-개발 입력 두 개로 코드를 확인한 뒤 최종 비교 시 INPUT_PATH를 변경한다.
-최종 생성 평가 데이터의 답변을 보며 프롬프트를 고치지 않는다.
+입력 묶음(--split)
+- smoke: steps/examples의 2건. 코드가 도는지만 확인한다.
+- development: generation_development.jsonl 15건. 1차 비교와 프롬프트 개발에 쓴다.
+- eval: generation_eval.jsonl 24건. 최종 비교. 이 답변을 보고 프롬프트를 고치지 않는다.
+
+모델마다 준비 호출로 먼저 메모리에 올린 뒤 측정하고, 끝나면 내린다(로컬 모델).
+분류는 입력마다 한 번만 하고, 같은 프롬프트를 모든 모델이 공유한다.
+expected_label, required_points 등은 채점용으로만 기록하고 프롬프트에 넣지 않는다.
 
 VS Code 터미널에서 프로젝트 폴더를 기준으로 실행한다.
-uv run python steps/step09_compare.py
+uv run python steps/step09_compare.py --split smoke
+uv run python steps/step09_compare.py --split development
+uv run python steps/step09_compare.py --split eval --targets qwen2.5-7b exaone3.5-7.8b openai --repeats 2
 """
 
-import csv
+import argparse
 import json
 import statistics
 from pathlib import Path
 
-from lesson_settings import DATA_DIR, DEVELOPMENT_INPUT, LEARNER_DIR
+import lesson_settings as lesson
+from common.records import new_run_dir, now_iso, write_json
+from prompts.document_policies import PROMPT_VERSION, build_prompt
+from step01_read_data import read_jsonl, read_rows
 from step06_predict import load_classifier
-from step07_call_models import generation_config
+from step07_call_models import call_model, execution_conditions, ollama_unload, resolve_target
 from step08_connect_chain import MAX_INPUT_CHARS, create_chain, generate_prepared
 
-# 최종 비교를 시작할 때 INPUT_PATH = FINAL_INPUT_PATH로 바꾼다.
-FINAL_INPUT_PATH = DATA_DIR / "generation_eval.jsonl"
-INPUT_PATH = DEVELOPMENT_INPUT
-REPEATS = 2
-OUTPUT_NAME = "development01"
-OUTPUT_DIR = LEARNER_DIR / "comparisons" / OUTPUT_NAME
+SPLITS = {
+    "smoke": lesson.DEVELOPMENT_INPUT,
+    "development": lesson.DATA_DIR / "generation_development.jsonl",
+    "eval": lesson.DATA_DIR / "generation_eval.jsonl",
+}
+# 비용이 드는 openai는 기본 목록에서 빼고, 필요할 때 --targets로 직접 넣는다.
+DEFAULT_TARGETS = [name for name, spec in lesson.GENERATION_CANDIDATES.items()
+                   if spec["provider"] == "ollama"]
+SCORING_FIELDS = ("expected_label", "required_points", "forbidden_claims", "rubric_note")
 
 
 def read_cases(path):
-    cases = [
-        json.loads(line)
-        for line in Path(path).read_text(encoding="utf-8-sig").splitlines()
-        if line.strip()
-    ]
+    cases = read_jsonl(path)
     validate_cases(cases)
     return cases
 
@@ -48,107 +58,199 @@ def validate_cases(cases):
             raise ValueError("비교 입력의 text와 길이를 확인하세요.")
 
 
-def summarize_provider(records, provider):
-    subset = [record for record in records if record["provider"] == provider]
-    success = [record for record in subset if not record["error"]]
-    calls = len(subset)
-    errors = calls - len(success)
-    valid = sum(record["output_format_valid"] for record in subset)
+def warm_up(target):
+    """측정 전에 모델을 메모리에 올린다.
+
+    비교 입력과 겹치지 않게 train 첫 문장을 쓰고, 결과는 warmup.json에만 남기며 요약 지표에서 뺀다.
+    적재 시간(콜드 스타트)은 운영 조건 비교용으로 따로 보고한다.
+    """
+    row = read_rows(lesson.DATA_DIR / "train.csv")[0]
+    result = call_model(target, build_prompt(row["text"], row["label"]))
+    return {"alias": target["alias"], "sample_id": row["id"], "excluded_from_metrics": True,
+            "status": result["status"], "error": result["error"],
+            "error_message": result["error_message"],
+            "load_time_sec": result["performance_metrics"]["load_time_sec"],
+            "total_time_sec": result["performance_metrics"]["total_time_sec"]}
+
+
+def build_record(run_name, case, prepared, target, conditions, generated, repeat):
     return {
-        "calls": calls,
-        "errors": errors,
-        "error_rate_all_calls": errors / calls if calls else None,
-        "mean_latency_seconds_success_only": statistics.mean(
-            record["latency_seconds"] for record in success
-        ) if success else None,
-        "format_valid_rate_all_calls": valid / calls if calls else None,
+        "experiment_id": f"{run_name}-{target['alias']}-{case['id']}-r{repeat}",
+        "task_type": "document_summary", "case_id": case["id"], "repeat": repeat,
+        "input_data": {
+            "sample_id": case["id"],
+            "predicted_label": prepared["classification"]["label"],
+            "classification_confidence": prepared["classification"]["confidence"],
+            "prompt_template_used": prepared["prompt_version"],
+            "source_text": prepared["text"],
+        },
+        # 채점 전용. 프롬프트에는 들어가지 않았다.
+        "scoring_reference": {key: case.get(key) for key in SCORING_FIELDS},
+        "model_info": {"model_type": "local" if target["provider"] == "ollama" else "cloud",
+                       "model_name": target["model"], "provider": target["provider"],
+                       "alias": target["alias"]},
+        "execution_conditions": conditions,
+        "performance_metrics": generated["performance_metrics"],
+        "cost_metrics": generated["cost_metrics"],
+        "result": {
+            "status": generated["status"], "error": generated["error"],
+            "error_message": generated["error_message"],
+            "generated_text": generated["text"],
+            "generation_complete": generated["generation_complete"],
+            "finish_reason": generated["finish_reason"],
+            "format_valid_strict": generated["format_valid_strict"],
+            "format_valid_lenient": generated["format_valid_lenient"],
+            "format_error": generated["format_error"], "parsed": generated["parsed"],
+        },
+        "prompt": prepared["prompt"],
+        "timestamp": now_iso(),
     }
 
 
-def write_human_scores(path, records):
-    fields = [
-        "case_id", "repeat", "provider", "model",
-        "predicted_label", "expected_label", "latency_seconds", "input_tokens",
-        "output_tokens", "output_format_valid", "generation_complete", "finish_reason",
-        "error", "text", "response", "required_points", "forbidden_claims",
-        "reviewer", "policy_correct_0_2", "required_points_0_2",
-        "no_unsupported_claims_0_2", "clarity_0_2", "notes",
-    ]
-    with Path(path).open("w", encoding="utf-8-sig", newline="") as stream:
-        writer = csv.DictWriter(stream, fieldnames=fields)
-        writer.writeheader()
-        for record in records:
-            row = {key: record.get(key, "") for key in fields}
-            row.update(
-                predicted_label=record["classification"]["label"],
-                text=record["input_text"], response=record["response_text"],
-                input_tokens=record["usage"]["input_tokens"],
-                output_tokens=record["usage"]["output_tokens"],
-                required_points=json.dumps(record["required_points"], ensure_ascii=False),
-                forbidden_claims=json.dumps(record["forbidden_claims"], ensure_ascii=False),
-            )
-            # 점수는 빈칸으로 남긴다. 사람이 원문과 답변을 비교한 뒤 채운다.
-            writer.writerow(row)
+def _mean(values):
+    values = [value for value in values if value is not None]
+    return statistics.mean(values) if values else None
 
 
-def run_comparison(chain, cases, output_dir, repeats=REPEATS):
+def _percentile(values, ratio):
+    values = sorted(value for value in values if value is not None)
+    return values[min(len(values) - 1, int(len(values) * ratio))] if values else None
+
+
+def summarize_target(records, alias, warmup):
+    subset = [row for row in records if row["model_info"]["alias"] == alias]
+    success = [row for row in subset if row["result"]["status"] == "SUCCESS"]
+    calls = len(subset)
+
+    def metric(key):
+        return [row["performance_metrics"][key] for row in success]
+
+    costs = [row["cost_metrics"]["api_cost_usd"] for row in subset]
+    known_costs = [cost for cost in costs if cost is not None]
+    mean_cost = statistics.mean(known_costs) if known_costs else None
+    return {
+        "model": subset[0]["model_info"]["model_name"] if subset else None,
+        "model_type": subset[0]["model_info"]["model_type"] if subset else None,
+        "calls": calls, "errors": calls - len(success),
+        "error_rate": (calls - len(success)) / calls if calls else None,
+        "format_valid_strict_rate": sum(r["result"]["format_valid_strict"] for r in subset) / calls
+        if calls else None,
+        "format_valid_lenient_rate": sum(r["result"]["format_valid_lenient"] for r in subset)
+        / calls if calls else None,
+        "generation_complete_rate": sum(r["result"]["generation_complete"] for r in subset)
+        / calls if calls else None,
+        "latency_mean_sec": _mean(metric("total_time_sec")),
+        "latency_p50_sec": _percentile(metric("total_time_sec"), 0.5),
+        "latency_p95_sec": _percentile(metric("total_time_sec"), 0.95),
+        "ttft_mean_sec": _mean(metric("ttft_sec")),
+        "tokens_per_second_mean": _mean(metric("tokens_per_second")),
+        "prompt_tokens_mean": _mean(metric("prompt_tokens")),
+        "completion_tokens_mean": _mean(metric("completion_tokens")),
+        "vram_mb_max": max((v for v in metric("vram_mb") if v is not None), default=None),
+        "memory_mb_max": max((v for v in metric("peak_memory_mb") if v is not None),
+                             default=None),
+        "warmup_load_time_sec": warmup.get("load_time_sec"),
+        "api_cost_total_usd": sum(known_costs) if known_costs else None,
+        "api_cost_per_1000_docs_usd": mean_cost * 1000 if mean_cost is not None else None,
+        "energy_wh_total_estimate": sum(e for e in (r["cost_metrics"]["energy_wh_estimate"]
+                                                    for r in subset) if e is not None) or None,
+    }
+
+
+def write_summary_md(path, summary):
+    columns = [("calls", "호출"), ("errors", "오류"), ("format_valid_strict_rate", "형식(엄격)"),
+               ("format_valid_lenient_rate", "형식(완화)"), ("latency_mean_sec", "응답 평균(s)"),
+               ("latency_p95_sec", "응답 p95(s)"), ("ttft_mean_sec", "TTFT(s)"),
+               ("tokens_per_second_mean", "토큰/s"), ("completion_tokens_mean", "출력 토큰"),
+               ("vram_mb_max", "VRAM(MB)"), ("warmup_load_time_sec", "적재(s)"),
+               ("api_cost_per_1000_docs_usd", "1000건 비용($)")]
+
+    def cell(value):
+        if value is None:
+            return "-"
+        return f"{value:.3f}" if isinstance(value, float) and value < 10 else (
+            f"{value:.1f}" if isinstance(value, float) else str(value))
+
+    lines = [f"# 생성 모델 비교 ({summary['split']}, {summary['cases']}건 × {summary['repeats']}회)",
+             "", f"- 프롬프트: `{summary['prompt_version']}`, 분류기: `{summary['classifier_run']}`",
+             (f"- 분류 오답 입력: {len(summary['misclassified_cases'])}건 "
+              f"{summary['misclassified_cases'] or ''}"), "",
+             "| 모델 | " + " | ".join(name for _, name in columns) + " |",
+             "|---|" + "---|" * len(columns)]
+    for alias, row in summary["targets"].items():
+        lines.append(f"| {alias} | " + " | ".join(cell(row[key]) for key, _ in columns) + " |")
+    lines += ["", "품질 점수는 채점 단계에서 따로 계산한다."]
+    Path(path).write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def run_comparison(chain, cases, targets, output_dir, split, repeats=1, classifier_run=None):
     validate_cases(cases)
     if repeats < 1:
-        raise ValueError("REPEATS는 1 이상이어야 합니다.")
+        raise ValueError("--repeats는 1 이상이어야 합니다.")
+    targets = [resolve_target(name) for name in targets]
+    prepared = [chain.invoke(case["text"]) for case in cases]  # text만 넘긴다.
+    conditions = {target["alias"]: execution_conditions(target) for target in targets}
+    write_json(output_dir / "config.json", {
+        "split": split, "cases": len(cases), "repeats": repeats, "prompt_version": PROMPT_VERSION,
+        "classifier_run": classifier_run, "targets": targets,
+        "execution_conditions": conditions, "started_at": now_iso()})
 
-    # 폴더가 이미 있으면 멈춘다. 앞선 결과를 덮어쓰지 않는다.
-    output_dir = Path(output_dir)
-    if output_dir.exists():
-        raise FileExistsError("출력 폴더가 있습니다. OUTPUT_NAME을 새 이름으로 바꾸세요.")
-    prepared = [chain.invoke(case["text"]) for case in cases]
-    output_dir.mkdir(parents=True, exist_ok=False)
-    records = []
+    records, warmups = [], {}
     with (output_dir / "results.jsonl").open("w", encoding="utf-8") as stream:
-        for case_index, (case, fixed) in enumerate(zip(cases, prepared, strict=True)):
-            for repeat in range(repeats):
-                # 준비한 프롬프트를 매번 그대로 사용한다. 예열 호출은 하지 않는다.
-                for provider in ("ollama", "openai"):
-                    generated = generate_prepared(fixed, provider)
-                    record = {
-                        "case_id": case["id"], "repeat": repeat + 1,
-                        "input_text": fixed["text"],
-                        "expected_label": case.get("expected_label"),
-                        "classification": fixed["classification"],
-                        "policy": fixed["policy"], "prompt": fixed["prompt"],
-                        "required_points": case.get("required_points", []),
-                        "forbidden_claims": case.get("forbidden_claims", []),
-                        **generated, "response_text": generated["text"],
-                    }
-                    # 예외가 생긴 호출도 저장한다. 중단되더라도 끝난 호출 기록은 남긴다.
+        # 모델을 바깥 반복에 두어 모델마다 한 번만 메모리에 올린다.
+        for target in targets:
+            warmups[target["alias"]] = warm_up(target)
+            print(f"\n[{target['alias']}] 준비 호출 {warmups[target['alias']]['status']}, "
+                  f"적재 {warmups[target['alias']]['load_time_sec']}")
+            for repeat in range(1, repeats + 1):
+                for case, fixed in zip(cases, prepared, strict=True):
+                    generated = generate_prepared(fixed, target)
+                    record = build_record(output_dir.name, case, fixed, target,
+                                          conditions[target["alias"]], generated, repeat)
+                    # 실패한 호출도 저장한다. 중단되더라도 끝난 호출 기록은 남긴다.
                     stream.write(json.dumps(record, ensure_ascii=False) + "\n")
                     stream.flush()
                     records.append(record)
-                print(f"입력 {case_index + 1}/{len(cases)}, 반복 {repeat + 1} 저장")
+                    print(f"  r{repeat} {case['id']}: {generated['status']} "
+                          f"{generated['performance_metrics']['total_time_sec']:.1f}s "
+                          f"형식 {'O' if generated['format_valid_strict'] else 'X'}")
+            if target["provider"] == "ollama":
+                ollama_unload(target["model"])
+    write_json(output_dir / "warmup.json", warmups)
 
-    write_human_scores(output_dir / "human_scores.csv", records)
-    summary = {
-        "cases": len(cases), "repeats": repeats,
-        "generation_config": generation_config(),
-        "human_quality_scored": False,
-        "providers": {
-            provider: summarize_provider(records, provider)
-            for provider in ("ollama", "openai")
-        },
-    }
-    (output_dir / "summary.json").write_text(
-        json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
+    misclassified = sorted({row["case_id"] for row in records
+                            if row["scoring_reference"]["expected_label"]
+                            and row["input_data"]["predicted_label"]
+                            != row["scoring_reference"]["expected_label"]})
+    summary = {"split": split, "cases": len(cases), "repeats": repeats,
+               "prompt_version": PROMPT_VERSION, "classifier_run": classifier_run,
+               "misclassified_cases": misclassified, "quality_scored": False,
+               "targets": {target["alias"]: summarize_target(records, target["alias"],
+                                                             warmups[target["alias"]])
+                           for target in targets},
+               "finished_at": now_iso()}
+    write_json(output_dir / "summary.json", summary)
+    write_summary_md(output_dir / "summary.md", summary)
     return summary
 
 
 def main():
-    cases = read_cases(INPUT_PATH)
+    parser = argparse.ArgumentParser(description="생성 모델 비교")
+    parser.add_argument("--split", choices=list(SPLITS), default="smoke")
+    parser.add_argument("--targets", nargs="+", default=DEFAULT_TARGETS,
+                        help=f"후보: {', '.join(lesson.GENERATION_CANDIDATES)}")
+    parser.add_argument("--repeats", type=int, default=1)
+    parser.add_argument("--name", default="", help="결과 폴더 이름에 붙일 메모")
+    args = parser.parse_args()
+    cases = read_cases(SPLITS[args.split])
     classifier = load_classifier()
-    chain = create_chain(classifier)
-    summary = run_comparison(chain, cases, OUTPUT_DIR)
-    print(json.dumps(summary, ensure_ascii=False, indent=2))
-    print("저장 위치:", OUTPUT_DIR)
-    print("human_scores.csv에 원문과 답변을 비교한 점수와 이유를 적으세요.")
+    # artifacts/{dataset}/{learner}/comparisons/{시각}_{split}_{name}
+    output_dir = new_run_dir(lesson.LEARNER_DIR, "_".join(filter(None, [args.split, args.name])),
+                             subdir="comparisons")
+    summary = run_comparison(create_chain(classifier), cases, args.targets, output_dir,
+                             args.split, args.repeats, classifier["identity"]["run_name"])
+    print(json.dumps(summary["targets"], ensure_ascii=False, indent=2))
+    print("저장 위치:", output_dir)
 
 
 if __name__ == "__main__":

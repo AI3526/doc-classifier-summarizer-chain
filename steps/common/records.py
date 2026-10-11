@@ -17,9 +17,9 @@ def stamp():
     return datetime.now().astimezone().strftime("%Y%m%d-%H%M%S")
 
 
-def new_run_dir(learner_dir, run_name):
-    # artifacts/{dataset}/{learner}/runs/{YYYYMMDD-HHMMSS}_{run_name}
-    run_dir = Path(learner_dir) / "runs" / f"{stamp()}_{run_name}"
+def new_run_dir(learner_dir, run_name, subdir="runs"):
+    # artifacts/{dataset}/{learner}/{subdir}/{YYYYMMDD-HHMMSS}_{run_name}
+    run_dir = Path(learner_dir) / subdir / f"{stamp()}_{run_name}"
     run_dir.mkdir(parents=True, exist_ok=False)
     return run_dir
 

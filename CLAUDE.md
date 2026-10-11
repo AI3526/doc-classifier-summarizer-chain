@@ -93,8 +93,19 @@ artifacts/{dataset}/
 - 문의(inquiries) 주제는 사용하지 않는다. 연습 키트에서 온 문의 전용 코드는 정리 대상.
 
 ## 프롬프트
-- 정책·프롬프트·출력 형식 검사는 `steps/prompts/document_policies.py` 한 곳에 둔다(`POLICIES`, `build_prompt`, `valid_output`, `PROMPT_VERSION`).
-- 프롬프트를 바꾸면 `PROMPT_VERSION`도 바꾼다.
+- 정책·프롬프트·출력 형식은 `steps/prompts/document_policies.py` 한 곳에 둔다(`POLICIES`, `SCHEMAS`, `build_prompt`, `parse_output`, `PROMPT_VERSION`).
+- 라벨별 출력 JSON: announcement{summary, audience, schedule, actions[], changes} / manual{summary, prerequisites[], steps[], cautions[]} / minutes{summary, discussion[], decisions[], owners[], follow_ups[]}. 없는 정보는 "미기재" 또는 [].
+- `parse_output`: strict(응답 그대로 유효) / lenient(```json 코드 블록만 걷어 내면 유효). 품질 채점은 lenient 결과를 쓴다.
+- 프롬프트를 바꾸면 `PROMPT_VERSION`도 바꾼다. eval 답변을 보고 프롬프트를 고치지 않는다.
+
+## 생성 모델 (`lesson_settings.GENERATION_CANDIDATES`)
+- 로컬(Ollama): `qwen3-4b`, `gemma3-4b`, `qwen2.5-7b`, `exaone3.5-7.8b`, `llama3.1-8b`(한국어 약세 대조군) / 상용: `openai`(**요금 발생**, step09 기본 목록에서 제외)
+- step07: 스트리밍 호출로 TTFT, tokens/s, 토큰 수, Ollama 적재 시간·메모리(`/api/ps`)를 기록. 비용은 `lesson_settings`의 gpt-6-luna Standard 단가(입력 $0.10, 캐시 입력 $0.01, 출력 $0.50 /1M, 272K 초과 시 입력 2배·출력 1.5배, 2026-10-11 확인)와 실측 토큰으로 계산(`openai_cost`, `.env`로 덮어쓰기 가능). 로컬은 API 0 + `LOCAL_POWER_WATTS`로 전력량 추정
+- 준비 호출(warm-up): 모델마다 train 첫 문장으로 1회, `warmup.json`에만 기록하고 요약 지표에서 제외. 적재 시간은 콜드 스타트 지표로 따로 보고
+- step08: `create_chain`(분류→프롬프트), `create_service_chain`(분류→프롬프트→생성), `generate_prepared`(호출+형식 검사)
+- step09: `--split smoke|development|eval --targets ... --repeats N` → `artifacts/{dataset}/{learner}/comparisons/{시각}_{split}/`(config, warmup, results.jsonl, summary.json/md). 모델별로 준비 호출 후 측정, 끝나면 언로드. 기록은 needtocheck의 GEN 형식
+- 검수: `uv run python scripts/verify_service.py [폴더]` (호출 수, 프롬프트 공유, 채점 기준 비노출, 요약 일치)
+- 계획: 1차 development 15건 × 로컬 5개 → 2차 eval 24건 × 2회 × (상위 로컬 2 + openai)
 
 ## 진행 상태 / 알려진 문제
 - [완료] 0단계 기반 정리: `.gitignore`(가중치만 제외), `pyproject.toml` 정리·의존성(joblib, matplotlib, psutil), 문의용 코드 제거, 프롬프트 분리

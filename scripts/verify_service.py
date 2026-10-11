@@ -1,10 +1,9 @@
 """저장한 생성 비교 기록을 검수한다. 모델을 호출하거나 답변을 다시 만들지 않는다.
 
-교안의 실행 순서에는 포함하지 않는다. 튜터가 결과를 확인할 때 사용한다.
-COMPARISON_DIR를 확인할 결과 폴더로 바꾼 뒤 이 파일을 실행한다.
+uv run python scripts/verify_service.py                      # 가장 최근 비교 폴더
+uv run python scripts/verify_service.py <비교 폴더 경로>
 """
 
-import csv
 import json
 import math
 import sys
@@ -15,67 +14,68 @@ STEPS = Path(__file__).resolve().parents[1] / "steps"
 sys.path.insert(0, str(STEPS))
 
 from lesson_settings import LEARNER_DIR
-from step07_call_models import valid_output
-from step09_compare import summarize_provider
+from prompts.document_policies import parse_output
+from step09_compare import summarize_target
 
-COMPARISON_DIR = LEARNER_DIR / "comparisons" / "development01"
+
+def latest_comparison():
+    folders = sorted((LEARNER_DIR / "comparisons").glob("*/summary.json"))
+    if not folders:
+        raise FileNotFoundError("비교 결과가 없습니다. step09_compare.py를 먼저 실행하세요.")
+    return folders[-1].parent
 
 
 def verify_comparison(directory):
     directory = Path(directory)
-    records = [
-        json.loads(line)
-        for line in (directory / "results.jsonl").read_text(encoding="utf-8").splitlines()
-        if line.strip()
-    ]
+    records = [json.loads(line) for line in
+               (directory / "results.jsonl").read_text(encoding="utf-8").splitlines()
+               if line.strip()]
+    config = json.loads((directory / "config.json").read_text(encoding="utf-8"))
     summary = json.loads((directory / "summary.json").read_text(encoding="utf-8"))
-    expected_count = summary["cases"] * summary["repeats"] * 2
+    warmups = json.loads((directory / "warmup.json").read_text(encoding="utf-8"))
+    aliases = [target["alias"] for target in config["targets"]]
+    expected_count = config["cases"] * config["repeats"] * len(aliases)
     assert len(records) == expected_count, "예상 호출 수와 저장된 행 수가 다릅니다."
-    assert not (directory / "warmup.json").exists(), "현재 실습은 예열 호출을 하지 않습니다."
+    assert set(warmups) == set(aliases), "모델마다 준비 호출 기록이 있어야 합니다."
 
     case_ids = {row["case_id"] for row in records}
-    assert len(case_ids) == summary["cases"], "입력 개수가 다릅니다."
+    assert len(case_ids) == config["cases"], "입력 개수가 다릅니다."
     for case_id in case_ids:
         case_records = [row for row in records if row["case_id"] == case_id]
-        actual = Counter((row["repeat"], row["provider"]) for row in case_records)
-        expected = Counter(
-            (repeat, provider)
-            for repeat in range(1, summary["repeats"] + 1)
-            for provider in ("ollama", "openai")
-        )
-        assert actual == expected, "제공자별 반복 횟수가 다릅니다."
-        for field in ("input_text", "classification", "policy", "prompt"):
-            values = {json.dumps(row[field], ensure_ascii=False, sort_keys=True)
-                      for row in case_records}
-            assert len(values) == 1, f"같은 입력의 {field} 값이 달라졌습니다."
+        actual = Counter((row["repeat"], row["model_info"]["alias"]) for row in case_records)
+        expected = Counter((repeat, alias) for repeat in range(1, config["repeats"] + 1)
+                           for alias in aliases)
+        assert actual == expected, "모델별 반복 횟수가 다릅니다."
+        # 같은 입력에서는 분류 결과와 프롬프트를 모든 모델이 공유해야 한다.
+        for field in ("source_text", "predicted_label", "prompt_template_used"):
+            assert len({row["input_data"][field] for row in case_records}) == 1, \
+                f"같은 입력의 {field} 값이 달라졌습니다."
+        assert len({row["prompt"] for row in case_records}) == 1, "같은 입력의 프롬프트가 다릅니다."
 
     for row in records:
-        assert row["text"] == row["response_text"], "응답 원문이 달라졌습니다."
-        assert row["output_format_valid"] == valid_output(row["response_text"])
-        assert math.isfinite(row["latency_seconds"]) and row["latency_seconds"] >= 0
-        if row["error"]:
-            assert row["response_text"] == "", "실패가 임의의 답변으로 바뀌었습니다."
-            assert row["generation_complete"] is False
-        assert not {"mock", "prompt_sha256", "metadata"}.intersection(row)
+        result = row["result"]
+        # 채점 기준이 프롬프트에 섞이지 않았는지 확인한다.
+        for point in (row["scoring_reference"].get("required_points") or []) + \
+                (row["scoring_reference"].get("forbidden_claims") or []):
+            assert point not in row["prompt"], "채점 기준이 프롬프트에 들어갔습니다."
+        parsed = parse_output(result["generated_text"], row["input_data"]["predicted_label"])
+        assert result["format_valid_strict"] == parsed["strict"]
+        assert result["format_valid_lenient"] == parsed["lenient"]
+        latency = row["performance_metrics"]["total_time_sec"]
+        assert math.isfinite(latency) and latency >= 0
+        if result["status"] == "ERROR":
+            assert result["generated_text"] == "", "실패가 임의의 답변으로 바뀌었습니다."
+            assert result["generation_complete"] is False
 
-    for provider in ("ollama", "openai"):
-        assert summary["providers"][provider] == summarize_provider(records, provider)
-
-    with (directory / "human_scores.csv").open(encoding="utf-8-sig", newline="") as stream:
-        scores = list(csv.DictReader(stream))
-    assert len(scores) == len(records), "사람 검토 표의 행 수가 다릅니다."
-    for record, score in zip(records, scores, strict=True):
-        assert score["case_id"] == record["case_id"]
-        assert score["provider"] == record["provider"]
-        assert score["response"] == record["response_text"]
-    return {
-        "cases": len(case_ids), "records": len(records),
-        "errors": sum(bool(row["error"]) for row in records),
-        "format_valid": sum(row["output_format_valid"] for row in records),
-        "generation_complete": sum(row["generation_complete"] for row in records),
-        "human_quality_verified": False,
-    }
+    for alias in aliases:
+        assert summary["targets"][alias] == summarize_target(records, alias, warmups[alias]), \
+            f"{alias} 요약이 기록과 다릅니다."
+    return {"directory": directory.name, "cases": len(case_ids), "records": len(records),
+            "errors": sum(row["result"]["status"] == "ERROR" for row in records),
+            "format_valid_strict": sum(row["result"]["format_valid_strict"] for row in records),
+            "quality_scored": summary.get("quality_scored", False)}
 
 
 if __name__ == "__main__":
-    print(json.dumps(verify_comparison(COMPARISON_DIR), ensure_ascii=False, indent=2))
+    target = Path(sys.argv[1]) if len(sys.argv) > 1 else latest_comparison()
+    print(json.dumps(verify_comparison(target), ensure_ascii=False, indent=2))

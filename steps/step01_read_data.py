@@ -22,6 +22,11 @@ def read_rows(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(stream))
 
 
+def read_jsonl(path: Path) -> list[dict]:
+    with Path(path).open(encoding="utf-8-sig") as stream:
+        return [json.loads(line) for line in stream if line.strip()]
+
+
 def read_labels(data_dir: Path) -> list[str]:
     value = json.loads((Path(data_dir) / "labels.json").read_text(encoding="utf-8-sig"))
     labels = value["labels"]
