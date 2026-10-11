@@ -146,7 +146,9 @@ _예정: 선택 실험(심화 데이터)까지 마친 뒤 step11로 1회 평가�
 
 ## 5. 생성 모델 비교 (로컬 vs 상용)
 
-_예정: Ollama 로컬 모델(qwen3:4b, gemma3:4b, qwen2.5:7b, llama3.1:8b)과 상용 API를 같은 입력·지시문으로 비교한다. 품질(LLM 채점 + 블라인드 사람 채점), 응답 시간, 비용(실측·추정 구분), 운영 조건을 넣는다._
+평가 기준: [요약 평가 기준](evaluation_rubric.md) (주 지표: 사용 가능률)
+
+_예정: Ollama 로컬 모델(qwen3:4b-instruct, gemma3:4b, qwen2.5:7b, exaone3.5:7.8b, llama3.1:8b)과 상용 API(gpt-6-luna)를 같은 입력·지시문으로 비교한다. 품질(LLM 채점 + 블라인드 사람 채점), 응답 시간, 비용(실측·추정 구분), 운영 조건을 넣는다._
 
 ## 6. 서비스 구성 (LangChain + FastAPI)
 

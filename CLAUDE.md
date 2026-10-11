@@ -108,6 +108,7 @@ artifacts/{dataset}/
 - 검수: `uv run python scripts/verify_service.py [폴더]` (호출 수, 프롬프트 공유, 채점 기준 비노출, 요약 일치)
 
 ## 요약 품질 채점 (step09b, `common/quality.py`, `prompts/judge_prompt.py`)
+- **기준 원문은 `reports/evaluation_rubric.md`**. 채점 규칙을 바꾸면 이 문서·코드 상수·`JUDGE_VERSION`을 함께 바꾼다(eval 결과를 본 뒤에는 바꾸지 않음)
 - 사람과 LLM이 **같은 체크리스트**를 채움: required_points별 포함/부분/누락, forbidden_claims별 위반, 그 외 근거 없는 주장, 수치·날짜 오류, 외국어 섞임, 정책 위반, 어색한 문장
 - **주 지표 = 사용 가능률**: 형식 정상 + 환각 없음 + 수치 오류 없음 + 외국어 없음 + 핵심 포함률 ≥ 0.67. 함께 보고: 핵심 포함률(포함 1/부분 0.5), 환각률, 100점 감점 점수(환각 −40, 수치 −30, 외국어 −20, 정책 −10, 어색 −10, 누락 −10/부분 −5 최대 −30, 최저 0). 형식 실패는 0점·사용 불가. 외국어는 자동 탐지(원문에 없는 한자·가나·영문)와 OR
 - `judge`: `JUDGE_TARGET`(openai, 요금 발생, temperature 0)로 전체 응답 채점 → `judge.jsonl`, `quality_llm.json`. 이어서 실행하면 성공한 항목은 건너뜀. OpenAI도 후보라 자기 답변 편향 가능성을 한계로 적음
