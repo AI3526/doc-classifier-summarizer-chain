@@ -1,0 +1,226 @@
+{
+  "dataset_version": "synthetic-ko-v1",
+  "authored_date": "2026-10-01",
+  "language": "ko",
+  "provenance": "Original LLM-authored fictional teaching scenarios; no customer export, private source, web scraping, or external API",
+  "pii": "No real personal data. Fictional roles and abstract situations only.",
+  "split_policy": "Immutable v1 family assignment: 01-30 train; 31-36 validation; 37-42 test. Both authored variants stay together. Generation families are separate.",
+  "limitations": [
+    "Synthetic scores do not prove real-world generalization.",
+    "Two views of one family are correlated; effective scenario count is half the classification row count.",
+    "Balanced labels and moderately clean Korean differ from production distributions.",
+    "Document classes have strong writing-style cues; the baseline classification score may exploit these shortcuts.",
+    "Scenario-family disjointness is not full semantic independence: shipping family 03 and family 37 share delivered-but-missing intent.",
+    "Shared institutional topics across document labels are intentional boundary examples.",
+    "Calibrated confidence is not guaranteed, and a closed-set classifier cannot establish out-of-domain safety."
+  ],
+  "topics": {
+    "inquiries": {
+      "splits": {
+        "train": {
+          "rows": 180,
+          "families": 90,
+          "labels": {
+            "shipping": 60,
+            "refund": 60,
+            "account": 60
+          }
+        },
+        "validation": {
+          "rows": 36,
+          "families": 18,
+          "labels": {
+            "shipping": 12,
+            "refund": 12,
+            "account": 12
+          }
+        },
+        "test": {
+          "rows": 36,
+          "families": 18,
+          "labels": {
+            "shipping": 12,
+            "refund": 12,
+            "account": 12
+          }
+        },
+        "smoke": {
+          "rows": 18,
+          "source": "train subset only",
+          "labels": {
+            "shipping": 6,
+            "refund": 6,
+            "account": 6
+          }
+        },
+        "generation_eval": {
+          "rows": 24,
+          "families": 24,
+          "labels": {
+            "shipping": 8,
+            "refund": 8,
+            "account": 8
+          }
+        },
+        "challenge": {
+          "rows": 18,
+          "purpose": "Separate robustness/OOD set; no closed-set label accuracy target"
+        }
+      },
+      "qa": {
+        "unique_ids": 276,
+        "normalized_duplicate_count": 0,
+        "cross_split_family_overlap_count": 0,
+        "near_duplicate_method": "Whitespace-free character trigram Jaccard >= 0.55; cross-split only",
+        "near_duplicate_candidates": [],
+        "near_duplicate_review": "No threshold flags",
+        "semantic_family_review": "Authored family boundaries; teacher review recommended; lexical check is not a semantic proof"
+      },
+      "files": {
+        "challenge.jsonl": {
+          "sha256": "01faee1a1816a18890ecd5bc6fcc4374f1685c76ebb2a923cd5f0bf9e72f387f",
+          "bytes": 7902
+        },
+        "generation_eval.jsonl": {
+          "sha256": "738c3635458502d46841ba7d31c4721b3f81ecd2848202643fc01b21ebb5f0c0",
+          "bytes": 21994
+        },
+        "labels.json": {
+          "sha256": "4c71c161b13bae41375aa1db213412d5cdeebe9e157643e274ff83ac5a73867d",
+          "bytes": 369
+        },
+        "smoke.csv": {
+          "sha256": "4f881dae1bef2e1b2af8f21e6081fc57b3c153b0769fd84904af45b7f76520a9",
+          "bytes": 4118
+        },
+        "test.csv": {
+          "sha256": "6a378f91f736436e68d2a18a484c90a2fc3899033c257543679ada18e64063cf",
+          "bytes": 8721
+        },
+        "train.csv": {
+          "sha256": "d43c34e5849357d18b99a111663dd1882d6f60e5494c33343df4d68da01b321c",
+          "bytes": 41309
+        },
+        "validation.csv": {
+          "sha256": "2296a1e4fc4111baca3e6ed011a9fc5169ded8353f6332089e874d0c35df08ad",
+          "bytes": 8510
+        }
+      }
+    },
+    "documents": {
+      "splits": {
+        "train": {
+          "rows": 180,
+          "families": 90,
+          "labels": {
+            "announcement": 60,
+            "manual": 60,
+            "minutes": 60
+          }
+        },
+        "validation": {
+          "rows": 36,
+          "families": 18,
+          "labels": {
+            "announcement": 12,
+            "manual": 12,
+            "minutes": 12
+          }
+        },
+        "test": {
+          "rows": 36,
+          "families": 18,
+          "labels": {
+            "announcement": 12,
+            "manual": 12,
+            "minutes": 12
+          }
+        },
+        "smoke": {
+          "rows": 18,
+          "source": "train subset only",
+          "labels": {
+            "announcement": 6,
+            "manual": 6,
+            "minutes": 6
+          }
+        },
+        "generation_eval": {
+          "rows": 24,
+          "families": 24,
+          "labels": {
+            "announcement": 8,
+            "manual": 8,
+            "minutes": 8
+          }
+        },
+        "challenge": {
+          "rows": 9,
+          "purpose": "Post-baseline style diagnostic exercise; not an untouched final test set"
+        }
+      },
+      "qa": {
+        "unique_ids": 276,
+        "normalized_duplicate_count": 0,
+        "cross_split_family_overlap_count": 0,
+        "near_duplicate_method": "Whitespace-free character trigram Jaccard >= 0.55; cross-split only",
+        "near_duplicate_candidates": [],
+        "near_duplicate_review": "No threshold flags",
+        "semantic_family_review": "Authored family boundaries; teacher review recommended; lexical check is not a semantic proof"
+      },
+      "writing_style_diagnostic": {
+        "task": "minutes versus not-minutes only; NOT three-class classification",
+        "rule": "Predict minutes when re.search(r'했다|한다', text) matches anywhere; otherwise not-minutes",
+        "scores": {
+          "train": {
+            "correct": 178,
+            "total": 180
+          },
+          "validation": {
+            "correct": 36,
+            "total": 36
+          },
+          "test": {
+            "correct": 36,
+            "total": 36
+          }
+        },
+        "sentence_end_punctuation_counts": {
+          "2": 251,
+          "1": 1
+        },
+        "interpretation": "Strong writing-style shortcuts; unchanged original splits; separate post-baseline challenge is diagnostic only"
+      },
+      "files": {
+        "challenge.jsonl": {
+          "sha256": "d4fb9d0bb23688120d8909e6e726574580fe564381185d84888b293538a66f77",
+          "bytes": 6693
+        },
+        "generation_eval.jsonl": {
+          "sha256": "88efa8be3cc8e49fc05bdc57670d4c5dc10507bc387138297923161c9e9cfc89",
+          "bytes": 21180
+        },
+        "labels.json": {
+          "sha256": "fc8e4e39b5b49f4e551087a36767a4fc0a11ef08fd481b9df1886862f8edad4a",
+          "bytes": 395
+        },
+        "smoke.csv": {
+          "sha256": "8befb80f7f1b423417218b8026845610baac230702f00259c849b69b4770a8e2",
+          "bytes": 5025
+        },
+        "test.csv": {
+          "sha256": "3a2079dd48e9e3dc75e5e0ff8c5ceecfdf983bd43fdf18cbe4d82592ea3e69ac",
+          "bytes": 9563
+        },
+        "train.csv": {
+          "sha256": "e4eda4d46574d239b8b7476b1af40f3b2614a19baa526836af743505c03b6fb0",
+          "bytes": 47789
+        },
+        "validation.csv": {
+          "sha256": "6b2daddd1c59d63e5af1b65bf615f97b7de11c605b1a3ead3f54c2d35f8da899",
+          "bytes": 9573
+        }
+      }
+    }
+  }
+}

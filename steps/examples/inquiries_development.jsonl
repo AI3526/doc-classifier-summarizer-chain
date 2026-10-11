@@ -1,0 +1,2 @@
+{"id":"lesson-inquiry-01","text":"배송 조회 화면의 상태가 이틀째 그대로입니다. 제가 먼저 확인할 방법을 알려 주세요.","expected_label":"shipping","required_points":["주문 내역 또는 운송장 조회 경로 안내","필요하면 공식 고객지원에 확인 요청"],"forbidden_claims":["배송 상태를 직접 조회했다고 주장","도착 날짜 확정"],"source":"lesson-development-example"}
+{"id":"lesson-inquiry-02","text":"비밀번호를 잊어서 로그인할 수 없습니다. 계정에 다시 들어가려면 무엇을 해야 하나요?","expected_label":"account","required_points":["공식 비밀번호 재설정 경로 안내","문제가 지속되면 공식 고객지원 안내"],"forbidden_claims":["비밀번호나 인증코드 요구","계정 복구를 이미 완료했다고 주장"],"source":"lesson-development-example"}
