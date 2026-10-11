@@ -69,6 +69,12 @@ artifacts/{dataset}/
 - `--top-k`는 매번 그 시점의 평균 순위로 고르므로, seed가 추가되며 순위가 바뀌면 다시 실행했을 때 다른 설정이 반복 대상이 될 수 있다(상위 설정이 모두 같은 seed 수를 갖게 됨).
 - 실행 이름 형식: `{alias}_lr{lr}_s{seed}`
 
+## 보고서 (`reports/`)
+- `model_selection_report.md`: 최종 제출용 보고서(그림 + 설명). 단계가 끝날 때마다 해당 장을 채운다(현재 3장 분류까지).
+- `experiment_log_classification.md`: 분류 실험 상세 기록. 생성 실험도 `experiment_log_generation.md`로 같은 형식으로 남긴다.
+- `figures/`, `generated/`: `uv run python scripts/build_report.py`가 실험 JSON에서 자동 생성. 직접 수정하지 않고 스크립트를 고친다.
+- 보고서 수치는 반드시 artifacts의 JSON에서 가져온다. 라이선스 등 외부 정보는 출처를 확인하고 적는다.
+
 ## 공통 모듈 (`steps/common/`)
 - `metrics.py`: `classification_scores`(accuracy, macro/weighted F1, 혼동행렬), `save_errors`
 - `records.py`: `new_run_dir`, `write_json`, `read_json`, `now_iso`, `stamp`
