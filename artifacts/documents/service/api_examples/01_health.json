@@ -18,10 +18,21 @@
     },
     "default_target": "openai",
     "default_target_status": "provisional",
+    "routing_plans": {
+      "confidential": [
+        "qwen2.5-7b",
+        "qwen3-4b"
+      ],
+      "normal": [
+        "openai",
+        "qwen2.5-7b",
+        "qwen3-4b"
+      ]
+    },
     "structured_output": true,
     "ollama_reachable": true,
     "openai_key_configured": true
   },
   "note": "",
-  "recorded_at": "2026-10-12T17:14:57+09:00"
+  "recorded_at": "2026-10-12T17:32:48+09:00"
 }

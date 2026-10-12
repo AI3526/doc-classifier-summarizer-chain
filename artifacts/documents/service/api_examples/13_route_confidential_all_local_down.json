@@ -1,0 +1,55 @@
+{
+  "name": "route_confidential_all_local_down",
+  "kind": "대체 경로",
+  "request": {
+    "method": "POST",
+    "path": "/summarize",
+    "json": {
+      "text": "공용 라운지 조명의 자동 소등이 대화를 끊는다는 의견이 나왔다. 상시 점등 제안은 전력 사용을 더 살핀 뒤 결정하기로 했다. 우선 시설 담당이 소등 전 알림을 시험하고 이용자 반응을 모으기로 합의했다.",
+      "confidential": true
+    }
+  },
+  "status_code": 503,
+  "response": {
+    "error": {
+      "code": "generation_unavailable",
+      "message": "생성 모델에 연결할 수 없습니다. 대체 모델도 응답하지 않았습니다."
+    },
+    "classification": {
+      "label": "minutes",
+      "confidence": 0.9751806259155273,
+      "truncated": false,
+      "model": {
+        "dataset": "documents",
+        "learner": "learner_park",
+        "run_name": "20261011-210721_roberta_lr1e-5_s42",
+        "kind": "transformer",
+        "device": "cpu"
+      },
+      "low_confidence": false
+    },
+    "routing": {
+      "mode": "auto",
+      "confidential": true,
+      "plan": [
+        "qwen2.5-7b",
+        "qwen3-4b"
+      ],
+      "attempts": [
+        {
+          "target": "qwen2.5-7b",
+          "status": "ERROR",
+          "error": "ConnectError"
+        },
+        {
+          "target": "qwen3-4b",
+          "status": "ERROR",
+          "error": "ConnectError"
+        }
+      ]
+    },
+    "elapsed_sec": 4.1050955997779965
+  },
+  "note": "기밀 문서, 로컬 모델이 모두 응답하지 않음 → 상용 모델로 넘기지 않고 실패",
+  "recorded_at": "2026-10-12T17:33:02+09:00"
+}

@@ -25,35 +25,51 @@
       "low_confidence": false
     },
     "prompt_version": "document_summary_v6",
+    "routing": {
+      "mode": "explicit",
+      "confidential": false,
+      "plan": [
+        "qwen2.5-7b"
+      ],
+      "used_target": "qwen2.5-7b",
+      "fallback_used": false,
+      "attempts": [
+        {
+          "target": "qwen2.5-7b",
+          "status": "SUCCESS",
+          "error": null
+        }
+      ]
+    },
     "generation": {
       "target": "qwen2.5-7b",
       "provider": "ollama",
       "model": "qwen2.5:7b",
       "status": "SUCCESS",
       "summary": {
-        "summary": "공용 라운지 조명의 자동 소등이 대화를 끊는다는 의견이 나왔고, 상시 점등 제안은 전력 사용을 더 살펴보기로 했다. 우선 시설 담당이 소등 전 알림을 시험하고 이용자 반응을 모으기로 했다.",
+        "summary": "공용 라운지 조명의 자동 소등이 대화를 끊는다는 의견이 나왔고, 상시 점등은 전력 사용을 살펴본 후 결정하기로 했다. 시설 담당은 소등 전 알림 시험과 이용자 반응 모집을 진행하기로 했다.",
         "discussion": [
           "공용 라운지 조명의 자동 소등이 대화를 끊는다는 의견"
         ],
         "decisions": [
-          "상시 점등 제안은 전력 사용을 더 살핀 뒤 결정한다.",
-          "소등 전 알림을 시험하고 이용자 반응을 모은다."
+          "상시 점등은 전력 사용을 살펴본 후 결정한다.",
+          "소등 전 알림 시험과 이용자 반응 모집을 진행한다."
         ],
         "owners": [
-          "시설 담당: 소등 전 알림 시험 및 이용자 반응 모음 (마감 미기재)"
+          "시설 담당: 소등 전 알림 시험과 이용자 반응 모집 (마감 미기재)"
         ],
         "follow_ups": []
       },
       "format_valid": true,
-      "latency_sec": 6.15505910012871,
-      "ttft_sec": 3.220548799727112,
+      "latency_sec": 3.5865969001315534,
+      "ttft_sec": 0.6523096999153495,
       "prompt_tokens": 1081,
-      "completion_tokens": 199,
+      "completion_tokens": 193,
       "api_cost_usd": 0.0
     },
     "warnings": [],
-    "elapsed_sec": 6.197776800021529
+    "elapsed_sec": 3.6381215997971594
   },
   "note": "로컬 모델 지정",
-  "recorded_at": "2026-10-12T17:15:04+09:00"
+  "recorded_at": "2026-10-12T17:32:52+09:00"
 }

@@ -56,6 +56,10 @@ GENERATION_DEFAULT = "qwen3-4b"  # 생성 모델 비교 전 서비스 기본값
 # 구조화 출력(스키마에 맞는 토큰만 생성) 사용 여부. 1차 비교 결과로 서비스 기본값을 사용으로 정했다.
 # step09는 --structured로 따로 정한다(2차 비교는 사용).
 STRUCTURED_OUTPUT = True
+# 하이브리드 라우팅: 기밀 문서는 로컬 모델로만 보낸다(외부 전송 금지).
+# 생성 모델이 연결 실패·시간 초과면 대체 모델로 넘기되, 기밀 문서는 로컬 모델 사이에서만 넘긴다.
+CONFIDENTIAL_TARGET = "qwen2.5-7b"  # 최종 비교에서 환각이 가장 적고 읽기용 기준을 통과한 로컬 모델
+LOCAL_FALLBACK_TARGET = "qwen3-4b"  # 로컬 모델의 대체(최종 비교의 두 번째 로컬 후보)
 # 요약 품질 LLM 채점 모델. 후보이기도 해서 자기 답변을 후하게 볼 수 있음을 한계로 적는다.
 JUDGE_TARGET = "openai"
 TEMPERATURE = 0.2

@@ -9,6 +9,7 @@ uv run python scripts/api_examples.py
 """
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -51,7 +52,13 @@ def main():
         run("summarize_local_minutes", "정상", "POST", "/summarize",
             {"text": by_label["minutes"], "target": "qwen2.5-7b"}, "로컬 모델 지정")
         run("summarize_default_manual", "정상", "POST", "/summarize", {"text": by_label["manual"]},
-            "target 생략 → 기본 생성 모델(선택 결과 파일)")
+            "target 생략 → 라우팅: 일반 문서는 기본 생성 모델")
+        run("route_confidential_local", "라우팅", "POST", "/summarize",
+            {"text": by_label["announcement"], "confidential": True},
+            "기밀 문서 → 로컬 모델로만 처리")
+        run("confidential_cloud_rejected", "라우팅", "POST", "/summarize",
+            {"text": by_label["announcement"], "confidential": True, "target": "openai"},
+            "기밀 문서를 상용 모델로 지정한 요청은 거부")
         run("blank_text", "잘못된 입력", "POST", "/classify", {"text": "   "})
         run("too_long_text", "잘못된 입력", "POST", "/summarize",
             {"text": "가" * (lesson.MAX_INPUT_CHARS + 1)})
@@ -70,8 +77,21 @@ def main():
             run("generation_timeout", "모델 호출 실패", "POST", "/summarize",
                 {"text": by_label["announcement"], "target": "qwen2.5-7b"},
                 "시간 제한을 0.001초로 줄여 응답 시간 초과를 재현")
+            lesson.TIMEOUT_SECONDS = original_timeout
+            lesson.OLLAMA_URL = "http://127.0.0.1:9"
+            run("route_confidential_all_local_down", "대체 경로", "POST", "/summarize",
+                {"text": by_label["minutes"], "confidential": True},
+                "기밀 문서, 로컬 모델이 모두 응답하지 않음 → 상용 모델로 넘기지 않고 실패")
         finally:
             lesson.OLLAMA_URL, lesson.TIMEOUT_SECONDS = original_url, original_timeout
+        key = os.environ.pop("OPENAI_API_KEY", None)
+        try:
+            run("route_fallback_to_local", "대체 경로", "POST", "/summarize",
+                {"text": by_label["minutes"]},
+                "일반 문서, 상용 모델 사용 불가(키 없음)를 재현 → 로컬 모델로 넘김")
+        finally:
+            if key:
+                os.environ["OPENAI_API_KEY"] = key
 
     lines = ["# API 요청 예시", "",
              (f"`scripts/api_examples.py`가 생성. 생성 시각 {now_iso()}. 각 응답 전문은 "
@@ -98,8 +118,16 @@ def main():
                        f"(확신도 {body['classification']['confidence']:.2f})")
         else:
             outcome = f"기본 생성 모델 {body.get('default_target')} ({body.get('default_target_status')})"
+        attempts = (body.get("routing") or {}).get("attempts", []) if isinstance(body, dict) else []
+        if len(attempts) > 1 or (attempts and error):
+            outcome += " — 시도: " + " → ".join(
+                f"{a['target']}({'성공' if not a['error'] else a['error']})" for a in attempts)
+        flags = []
+        if isinstance(request["json"], dict) and request["json"].get("confidential"):
+            flags.append("기밀")
         lines.append(f"| {number} | {record['kind']} | `{request['method']} {request['path']}`"
-                     f"{' ' + target if target else ''} | {record['status_code']} | "
+                     f"{' ' + target if target else ''}{' (' + ', '.join(flags) + ')' if flags else ''} | "
+                     f"{record['status_code']} | "
                      f"{error.get('code', '-')} | {outcome} |")
     REPORT.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("저장:", OUTPUT, REPORT)

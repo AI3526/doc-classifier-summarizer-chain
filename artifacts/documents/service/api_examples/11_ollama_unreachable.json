@@ -28,6 +28,22 @@
       },
       "low_confidence": false
     },
+    "routing": {
+      "mode": "explicit",
+      "confidential": false,
+      "plan": [
+        "qwen2.5-7b"
+      ],
+      "used_target": "qwen2.5-7b",
+      "fallback_used": false,
+      "attempts": [
+        {
+          "target": "qwen2.5-7b",
+          "status": "ERROR",
+          "error": "ConnectError"
+        }
+      ]
+    },
     "generation": {
       "target": "qwen2.5-7b",
       "provider": "ollama",
@@ -35,7 +51,7 @@
       "status": "ERROR",
       "summary": null,
       "format_valid": false,
-      "latency_sec": 2.063833400141448,
+      "latency_sec": 2.0494386996142566,
       "ttft_sec": null,
       "prompt_tokens": null,
       "completion_tokens": null,
@@ -43,8 +59,8 @@
       "error": "ConnectError",
       "error_message": "[WinError 10061] 대상 컴퓨터에서 연결을 거부했으므로 연결하지 못했습니다"
     },
-    "elapsed_sec": 2.082953200209886
+    "elapsed_sec": 2.068923399783671
   },
   "note": "Ollama 서버에 연결할 수 없는 상황을 재현",
-  "recorded_at": "2026-10-12T17:15:08+09:00"
+  "recorded_at": "2026-10-12T17:32:58+09:00"
 }

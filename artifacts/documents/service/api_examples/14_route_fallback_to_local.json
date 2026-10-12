@@ -1,0 +1,83 @@
+{
+  "name": "route_fallback_to_local",
+  "kind": "대체 경로",
+  "request": {
+    "method": "POST",
+    "path": "/summarize",
+    "json": {
+      "text": "공용 라운지 조명의 자동 소등이 대화를 끊는다는 의견이 나왔다. 상시 점등 제안은 전력 사용을 더 살핀 뒤 결정하기로 했다. 우선 시설 담당이 소등 전 알림을 시험하고 이용자 반응을 모으기로 합의했다."
+    }
+  },
+  "status_code": 200,
+  "response": {
+    "classification": {
+      "label": "minutes",
+      "confidence": 0.9751806259155273,
+      "truncated": false,
+      "model": {
+        "dataset": "documents",
+        "learner": "learner_park",
+        "run_name": "20261011-210721_roberta_lr1e-5_s42",
+        "kind": "transformer",
+        "device": "cpu"
+      },
+      "low_confidence": false
+    },
+    "prompt_version": "document_summary_v6",
+    "routing": {
+      "mode": "auto",
+      "confidential": false,
+      "plan": [
+        "openai",
+        "qwen2.5-7b",
+        "qwen3-4b"
+      ],
+      "used_target": "qwen2.5-7b",
+      "fallback_used": true,
+      "attempts": [
+        {
+          "target": "openai",
+          "status": "ERROR",
+          "error": "RuntimeError"
+        },
+        {
+          "target": "qwen2.5-7b",
+          "status": "SUCCESS",
+          "error": null
+        }
+      ]
+    },
+    "generation": {
+      "target": "qwen2.5-7b",
+      "provider": "ollama",
+      "model": "qwen2.5:7b",
+      "status": "SUCCESS",
+      "summary": {
+        "summary": "공용 라운지 조명의 자동 소등이 대화를 끊는다는 의견이 나왔고, 상시 점등 제안은 전력 사용을 더 살펴보기로 했다. 우선 시설 담당이 소등 전 알림을 시험하고 이용자 반응을 모으기로 했다.",
+        "discussion": [
+          "공용 라운지 조명의 자동 소등이 대화를 끊는다는 의견"
+        ],
+        "decisions": [
+          "상시 점등 제안은 전력 사용을 더 살펴보기로 했다.",
+          "소등 전 알림을 시험하고 이용자 반응을 모으기로 했다."
+        ],
+        "owners": [
+          "시설 담당: 소등 전 알림 시험 및 이용자 반응 모음 (마감 미기재)"
+        ],
+        "follow_ups": []
+      },
+      "format_valid": true,
+      "latency_sec": 3.318320699967444,
+      "ttft_sec": 0.2736633000895381,
+      "prompt_tokens": 1081,
+      "completion_tokens": 204,
+      "api_cost_usd": 0.0
+    },
+    "warnings": [
+      "openai이(가) 응답하지 않아 qwen2.5-7b(으)로 처리했습니다."
+    ],
+    "elapsed_sec": 3.3778295000083745
+  },
+  "note": "일반 문서, 상용 모델 사용 불가(키 없음)를 재현 → 로컬 모델로 넘김",
+  "recorded_at": "2026-10-12T17:33:05+09:00"
+}

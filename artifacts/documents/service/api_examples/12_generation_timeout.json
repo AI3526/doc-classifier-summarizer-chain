@@ -28,6 +28,22 @@
       },
       "low_confidence": false
     },
+    "routing": {
+      "mode": "explicit",
+      "confidential": false,
+      "plan": [
+        "qwen2.5-7b"
+      ],
+      "used_target": "qwen2.5-7b",
+      "fallback_used": false,
+      "attempts": [
+        {
+          "target": "qwen2.5-7b",
+          "status": "ERROR",
+          "error": "ReadTimeout"
+        }
+      ]
+    },
     "generation": {
       "target": "qwen2.5-7b",
       "provider": "ollama",
@@ -35,7 +51,7 @@
       "status": "ERROR",
       "summary": null,
       "format_valid": false,
-      "latency_sec": 0.038162400014698505,
+      "latency_sec": 0.039128600154072046,
       "ttft_sec": null,
       "prompt_tokens": null,
       "completion_tokens": null,
@@ -43,8 +59,8 @@
       "error": "ReadTimeout",
       "error_message": "timed out"
     },
-    "elapsed_sec": 0.05982519965618849
+    "elapsed_sec": 0.0595786003395915
   },
   "note": "시간 제한을 0.001초로 줄여 응답 시간 초과를 재현",
-  "recorded_at": "2026-10-12T17:15:08+09:00"
+  "recorded_at": "2026-10-12T17:32:58+09:00"
 }

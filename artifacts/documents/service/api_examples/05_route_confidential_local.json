@@ -1,0 +1,69 @@
+{
+  "name": "route_confidential_local",
+  "kind": "라우팅",
+  "request": {
+    "method": "POST",
+    "path": "/summarize",
+    "json": {
+      "text": "기록 보관함 열쇠의 반납 창구를 다음 달부터 안내실로 변경합니다. 처음 열쇠를 받는 곳은 기존 자료실입니다. 야간 반납은 받지 않으므로 안내실 운영 시간에 방문해 주세요.",
+      "confidential": true
+    }
+  },
+  "status_code": 200,
+  "response": {
+    "classification": {
+      "label": "announcement",
+      "confidence": 0.972260057926178,
+      "truncated": false,
+      "model": {
+        "dataset": "documents",
+        "learner": "learner_park",
+        "run_name": "20261011-210721_roberta_lr1e-5_s42",
+        "kind": "transformer",
+        "device": "cpu"
+      },
+      "low_confidence": false
+    },
+    "prompt_version": "document_summary_v6",
+    "routing": {
+      "mode": "auto",
+      "confidential": true,
+      "plan": [
+        "qwen2.5-7b",
+        "qwen3-4b"
+      ],
+      "used_target": "qwen2.5-7b",
+      "fallback_used": false,
+      "attempts": [
+        {
+          "target": "qwen2.5-7b",
+          "status": "SUCCESS",
+          "error": null
+        }
+      ]
+    },
+    "generation": {
+      "target": "qwen2.5-7b",
+      "provider": "ollama",
+      "model": "qwen2.5:7b",
+      "status": "SUCCESS",
+      "summary": {
+        "summary": "기록 보관함 열쇠의 반납 창구가 다음 달부터 안내실로 변경되며, 야간 반납은 받지 않으므로 운영 시간 내에 방문해야 합니다.",
+        "audience": null,
+        "schedule": "다음 달부터",
+        "actions": [],
+        "changes": "기록 보관함 열쇠의 반납 창구가 다음 달부터 안내실로 변경된다."
+      },
+      "format_valid": true,
+      "latency_sec": 1.6842497000470757,
+      "ttft_sec": 0.08823900017887354,
+      "prompt_tokens": 1046,
+      "completion_tokens": 106,
+      "api_cost_usd": 0.0
+    },
+    "warnings": [],
+    "elapsed_sec": 1.7299915999174118
+  },
+  "note": "기밀 문서 → 로컬 모델로만 처리",
+  "recorded_at": "2026-10-12T17:32:56+09:00"
+}

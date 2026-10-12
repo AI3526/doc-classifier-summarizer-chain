@@ -1,11 +1,11 @@
 {
-  "name": "blank_text",
+  "name": "missing_text",
   "kind": "잘못된 입력",
   "request": {
     "method": "POST",
-    "path": "/classify",
+    "path": "/summarize",
     "json": {
-      "text": "   "
+      "target": "qwen2.5-7b"
     }
   },
   "status_code": 422,
@@ -17,10 +17,10 @@
     "detail": [
       {
         "field": "text",
-        "reason": "Value error, 공백만 입력할 수 없습니다."
+        "reason": "Field required"
       }
     ]
   },
   "note": "",
-  "recorded_at": "2026-10-12T17:15:06+09:00"
+  "recorded_at": "2026-10-12T17:32:56+09:00"
 }

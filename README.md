@@ -15,11 +15,14 @@
 flowchart LR
     A[문서 원문] --> B["분류기<br/>klue/roberta-base<br/>(직접 파인튜닝)"]
     B -->|공지 / 매뉴얼 / 회의록| C["유형별 정책·출력 형식 선택"]
-    C --> D["생성 LLM<br/>구조화 출력(JSON 스키마)"]
-    D --> E["유형별 요약 JSON<br/>+ 분류 결과·실행 기록"]
+    C --> R{"기밀 문서?"}
+    R -->|예| L["로컬 LLM만<br/>qwen2.5-7b → qwen3-4b"]
+    R -->|아니요| N["기본 생성 모델<br/>→ 실패 시 로컬 LLM"]
+    L --> E["유형별 요약 JSON<br/>+ 분류 결과·실행 기록"]
+    N --> E
 ```
 
-학습한 분류기의 **실제 예측**으로 요약 정책과 출력 형식을 고릅니다. 정답 라벨은 쓰지 않습니다.
+학습한 분류기의 **실제 예측**으로 요약 정책과 출력 형식을 고릅니다. 정답 라벨은 쓰지 않습니다. 기밀 문서는 외부로 보내지 않고 로컬 LLM에서만 요약하며, 생성 모델이 응답하지 않으면 다음 모델로 자동 전환합니다(기밀 문서는 로컬 모델 사이에서만).
 
 ## 결과 한눈에 보기
 
@@ -75,7 +78,8 @@ ollama pull qwen2.5:7b      # 비교에 쓰는 로컬 모델: llama3.1:8b, gemma
 | 생성 비교 | `uv run python steps/step09_compare.py --split eval --targets qwen2.5-7b qwen3-4b openai --repeats 2 --structured` | openai 포함 시 **요금 발생** |
 | 품질 채점 | `uv run python steps/step09b_score.py judge` → `sheet` → `aggregate` → `select` | LLM 채점, 사람 채점 시트, 집계, 생성 모델 선택 |
 | API | `uv run python steps/step10_serve_api.py` | `http://127.0.0.1:8000/docs` |
-| API 예시 | `uv run python scripts/api_examples.py` | 정상·잘못된 입력·호출 실패 응답 저장 |
+| 화면 | `uv run streamlit run app/streamlit_app.py` | API를 띄운 뒤 다른 터미널에서. `http://localhost:8501` |
+| API 예시 | `uv run python scripts/api_examples.py` | 정상·라우팅·잘못된 입력·호출 실패·대체 경로 응답 저장 |
 | 메모리 측정 | `uv run python scripts/measure_service_memory.py` | 분류기 + 로컬 LLM 동시 실행 |
 | test 평가 | `uv run python steps/step11_evaluate_final.py` | 모델을 확정한 뒤 1회만 |
 | 보고서 그림 | `uv run python scripts/build_report.py` | `reports/figures/`, `reports/generated/` |
@@ -84,29 +88,41 @@ ollama pull qwen2.5:7b      # 비교에 쓰는 로컬 모델: llama3.1:8b, gemma
 
 | 엔드포인트 | 하는 일 |
 |---|---|
-| `GET /health` | 서버·분류기 상태, 기본 생성 모델(잠정/확정), Ollama 연결 |
+| `GET /health` | 서버·분류기 상태, 기본 생성 모델(잠정/확정), 라우팅 순서, Ollama 연결 |
 | `POST /classify` | 분류만 |
-| `POST /summarize` | 분류 → 유형별 정책 → 생성 → 형식 검사. `target`으로 생성 모델 지정 가능 |
+| `POST /summarize` | 분류 → 유형별 정책 → (라우팅) → 생성 → 형식 검사. `confidential`로 기밀 문서 표시, `target`으로 생성 모델 지정 가능 |
 | `POST /compare` | 같은 입력으로 여러 생성 모델 비교 |
 
 ```powershell
 curl -X POST http://127.0.0.1:8000/summarize -H "Content-Type: application/json" `
-  -d '{"text": "다음 주 월요일 오전 10시에 시스템 점검을 진행합니다. 점검 중에는 로그인이 제한됩니다.", "target": "qwen2.5-7b"}'
+  -d '{"text": "다음 주 월요일 오전 10시에 시스템 점검을 진행합니다. 점검 중에는 로그인이 제한됩니다.", "confidential": true}'
 ```
 
-- 응답: 분류 결과(유형, 확신도), 유형별 요약 JSON, 응답 시간·토큰·비용, 경고(낮은 확신도, 잠정 모델 등)
+- **라우팅**(`target` 생략 시): 기밀 문서는 qwen2.5-7b → qwen3-4b(로컬만), 일반 문서는 기본 생성 모델 → qwen2.5-7b → qwen3-4b 순서로 시도합니다. 연결 실패·시간 초과일 때만 다음 모델로 넘기고, 기밀 문서를 상용 모델로 지정하면 422 `confidential_requires_local`로 거부합니다.
+
+- 응답: 분류 결과(유형, 확신도), 유형별 요약 JSON, 사용한 모델과 시도 기록(`routing`), 응답 시간·토큰·비용, 경고(낮은 확신도, 대체 모델 사용, 잠정 모델 등)
 - 오류: 잘못된 입력 422 `invalid_request`, 생성 모델 연결 실패 503, 시간 초과 504, 기타 실패·형식 불일치 502. 실패해도 분류 결과와 실패 기록을 함께 돌려줍니다.
 - 분류기는 CPU(약 365MB), 로컬 LLM은 GPU(qwen2.5:7b 4.5GB)에서 실행되어 8GB GPU에서 함께 돌아갑니다. 실제 요청 예시: [API 요청 예시](reports/generated/api_examples.md)
+
+## 화면 (Streamlit)
+
+API 서버(터미널 1)를 띄운 뒤 `uv run streamlit run app/streamlit_app.py`(터미널 2)로 실행합니다. 화면은 API를 호출만 합니다.
+
+- **문서 하나 요약**: 문서 입력(예시 불러오기 가능), 기밀 문서 체크, 생성 모델 선택(자동 라우팅/직접 지정) → 문서 유형·확신도·사용 모델·응답 시간과 유형별 칸으로 나눈 요약
+- **CSV 일괄 처리**: `text` 열이 있는 CSV(예시: [data/demo/batch_sample.csv](data/demo/batch_sample.csv), 개발 데이터 15건) 업로드 → 진행률, 결과 표, 결과 CSV 내려받기. 상용 모델을 쓰면 요금 안내가 나옵니다.
+- API 주소는 사이드바에서 바꾸거나 환경 변수 `SUMMARY_API_URL`로 정합니다.
 
 ## 폴더 구조
 
 ```
 steps/                 단계별 실행 파일 (01~11), 설정 lesson_settings.py
+app/                   Streamlit 화면 (API 호출)
   common/              지표·기록·자원 측정·품질 채점·그림
   prompts/             요약 정책·출력 스키마·채점 프롬프트
 scripts/               검수(verify_*), 보고서 생성(build_report), 데이터 생성 원본
 data/documents/        기본 데이터 (train 360 / validation 120 / test 120, 생성 개발 15 / 평가 24)
 data/documents_advanced/  긴 문서 심화 데이터 (선택 과제)
+data/demo/             화면 시연용 CSV (개발 데이터의 id·text)
 artifacts/documents/   실험 기록 (지표 JSON·CSV는 커밋, 가중치는 제외)
   <learner>/runs/      분류 학습 실행
   <learner>/comparisons/  생성 비교 실행과 채점

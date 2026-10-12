@@ -4,6 +4,8 @@
 - GET  /health    서버, 분류기, 기본 생성 모델, Ollama 연결 상태
 - POST /classify  분류만 (생성 모델을 부르지 않음)
 - POST /summarize 분류 → 정책 → 생성 → 형식 검사 (LangChain 체인 하나, /generate도 같은 동작)
+                  target을 생략하면 하이브리드 라우팅: 기밀 문서(confidential=true)는 로컬 모델만,
+                  그 외는 기본 생성 모델. 연결 실패·시간 초과면 대체 모델로 넘긴다.
 - POST /compare   같은 분류 결과와 프롬프트로 여러 생성 모델을 비교
 
 기본 생성 모델은 selection/generation_selected.json의 선택 결과를 따르고(가상 채점 결과는 쓰지 않음),
@@ -29,8 +31,10 @@ from pydantic import BaseModel, Field, field_validator
 from step06_predict import load_classifier
 from step08_connect_chain import (
     MAX_INPUT_CHARS,
+    GenerationUnavailable,
     compare_prepared,
     create_chain,
+    create_routed_chain,
     create_service_chain,
 )
 
@@ -66,7 +70,8 @@ class TextRequest(BaseModel):
 
 
 class SummarizeRequest(TextRequest):
-    target: TargetName | None = None  # 생략하면 기본 생성 모델
+    target: TargetName | None = None  # 생략하면 하이브리드 라우팅
+    confidential: bool = False  # 기밀 문서면 외부(상용) 모델로 보내지 않는다
 
 
 class CompareRequest(TextRequest):
@@ -117,6 +122,9 @@ async def lifespan(app):
     app.state.prepare_chain = create_chain(classifier)  # 분류 → 정책·프롬프트
     app.state.service_chains = {}  # 생성 모델별 전체 체인(분류 → 정책 → 생성), 처음 쓸 때 만든다
     app.state.default_target, app.state.default_status = default_target()
+    # 하이브리드 라우팅 체인: 기밀 여부로 분기하고, 응답하지 못한 모델은 다음 모델로 넘긴다.
+    app.state.routed_chain, app.state.routing_plans = create_routed_chain(
+        classifier, app.state.default_target)
     yield
 
 
@@ -145,6 +153,8 @@ def health(request: Request):
     return {"status": "ok", "classifier": request.app.state.classifier["identity"],
             "default_target": request.app.state.default_target,
             "default_target_status": request.app.state.default_status,
+            "routing_plans": request.app.state.routing_plans,
+            "targets": {name: spec["provider"] for name, spec in lesson.GENERATION_CANDIDATES.items()},
             "structured_output": lesson.STRUCTURED_OUTPUT, "ollama_reachable": ollama_ok,
             "openai_key_configured": bool(os.getenv("OPENAI_API_KEY"))}
 
@@ -165,36 +175,70 @@ def classify(body: TextRequest, request: Request):
             "warnings": warnings, "elapsed_sec": time.perf_counter() - started}
 
 
+def is_local(target):
+    return lesson.GENERATION_CANDIDATES[target]["provider"] == "ollama"
+
+
 @app.post("/summarize")
 @app.post("/generate")
 def summarize(body: SummarizeRequest, request: Request):
     started = time.perf_counter()
-    target = body.target or request.app.state.default_target
-    chains = request.app.state.service_chains
-    if target not in chains:
-        chains[target] = create_service_chain(request.app.state.classifier, target)
+    state = request.app.state
+    if body.target:
+        # 직접 지정: 그 모델만 쓴다. 기밀 문서를 상용 모델로 보내는 요청은 막는다.
+        if body.confidential and not is_local(body.target):
+            return error_response(422, "confidential_requires_local",
+                                  "기밀 문서는 로컬 생성 모델로만 처리할 수 있습니다.",
+                                  allowed=[name for name in lesson.GENERATION_CANDIDATES
+                                           if is_local(name)])
+        if body.target not in state.service_chains:
+            state.service_chains[body.target] = create_service_chain(state.classifier,
+                                                                     body.target)
+        chain, payload = state.service_chains[body.target], body.text
+        plan = [body.target]
+    else:
+        chain = state.routed_chain
+        payload = {"text": body.text, "confidential": body.confidential}
+        plan = state.routing_plans["confidential" if body.confidential else "normal"]
+    routing = {"mode": "explicit" if body.target else "auto", "confidential": body.confidential,
+               "plan": plan}
     try:
-        result = chains[target].invoke(body.text)
-    except Exception as exc:  # noqa: BLE001 - 분류 단계 실패(생성 실패는 결과 안에 기록된다)
+        result = chain.invoke(payload)
+    except GenerationUnavailable as exc:
+        # 목록의 모든 모델이 응답하지 못함. 분류 결과와 시도 기록을 함께 돌려준다.
+        status, code, message = generation_failure(exc.generation)
+        return error_response(status, code, f"{message} 대체 모델도 응답하지 않았습니다.",
+                              classification=classification_view(exc.item["classification"]),
+                              routing={**routing, "attempts": exc.attempts},
+                              elapsed_sec=time.perf_counter() - started)
+    except Exception as exc:  # noqa: BLE001 - 분류 단계 실패
         return error_response(500, "classification_failed", "문서 분류에 실패했습니다.",
                               detail=type(exc).__name__)
+    used = result.get("used_target", body.target)
+    attempts = result.get("attempts", [{"target": used, "status": result["generation"]["status"],
+                                        "error": result["generation"]["error"]}])
+    routing = {**routing, "used_target": used, "fallback_used": len(attempts) > 1,
+               "attempts": attempts}
     classification = classification_view(result["classification"])
     generation = result["generation"]
     failure = generation_failure(generation)
-    view = generation_view(generation, target)
+    view = generation_view(generation, used)
     if failure:
         status, code, message = failure
         # 실패해도 분류 결과와 실패한 호출의 기록은 돌려준다.
         return error_response(status, code, message, classification=classification,
+                              routing=routing,
                               generation={**view, "error": generation["error"],
                                           "error_message": generation["error_message"]},
                               elapsed_sec=time.perf_counter() - started)
     warnings = (["분류 확신도가 낮습니다. 요약 형식이 문서와 맞는지 확인하세요."]
                 if classification["low_confidence"] else [])
-    if request.app.state.default_status == "provisional" and body.target is None:
+    if routing["fallback_used"]:
+        warnings.append(f"{attempts[0]['target']}이(가) 응답하지 않아 {used}(으)로 처리했습니다.")
+    if state.default_status == "provisional" and not body.target and not body.confidential             and used == state.default_target:
         warnings.append("기본 생성 모델은 사람 채점 전 잠정 선택입니다.")
     return {"classification": classification, "prompt_version": result["prompt_version"],
-            "generation": view, "warnings": warnings,
+            "routing": routing, "generation": view, "warnings": warnings,
             "elapsed_sec": time.perf_counter() - started}
 
 
