@@ -1,0 +1,157 @@
+{
+  "measured_at": "2026-10-12T17:14:44+09:00",
+  "classifier": {
+    "dataset": "documents",
+    "learner": "learner_park",
+    "run_name": "20261011-210721_roberta_lr1e-5_s42",
+    "kind": "transformer",
+    "device": "cpu"
+  },
+  "classifier_device": "cpu",
+  "baseline": {
+    "stage": "baseline (로컬 모델 없음, 분류기 전)",
+    "process_rss_mb": 692.421875,
+    "system_ram_used_mb": 15429.3203125,
+    "system_ram_total_mb": 32189.3671875,
+    "gpu_used_mb": 111.0,
+    "gpu_total_mb": 8151.0
+  },
+  "classifier_loaded": {
+    "stage": "classifier_loaded_and_used",
+    "process_rss_mb": 1057.8515625,
+    "system_ram_used_mb": 15794.25390625,
+    "system_ram_total_mb": 32189.3671875,
+    "gpu_used_mb": 111.0,
+    "gpu_total_mb": 8151.0
+  },
+  "classifier_rss_mb": 365.4296875,
+  "documents": 6,
+  "targets": [
+    {
+      "target": "qwen2.5-7b",
+      "model": "qwen2.5:7b",
+      "stages": [
+        {
+          "stage": "before_load",
+          "process_rss_mb": 1058.78125,
+          "system_ram_used_mb": 15799.44140625,
+          "system_ram_total_mb": 32189.3671875,
+          "gpu_used_mb": 111.0,
+          "gpu_total_mb": 8151.0
+        },
+        {
+          "stage": "after_first_request",
+          "process_rss_mb": 1063.8984375,
+          "system_ram_used_mb": 16548.04296875,
+          "system_ram_total_mb": 32189.3671875,
+          "gpu_used_mb": 4770.0,
+          "gpu_total_mb": 8151.0,
+          "ollama_model_mb": 4528.099998474121,
+          "ollama_vram_mb": 4528.099998474121,
+          "first_request_sec": 4.837430300191045,
+          "load_time_sec": 2.4908151
+        },
+        {
+          "stage": "after_requests",
+          "process_rss_mb": 1068.8046875,
+          "system_ram_used_mb": 16620.58984375,
+          "system_ram_total_mb": 32189.3671875,
+          "gpu_used_mb": 4770.0,
+          "gpu_total_mb": 8151.0
+        }
+      ],
+      "requests": [
+        {
+          "end_to_end_sec": 2.204384599812329,
+          "generation_sec": 2.1759954998269677,
+          "status": "SUCCESS"
+        },
+        {
+          "end_to_end_sec": 2.004820399917662,
+          "generation_sec": 1.9583680001087487,
+          "status": "SUCCESS"
+        },
+        {
+          "end_to_end_sec": 1.9523133002221584,
+          "generation_sec": 1.9025131999514997,
+          "status": "SUCCESS"
+        },
+        {
+          "end_to_end_sec": 2.08550909999758,
+          "generation_sec": 2.03546079993248,
+          "status": "SUCCESS"
+        },
+        {
+          "end_to_end_sec": 1.9027941999956965,
+          "generation_sec": 1.8517831000499427,
+          "status": "SUCCESS"
+        }
+      ],
+      "end_to_end_mean_sec": 2.029964319989085,
+      "classification_overhead_mean_sec": 0.045140200015157464
+    },
+    {
+      "target": "qwen3-4b",
+      "model": "qwen3:4b-instruct-2507-q4_K_M",
+      "stages": [
+        {
+          "stage": "before_load",
+          "process_rss_mb": 1068.94921875,
+          "system_ram_used_mb": 15816.98046875,
+          "system_ram_total_mb": 32189.3671875,
+          "gpu_used_mb": 111.0,
+          "gpu_total_mb": 8151.0
+        },
+        {
+          "stage": "after_first_request",
+          "process_rss_mb": 1071.00390625,
+          "system_ram_used_mb": 16570.53515625,
+          "system_ram_total_mb": 32189.3671875,
+          "gpu_used_mb": 3264.0,
+          "gpu_total_mb": 8151.0,
+          "ollama_model_mb": 3030.9199991226196,
+          "ollama_vram_mb": 3030.9199991226196,
+          "first_request_sec": 3.610479800030589,
+          "load_time_sec": 1.9342196
+        },
+        {
+          "stage": "after_requests",
+          "process_rss_mb": 1071.5234375,
+          "system_ram_used_mb": 16716.90625,
+          "system_ram_total_mb": 32189.3671875,
+          "gpu_used_mb": 3264.0,
+          "gpu_total_mb": 8151.0
+        }
+      ],
+      "requests": [
+        {
+          "end_to_end_sec": 1.6003943998366594,
+          "generation_sec": 1.5514339003711939,
+          "status": "SUCCESS"
+        },
+        {
+          "end_to_end_sec": 1.5564136998727918,
+          "generation_sec": 1.5118201998993754,
+          "status": "SUCCESS"
+        },
+        {
+          "end_to_end_sec": 1.2578961001709104,
+          "generation_sec": 1.2071589999832213,
+          "status": "SUCCESS"
+        },
+        {
+          "end_to_end_sec": 1.535035400185734,
+          "generation_sec": 1.5045801997184753,
+          "status": "SUCCESS"
+        },
+        {
+          "end_to_end_sec": 1.4280916000716388,
+          "generation_sec": 1.3832020000554621,
+          "status": "SUCCESS"
+        }
+      ],
+      "end_to_end_mean_sec": 1.4755662400275469,
+      "classification_overhead_mean_sec": 0.043927180022001265
+    }
+  ]
+}

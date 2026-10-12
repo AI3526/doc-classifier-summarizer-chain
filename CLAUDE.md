@@ -35,7 +35,7 @@
 | 8 | `step08_connect_chain.py` | 분류 → 정책 → 프롬프트 LangChain 체인 |
 | 9 | `step09_compare.py` | 같은 입력으로 생성 모델 비교 기록 (openai 포함 시 **요금 발생**) |
 | 9b | `step09b_score.py` | 요약 품질 채점: `judge`(LLM, **요금 발생**) / `sheet`(사람 시트) / `aggregate`(집계) / `select`(생성 모델 선택) |
-| 10 | `step10_serve_api.py` | FastAPI (`/health`, `/generate`, `/compare`) |
+| 10 | `step10_serve_api.py` | FastAPI (`/health`, `/classify`, `/summarize`(=`/generate`), `/compare`). 기본 생성 모델은 `selection/generation_selected.json`(dummy 제외) |
 | 11 | `step11_evaluate_final.py` | 고정된 분류기로 test 1회 평가 |
 
 `scripts/verify_learning.py`, `scripts/verify_service.py`는 학습·비교 기록 검수용, `scripts/build_datasets.py`는 데이터 생성 원본(수정하지 않음).
@@ -115,16 +115,22 @@ artifacts/{dataset}/
 - **주 지표 = 사용 가능률**(자동화 기준): 형식 정상 + 환각 없음 + 수치 오류 없음 + 외국어 없음 + 핵심 포함률 ≥ 0.67 + **칸 오류 없음**. 보조: 읽기용 사용 가능률(칸 오류 제외), 칸 정확도·자주 틀리는 칸, 핵심 포함률, 환각률
 - 100점 감점 점수(발표용, 선택에 안 씀): 환각·수치·칸 오류 각 −20, 핵심 누락 개당 −8/부분 −4 최대 −20, 외국어·어색 각 −10 (최대 합계 100)
 - `judge`: `JUDGE_TARGET`(openai, temperature 0). 같은 채점 기준 버전으로 끝난 응답만 건너뜀 → 버전이 바뀌면 다시 채점. `judge.jsonl`에 버전별로 쌓이고 `quality_llm.json`은 현재 버전만
-- `sheet`: 최종 비교 반복 1회분에서 모델×유형별 균등 36건(seed 2026), 4명 블라인드 시트. 칸 판정은 `checked_fields`(미리 채움) 중 틀린 칸을 `wrong_fields`에 쉼표로
-- `aggregate`: 항목별·칸별 다수결(동률은 보수적으로), Fleiss' kappa, LLM vs 사람 일치율·Cohen's kappa·PABAK·감점 점수 상관 → `quality_human.json`. `llm_trust_decision`: 사용 가능 판정 kappa ≥ 0.7(한쪽 판정 85% 초과면 PABAK ≥ 0.7)이면 LLM 채점 144건, 아니면 사람 다수결 36건 우선
+- `sheet`: 최종 비교 반복 1회분에서 모델×유형별 균등 36건(seed 2026), 블라인드 시트 4개(`HUMAN_RATERS`). 실제로는 사용자 혼자 채점 → 시트 간 일치도는 채점자 내 일관성으로 해석 칸 판정은 `checked_fields`(미리 채움) 중 틀린 칸을 `wrong_fields`에 쉼표로
+- `aggregate`: 시트 1개 이상이면 동작. 항목별·칸별 다수결(동률은 보수적으로), 시트 간 Fleiss' kappa·PABAK(`rater_pabak`), LLM vs 사람 일치율·Cohen's kappa·PABAK·감점 점수 상관 → `quality_human.json`. `llm_trust_decision`: 사용 가능 판정 kappa ≥ 0.7(한쪽 판정 85% 초과면 PABAK ≥ 0.7)이면 LLM 채점 144건, 아니면 사람 판정 36건 우선
 - `select`: 로컬 우선 + 품질 하한(상용 대비 사용 가능률 차이 ≤ 0.10, 환각률 차이 ≤ 0.10) → `generation_selected.json`(비교 폴더와 `selection/`). status: final / provisional / dummy
 - **가상 채점**: `scripts/make_dummy_human_sheets.py` → `human_dummy/`, `aggregate --dummy`, `select --dummy`. 보고서·README에 반드시 "가상 채점(미리보기용)" 표시. 실제 시트 `human/`은 건드리지 않음
+
+## 서비스 (step10, `scripts/api_examples.py`, `scripts/measure_service_memory.py`)
+- `/summarize`는 `create_service_chain`(분류→정책→생성) 하나를 호출. 실패 매핑: 입력 오류 422 `invalid_request`, 연결 실패 503 `generation_unavailable`, 시간 초과 504 `generation_timeout`, 기타 502 `generation_failed`, 형식 불일치 502 `invalid_output`. 실패해도 분류 결과와 실패 기록을 돌려준다. 확신도 < 0.6이면 경고
+- `api_examples.py`: TestClient로 정상 4 + 잘못된 입력 4 + 호출 실패 2(Ollama 주소를 닫힌 포트로, 시간 제한 0.001초) 실행 → `artifacts/{dataset}/service/api_examples/`, `reports/generated/api_examples.md` (openai 1건 요금 소액)
+- `measure_service_memory.py`: 분류기(CPU) RAM은 한 번 분류한 뒤 측정(메모리 매핑 때문), 로컬 LLM VRAM은 `/api/ps`, GPU 전체는 nvidia-smi → `service/memory.json`, `reports/generated/service_memory.md`
 
 ## 진행 상태 / 알려진 문제
 - [완료] 0단계 기반 정리, 1단계 분류(29회 파인튜닝, 선정 klue/roberta-base lr 1e-5)
 - [진행] 생성 개발 비교: v2(프롬프트만) → 칸 구분 오류·형식 문제 → v5(칸 규칙 + 퓨샷 + null + 구조화 출력) → v6(회의록 우선순위, 맞는 칸 없으면 summary). 채점 기준 v3로 재채점. 기록은 `reports/experiment_log_generation.md`
 - eval 최종 비교: v6 개발 비교 상위 로컬 2개 + gpt-6-luna로 진행 예정. **v4로 한 번 실행한 eval 결과(`20261011-230905_eval_final`)가 남아 있음** → 보고서 한계 절에 "eval을 한 번 본 뒤 프롬프트를 바꿔 다시 비교했다"고 한 줄 적는다(삭제·은폐하지 않음)
-- 분류 test 평가(step11), 심화 데이터(documents_advanced) 실험, 서비스 시연 남음
+- [완료] 서비스 마무리: API 엔드포인트·오류 처리, 요청 예시 10건, 동시 실행 메모리(분류기 365MB CPU + qwen2.5 4.5GB VRAM)
+- 남은 일: 사람 블라인드 채점(36건 × 시트 4개, 혼자 채점) → `aggregate` → `select`, 심화 데이터(documents_advanced) 실험, 분류 test 평가(step11, 심화 실험 뒤)
 - 모든 작업이 끝나면 선정 실행을 뺀 분류 체크포인트를 정리(약 12GB)
 - `data/manifest.json` 해시는 이전 데이터 버전 기준 → `verify_learning.py`는 일치 여부만 기록
 - `tests/` 폴더 아직 없음 (pytest testpaths = `tests`)

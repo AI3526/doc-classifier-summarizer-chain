@@ -1,0 +1,27 @@
+{
+  "name": "health",
+  "kind": "정상",
+  "request": {
+    "method": "GET",
+    "path": "/health",
+    "json": null
+  },
+  "status_code": 200,
+  "response": {
+    "status": "ok",
+    "classifier": {
+      "dataset": "documents",
+      "learner": "learner_park",
+      "run_name": "20261011-210721_roberta_lr1e-5_s42",
+      "kind": "transformer",
+      "device": "cpu"
+    },
+    "default_target": "openai",
+    "default_target_status": "provisional",
+    "structured_output": true,
+    "ollama_reachable": true,
+    "openai_key_configured": true
+  },
+  "note": "",
+  "recorded_at": "2026-10-12T17:14:57+09:00"
+}

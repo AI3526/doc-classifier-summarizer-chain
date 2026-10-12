@@ -106,7 +106,7 @@ v2는 칸 규칙을 알려 주지 않은 프롬프트라 칸 판정 기준에서
 
 ### 4.4 사람 채점과 선택
 
-- 사람 채점 시트(블라인드 36건 × 4명): `human/` (아직 비어 있음)
+- 사람 채점 시트(블라인드 36건 × 4개 시트): `human/human_sheet_rater1~4.csv` (아직 비어 있음)
 - 미리보기용 가상 채점: `human_dummy/`, `quality_human_dummy.json` (`scripts/make_dummy_human_sheets.py`가 LLM 판정에 무작위 변형을 더해 생성, **실제 결과 아님**)
 - **잠정 선택(LLM 채점 기준): gpt-6-luna** (`generation_selected.json`, status `provisional`)
   - qwen2.5-7b: 사용 가능률 차이 0.167(하한 0.10 미달), 환각률은 gpt-6-luna보다 0.042 낮음

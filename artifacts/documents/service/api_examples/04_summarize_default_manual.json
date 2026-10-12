@@ -1,0 +1,59 @@
+{
+  "name": "summarize_default_manual",
+  "kind": "정상",
+  "request": {
+    "method": "POST",
+    "path": "/summarize",
+    "json": {
+      "text": "음성 안내 파일의 재생 속도를 바꾸려면 재생을 멈추고 설정 창에서 속도를 선택합니다. 짧은 미리듣기로 발음이 들리는지 확인한 뒤 저장합니다. 알아듣기 어려우면 기본 속도로 되돌립니다."
+    }
+  },
+  "status_code": 200,
+  "response": {
+    "classification": {
+      "label": "manual",
+      "confidence": 0.9762439131736755,
+      "truncated": false,
+      "model": {
+        "dataset": "documents",
+        "learner": "learner_park",
+        "run_name": "20261011-210721_roberta_lr1e-5_s42",
+        "kind": "transformer",
+        "device": "cpu"
+      },
+      "low_confidence": false
+    },
+    "prompt_version": "document_summary_v6",
+    "generation": {
+      "target": "openai",
+      "provider": "openai",
+      "model": "gpt-6-luna",
+      "status": "SUCCESS",
+      "summary": {
+        "summary": "음성 안내 파일의 재생 속도를 바꾸는 절차다.",
+        "prerequisites": [
+          "재생을 멈춘다."
+        ],
+        "steps": [
+          "설정 창에서 속도를 선택한다.",
+          "짧은 미리듣기로 발음이 들리는지 확인한다.",
+          "저장한다.",
+          "알아듣기 어려우면 기본 속도로 되돌린다."
+        ],
+        "cautions": []
+      },
+      "format_valid": true,
+      "latency_sec": 2.4166920999996364,
+      "ttft_sec": 1.7667813999578357,
+      "prompt_tokens": 859,
+      "completion_tokens": 93,
+      "api_cost_usd": 0.0001324
+    },
+    "warnings": [
+      "기본 생성 모델은 사람 채점 전 잠정 선택입니다."
+    ],
+    "elapsed_sec": 2.4417437999509275
+  },
+  "note": "target 생략 → 기본 생성 모델(선택 결과 파일)",
+  "recorded_at": "2026-10-12T17:15:06+09:00"
+}

@@ -1,0 +1,59 @@
+{
+  "name": "summarize_local_minutes",
+  "kind": "정상",
+  "request": {
+    "method": "POST",
+    "path": "/summarize",
+    "json": {
+      "text": "공용 라운지 조명의 자동 소등이 대화를 끊는다는 의견이 나왔다. 상시 점등 제안은 전력 사용을 더 살핀 뒤 결정하기로 했다. 우선 시설 담당이 소등 전 알림을 시험하고 이용자 반응을 모으기로 합의했다.",
+      "target": "qwen2.5-7b"
+    }
+  },
+  "status_code": 200,
+  "response": {
+    "classification": {
+      "label": "minutes",
+      "confidence": 0.9751806259155273,
+      "truncated": false,
+      "model": {
+        "dataset": "documents",
+        "learner": "learner_park",
+        "run_name": "20261011-210721_roberta_lr1e-5_s42",
+        "kind": "transformer",
+        "device": "cpu"
+      },
+      "low_confidence": false
+    },
+    "prompt_version": "document_summary_v6",
+    "generation": {
+      "target": "qwen2.5-7b",
+      "provider": "ollama",
+      "model": "qwen2.5:7b",
+      "status": "SUCCESS",
+      "summary": {
+        "summary": "공용 라운지 조명의 자동 소등이 대화를 끊는다는 의견이 나왔고, 상시 점등 제안은 전력 사용을 더 살펴보기로 했다. 우선 시설 담당이 소등 전 알림을 시험하고 이용자 반응을 모으기로 했다.",
+        "discussion": [
+          "공용 라운지 조명의 자동 소등이 대화를 끊는다는 의견"
+        ],
+        "decisions": [
+          "상시 점등 제안은 전력 사용을 더 살핀 뒤 결정한다.",
+          "소등 전 알림을 시험하고 이용자 반응을 모은다."
+        ],
+        "owners": [
+          "시설 담당: 소등 전 알림 시험 및 이용자 반응 모음 (마감 미기재)"
+        ],
+        "follow_ups": []
+      },
+      "format_valid": true,
+      "latency_sec": 6.15505910012871,
+      "ttft_sec": 3.220548799727112,
+      "prompt_tokens": 1081,
+      "completion_tokens": 199,
+      "api_cost_usd": 0.0
+    },
+    "warnings": [],
+    "elapsed_sec": 6.197776800021529
+  },
+  "note": "로컬 모델 지정",
+  "recorded_at": "2026-10-12T17:15:04+09:00"
+}

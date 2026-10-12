@@ -1,0 +1,32 @@
+{
+  "name": "classify_announcement",
+  "kind": "정상",
+  "request": {
+    "method": "POST",
+    "path": "/classify",
+    "json": {
+      "text": "기록 보관함 열쇠의 반납 창구를 다음 달부터 안내실로 변경합니다. 처음 열쇠를 받는 곳은 기존 자료실입니다. 야간 반납은 받지 않으므로 안내실 운영 시간에 방문해 주세요."
+    }
+  },
+  "status_code": 200,
+  "response": {
+    "classification": {
+      "label": "announcement",
+      "confidence": 0.972260057926178,
+      "truncated": false,
+      "model": {
+        "dataset": "documents",
+        "learner": "learner_park",
+        "run_name": "20261011-210721_roberta_lr1e-5_s42",
+        "kind": "transformer",
+        "device": "cpu"
+      },
+      "low_confidence": false
+    },
+    "policy": "공지는 대상, 일정, 대상자가 할 일, 달라진 점을 중심으로 요약한다. 문서에 없는 날짜나 주관자, 확정 사항은 만들지 않는다.",
+    "warnings": [],
+    "elapsed_sec": 0.09845370007678866
+  },
+  "note": "",
+  "recorded_at": "2026-10-12T17:14:57+09:00"
+}

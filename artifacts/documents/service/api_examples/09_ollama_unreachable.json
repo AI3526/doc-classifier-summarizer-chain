@@ -1,0 +1,50 @@
+{
+  "name": "ollama_unreachable",
+  "kind": "모델 호출 실패",
+  "request": {
+    "method": "POST",
+    "path": "/summarize",
+    "json": {
+      "text": "기록 보관함 열쇠의 반납 창구를 다음 달부터 안내실로 변경합니다. 처음 열쇠를 받는 곳은 기존 자료실입니다. 야간 반납은 받지 않으므로 안내실 운영 시간에 방문해 주세요.",
+      "target": "qwen2.5-7b"
+    }
+  },
+  "status_code": 503,
+  "response": {
+    "error": {
+      "code": "generation_unavailable",
+      "message": "생성 모델에 연결할 수 없습니다."
+    },
+    "classification": {
+      "label": "announcement",
+      "confidence": 0.972260057926178,
+      "truncated": false,
+      "model": {
+        "dataset": "documents",
+        "learner": "learner_park",
+        "run_name": "20261011-210721_roberta_lr1e-5_s42",
+        "kind": "transformer",
+        "device": "cpu"
+      },
+      "low_confidence": false
+    },
+    "generation": {
+      "target": "qwen2.5-7b",
+      "provider": "ollama",
+      "model": "qwen2.5:7b",
+      "status": "ERROR",
+      "summary": null,
+      "format_valid": false,
+      "latency_sec": 2.063833400141448,
+      "ttft_sec": null,
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "api_cost_usd": 0.0,
+      "error": "ConnectError",
+      "error_message": "[WinError 10061] 대상 컴퓨터에서 연결을 거부했으므로 연결하지 못했습니다"
+    },
+    "elapsed_sec": 2.082953200209886
+  },
+  "note": "Ollama 서버에 연결할 수 없는 상황을 재현",
+  "recorded_at": "2026-10-12T17:15:08+09:00"
+}

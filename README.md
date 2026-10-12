@@ -75,8 +75,28 @@ ollama pull qwen2.5:7b      # 비교에 쓰는 로컬 모델: llama3.1:8b, gemma
 | 생성 비교 | `uv run python steps/step09_compare.py --split eval --targets qwen2.5-7b qwen3-4b openai --repeats 2 --structured` | openai 포함 시 **요금 발생** |
 | 품질 채점 | `uv run python steps/step09b_score.py judge` → `sheet` → `aggregate` → `select` | LLM 채점, 사람 채점 시트, 집계, 생성 모델 선택 |
 | API | `uv run python steps/step10_serve_api.py` | `http://127.0.0.1:8000/docs` |
+| API 예시 | `uv run python scripts/api_examples.py` | 정상·잘못된 입력·호출 실패 응답 저장 |
+| 메모리 측정 | `uv run python scripts/measure_service_memory.py` | 분류기 + 로컬 LLM 동시 실행 |
 | test 평가 | `uv run python steps/step11_evaluate_final.py` | 모델을 확정한 뒤 1회만 |
 | 보고서 그림 | `uv run python scripts/build_report.py` | `reports/figures/`, `reports/generated/` |
+
+## API
+
+| 엔드포인트 | 하는 일 |
+|---|---|
+| `GET /health` | 서버·분류기 상태, 기본 생성 모델(잠정/확정), Ollama 연결 |
+| `POST /classify` | 분류만 |
+| `POST /summarize` | 분류 → 유형별 정책 → 생성 → 형식 검사. `target`으로 생성 모델 지정 가능 |
+| `POST /compare` | 같은 입력으로 여러 생성 모델 비교 |
+
+```powershell
+curl -X POST http://127.0.0.1:8000/summarize -H "Content-Type: application/json" `
+  -d '{"text": "다음 주 월요일 오전 10시에 시스템 점검을 진행합니다. 점검 중에는 로그인이 제한됩니다.", "target": "qwen2.5-7b"}'
+```
+
+- 응답: 분류 결과(유형, 확신도), 유형별 요약 JSON, 응답 시간·토큰·비용, 경고(낮은 확신도, 잠정 모델 등)
+- 오류: 잘못된 입력 422 `invalid_request`, 생성 모델 연결 실패 503, 시간 초과 504, 기타 실패·형식 불일치 502. 실패해도 분류 결과와 실패 기록을 함께 돌려줍니다.
+- 분류기는 CPU(약 365MB), 로컬 LLM은 GPU(qwen2.5:7b 4.5GB)에서 실행되어 8GB GPU에서 함께 돌아갑니다. 실제 요청 예시: [API 요청 예시](reports/generated/api_examples.md)
 
 ## 폴더 구조
 
@@ -116,9 +136,3 @@ reports/               보고서, 실험 기록, 평가 기준, 그림
 - 평가 데이터를 이전 프롬프트로 한 번 실행해 결과를 본 뒤 프롬프트를 개선해 다시 비교했습니다(보고서 5.5장).
 - 칸 규칙은 팀이 정한 기준이고 정답 출력이 없습니다. 데이터 문서가 이 칸 구조를 염두에 두고 쓰이지 않아 규칙의 경계에 걸리는 문장이 있습니다.
 - 기본 데이터는 문서가 짧아(약 100자) 긴 문서의 비용·성능 차이는 심화 데이터 실험에서 확인합니다.
-
-## 팀
-
-| 이름 | 역할 |
-|---|---|
-| _작성 예정_ | |

@@ -205,13 +205,15 @@ def write_tables(round1, final, human, is_dummy, selection, path):
             lines.append(f"| {alias} | {t['n']} | {_f(t['usable_rate'])} | {_f(t['coverage_mean'])} "
                          f"| {_f(t['hallucination_rate'])} | {_f(t['deduction_score_mean'], 1)} |")
         lines += ["", f"### 일치도{mark}", "",
-                  "| 항목 | 사람-LLM 일치율 | Cohen's kappa | PABAK | 사람 간 Fleiss' kappa |",
-                  "|---|---|---|---|---|"]
+                  ("| 항목 | 사람-LLM 일치율 | 사람-LLM Cohen's kappa | 사람-LLM PABAK | "
+                   "사람 간 Fleiss' kappa | 사람 간 PABAK |"),
+                  "|---|---|---|---|---|---|"]
         for field, row in agreement["llm_vs_human"].items():
             if not isinstance(row, dict):
                 continue
             lines.append(f"| {field} | {_f(row['agreement'])} | {_f(row['cohen_kappa'])} | "
-                         f"{_f(row['pabak'])} | {_f(agreement['fleiss_kappa'].get(field))} |")
+                         f"{_f(row['pabak'])} | {_f(agreement['fleiss_kappa'].get(field))} | "
+                         f"{_f(agreement.get('rater_pabak', {}).get(field))} |")
         lines += ["", (f"- 감점 점수 상관(피어슨): "
                   f"{_f(agreement['llm_vs_human']['deduction_score_pearson'])}"),
                   (f"- LLM 채점 신뢰 판정: 기준 {trust['criterion']} = {_f(trust['value'])} "

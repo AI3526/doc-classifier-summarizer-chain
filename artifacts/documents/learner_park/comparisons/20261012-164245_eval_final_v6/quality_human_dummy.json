@@ -1286,7 +1286,16 @@
       "numeric_error": 0.1826189078097469,
       "foreign_language": 0.17739694302918055,
       "field_error": 0.3869969040247677,
-      "awkward_sentence": 0.03225806451612827
+      "awkward_sentence": 0.03225806451612827,
+      "usable": 0.14823914823914836
+    },
+    "rater_pabak": {
+      "hallucination": 0.35185185185185186,
+      "numeric_error": 0.7314814814814814,
+      "foreign_language": 0.6574074074074074,
+      "field_error": 0.38888888888888884,
+      "awkward_sentence": 0.537037037037037,
+      "usable": 0.39814814814814814
     },
     "llm_vs_human": {
       "hallucination": {
@@ -1397,5 +1406,5 @@
       "format_fail_rate": 0.0
     }
   },
-  "updated_at": "2026-10-12T16:54:03+09:00"
+  "updated_at": "2026-10-12T17:21:14+09:00"
 }

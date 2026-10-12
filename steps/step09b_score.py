@@ -33,6 +33,7 @@ from common.quality import (
     llm_trust_decision,
     pabak,
     pearson,
+    rater_pabak,
     score_checklist,
     summarize_scores,
 )
@@ -42,6 +43,9 @@ from pydantic import ValidationError
 from step07_call_models import call_model
 
 HUMAN_ITEMS = 36
+# 같은 36건을 4개 시트로 채점해 다수결과 채점자 간 일치도(Fleiss' kappa, PABAK)를 낸다.
+# 한 사람이 여러 시트를 채우면 채점자 간이 아니라 채점자 내 일관성을 재는 것이므로 보고서에 그렇게 적는다.
+# 집계는 채운 시트가 1개 이상이면 동작한다.
 HUMAN_RATERS = 4
 SAMPLE_SEED = 2026
 STATUS_KO = {"포함": "included", "부분": "partial", "누락": "missing"}
@@ -330,11 +334,13 @@ def aggregate(directory, dummy=False):
         problems += issues
         if filled:
             sheets[path.stem.replace("human_sheet_", "")] = filled
-    if len(sheets) < 2:
-        raise ValueError("채운 시트가 2개 이상 있어야 합니다.")
+    if len(sheets) < 1:
+        raise ValueError("채운 시트가 없습니다.")
 
     judgements = latest_judgements(directory) if (directory / "judge.jsonl").exists() else {}
-    items, ties, rater_flags = [], [], {field: [] for field in BINARY_FIELDS}
+    # 시트 간 일치도는 예/아니오 항목과 사용 가능 여부(시트마다 각자 판정)로 계산한다.
+    agreement_fields = (*BINARY_FIELDS, "usable")
+    items, ties, rater_flags = [], [], {field: [] for field in agreement_fields}
     for item_id, experiment_id in key["items"].items():
         record = records[experiment_id]
         expected = (len(record["scoring_reference"]["required_points"]),
@@ -346,11 +352,11 @@ def aggregate(directory, dummy=False):
                 per_rater.append(check)
             else:
                 problems.append(f"{rater} {item_id}: 비어 있거나 rp/fc 칸 수가 맞지 않아 제외")
-        if len(per_rater) < 2:
-            problems.append(f"{item_id}: 유효한 채점이 2개 미만이라 집계에서 제외")
+        if not per_rater:
+            problems.append(f"{item_id}: 유효한 채점이 없어 집계에서 제외")
             continue
         scored = [score_checklist(check, True, False) for check in per_rater]
-        for field in BINARY_FIELDS:
+        for field in agreement_fields:
             rater_flags[field].append([row[field] for row in scored])
         # 체크 항목별 다수결. 동률이면 보수적으로(문제 있음, 부분 포함) 정하고 논의 목록에 남긴다.
         points = []
@@ -388,7 +394,9 @@ def aggregate(directory, dummy=False):
     agreement = {"raters": sorted(sheets), "items": len(items), "ties": ties,
                  "problems": problems,
                  "fleiss_kappa": {field: fleiss_kappa(rater_flags[field])
-                                  for field in BINARY_FIELDS},
+                                  for field in agreement_fields},
+                 "rater_pabak": {field: rater_pabak(rater_flags[field])
+                                 for field in agreement_fields},
                  "llm_vs_human": {}}
     paired = [item for item in items if item["llm"]]
     for field in (*BINARY_FIELDS, "usable"):

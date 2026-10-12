@@ -180,6 +180,23 @@ def llm_trust_decision(human, llm):
             "cohen_kappa": kappa, "pabak": adjusted}
 
 
+def rater_pabak(ratings):
+    """여러 채점자 사이의 PABAK. 예/아니오 판정에서 2 × (짝지은 채점자끼리의 평균 일치율) − 1.
+
+    판정이 한쪽으로 몰려 Fleiss' kappa가 낮게 나올 때 함께 본다.
+    """
+    agreements = []
+    for row in ratings:
+        values = [value for value in row if value is not None]
+        n = len(values)
+        if n < 2:
+            continue
+        pairs = n * (n - 1) / 2
+        same = sum(values.count(label) * (values.count(label) - 1) / 2 for label in set(values))
+        agreements.append(same / pairs)
+    return 2 * statistics.mean(agreements) - 1 if agreements else None
+
+
 def fleiss_kappa(ratings):
     """여러 채점자의 일치도. ratings: 항목마다 채점자들의 판정 목록."""
     items = [[value for value in row if value is not None] for row in ratings]

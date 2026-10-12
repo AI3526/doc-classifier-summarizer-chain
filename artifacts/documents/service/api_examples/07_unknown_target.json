@@ -1,0 +1,27 @@
+{
+  "name": "unknown_target",
+  "kind": "잘못된 입력",
+  "request": {
+    "method": "POST",
+    "path": "/summarize",
+    "json": {
+      "text": "기록 보관함 열쇠의 반납 창구를 다음 달부터 안내실로 변경합니다. 처음 열쇠를 받는 곳은 기존 자료실입니다. 야간 반납은 받지 않으므로 안내실 운영 시간에 방문해 주세요.",
+      "target": "gpt-unknown"
+    }
+  },
+  "status_code": 422,
+  "response": {
+    "error": {
+      "code": "invalid_request",
+      "message": "요청 형식이 올바르지 않습니다. text는 공백이 아닌 1~4000자, target은 qwen3-4b, gemma3-4b, qwen2.5-7b, exaone3.5-7.8b, llama3.1-8b, openai 중 하나여야 합니다."
+    },
+    "detail": [
+      {
+        "field": "target",
+        "reason": "Input should be 'qwen3-4b', 'gemma3-4b', 'qwen2.5-7b', 'exaone3.5-7.8b', 'llama3.1-8b' or 'openai'"
+      }
+    ]
+  },
+  "note": "",
+  "recorded_at": "2026-10-12T17:15:06+09:00"
+}

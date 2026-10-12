@@ -1,0 +1,26 @@
+{
+  "name": "blank_text",
+  "kind": "잘못된 입력",
+  "request": {
+    "method": "POST",
+    "path": "/classify",
+    "json": {
+      "text": "   "
+    }
+  },
+  "status_code": 422,
+  "response": {
+    "error": {
+      "code": "invalid_request",
+      "message": "요청 형식이 올바르지 않습니다. text는 공백이 아닌 1~4000자, target은 qwen3-4b, gemma3-4b, qwen2.5-7b, exaone3.5-7.8b, llama3.1-8b, openai 중 하나여야 합니다."
+    },
+    "detail": [
+      {
+        "field": "text",
+        "reason": "Value error, 공백만 입력할 수 없습니다."
+      }
+    ]
+  },
+  "note": "",
+  "recorded_at": "2026-10-12T17:15:06+09:00"
+}
