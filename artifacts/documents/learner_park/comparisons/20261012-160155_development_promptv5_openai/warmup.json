@@ -1,0 +1,12 @@
+{
+  "openai": {
+    "alias": "openai",
+    "sample_id": "documents-v2-announcement-train-009-v1",
+    "excluded_from_metrics": true,
+    "status": "SUCCESS",
+    "error": null,
+    "error_message": null,
+    "load_time_sec": null,
+    "total_time_sec": 4.404275099746883
+  }
+}

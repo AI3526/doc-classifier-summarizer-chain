@@ -1,0 +1,52 @@
+{
+  "qwen3-4b": {
+    "alias": "qwen3-4b",
+    "sample_id": "documents-v2-announcement-train-009-v1",
+    "excluded_from_metrics": true,
+    "status": "SUCCESS",
+    "error": null,
+    "error_message": null,
+    "load_time_sec": 3.0368416,
+    "total_time_sec": 4.587531100027263
+  },
+  "gemma3-4b": {
+    "alias": "gemma3-4b",
+    "sample_id": "documents-v2-announcement-train-009-v1",
+    "excluded_from_metrics": true,
+    "status": "SUCCESS",
+    "error": null,
+    "error_message": null,
+    "load_time_sec": 3.7770966,
+    "total_time_sec": 5.304328399710357
+  },
+  "qwen2.5-7b": {
+    "alias": "qwen2.5-7b",
+    "sample_id": "documents-v2-announcement-train-009-v1",
+    "excluded_from_metrics": true,
+    "status": "SUCCESS",
+    "error": null,
+    "error_message": null,
+    "load_time_sec": 2.5478632,
+    "total_time_sec": 4.948840300086886
+  },
+  "exaone3.5-7.8b": {
+    "alias": "exaone3.5-7.8b",
+    "sample_id": "documents-v2-announcement-train-009-v1",
+    "excluded_from_metrics": true,
+    "status": "SUCCESS",
+    "error": null,
+    "error_message": null,
+    "load_time_sec": 3.9287817,
+    "total_time_sec": 5.8187926998361945
+  },
+  "llama3.1-8b": {
+    "alias": "llama3.1-8b",
+    "sample_id": "documents-v2-announcement-train-009-v1",
+    "excluded_from_metrics": true,
+    "status": "SUCCESS",
+    "error": null,
+    "error_message": null,
+    "load_time_sec": 4.0072545,
+    "total_time_sec": 6.033875900320709
+  }
+}

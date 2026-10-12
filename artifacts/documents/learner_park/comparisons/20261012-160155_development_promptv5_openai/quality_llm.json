@@ -1,0 +1,29 @@
+{
+  "judge_version": "summary_checklist_v3",
+  "judge_target": "openai",
+  "judged": 15,
+  "judge_errors": 0,
+  "judge_cost_total_usd": 0.0027054,
+  "targets": {
+    "openai": {
+      "n": 15,
+      "usable_rate": 0.6666666666666666,
+      "usable_reading_rate": 0.9333333333333333,
+      "coverage_mean": 0.9777777777777777,
+      "hallucination_rate": 0.0,
+      "numeric_error_rate": 0.0,
+      "foreign_language_rate": 0.0,
+      "field_error_rate": 0.26666666666666666,
+      "field_accuracy_mean": 0.9277777777777778,
+      "wrong_field_counts": {
+        "actions": 1,
+        "prerequisites": 1,
+        "decisions": 2
+      },
+      "awkward_sentence_rate": 0.0,
+      "deduction_score_mean": 94.13333333333334,
+      "format_fail_rate": 0.0
+    }
+  },
+  "updated_at": "2026-10-12T16:25:54+09:00"
+}

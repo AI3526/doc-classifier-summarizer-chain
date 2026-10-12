@@ -61,6 +61,11 @@ def main():
                 if keep_unsupported else ""
             for field in FLAG_COLUMNS:
                 row[field] = "1" if check[field] != (rng.random() < FLAG_FLIP) else "0"
+            # 칸 판정: LLM이 틀렸다고 본 칸을 바탕으로 칸마다 일정 확률로 판정을 뒤집는다.
+            llm_wrong = {item["field"] for item in check.get("field_checks", []) if not item["ok"]}
+            fields = [name.strip() for name in row["checked_fields"].split(",") if name.strip()]
+            wrong = [name for name in fields if (name in llm_wrong) != (rng.random() < FLAG_FLIP)]
+            row["wrong_fields"] = ", ".join(wrong)
             row["notes"] = "가상 채점"
         with path.open("w", encoding="utf-8-sig", newline="") as stream:
             writer = csv.DictWriter(stream, fieldnames=list(rows[0]))

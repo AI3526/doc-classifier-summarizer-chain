@@ -1,35 +1,47 @@
 """요약 품질 지표 계산. 사람 채점과 LLM 채점에 같은 공식을 쓴다.
 
-주 지표는 사용 가능률(그대로 보여 줘도 되는 요약의 비율)이다.
-100점 감점 점수는 같은 체크리스트에서 계산하는 발표용 요약 숫자다.
+주 지표는 사용 가능률(알림·일정·담당 지정처럼 자동화에 그대로 써도 되는 요약의 비율)이다.
+읽기용 사용 가능률은 칸 오류를 빼고 판정한 보조 지표(사람이 읽기만 하는 경우)다.
+100점 감점 점수는 같은 체크리스트에서 계산하는 발표용 요약 숫자이며 모델 선택에는 쓰지 않는다.
 """
 
-import json
 import re
 import statistics
 
-# 사용 가능 기준: 형식 정상, 환각·수치 오류·외국어 없음, 핵심 포함률이 이 값 이상
+# 읽기용 사용 가능: 형식 정상, 환각·수치 오류·외국어 없음, 핵심 포함률이 이 값 이상
+# 사용 가능(주 지표): 읽기용 사용 가능 + 칸 오류 없음
 USABLE_MIN_COVERAGE = 0.67
 POINT_VALUE = {"included": 1.0, "partial": 0.5, "missing": 0.0}
-# 모든 항목이 최대로 감점되면 정확히 100이 되도록 맞췄다(30+20+15+5+5+25).
-DEDUCTIONS = {"hallucination": 30, "numeric_error": 20, "foreign_language": 15,
-              "policy_violation": 5, "awkward_sentence": 5,
-              "missing_point": 8, "partial_point": 4, "coverage_cap": 25}
+# 치명적 오류 4가지(환각, 수치 오류, 칸 오류, 핵심 누락)는 각 20, 읽기 불편 2가지는 각 10.
+# 모든 항목이 최대로 감점되면 정확히 100이 된다(20+20+20+20+10+10).
+DEDUCTIONS = {"hallucination": 20, "numeric_error": 20, "field_error": 20,
+              "foreign_language": 10, "awkward_sentence": 10,
+              "missing_point": 8, "partial_point": 4, "coverage_cap": 20}
 # LLM 채점을 믿고 쓸지 정하는 기준: 사람 다수결과의 사용 가능 판정 일치도.
 # 판정이 한쪽으로 SKEW_RATIO보다 많이 몰리면 kappa가 낮게 나오는 문제가 있어 PABAK으로 판단한다.
 AGREEMENT_THRESHOLD = 0.7
 SKEW_RATIO = 0.85
-BINARY_FIELDS = ("hallucination", "numeric_error", "foreign_language", "policy_violation",
+BINARY_FIELDS = ("hallucination", "numeric_error", "foreign_language", "field_error",
                  "awkward_sentence")
 
 _HAN_OR_KANA = re.compile(r"[぀-ヿ一-鿿]")
 _LATIN_WORD = re.compile(r"[A-Za-z]{2,}")
 
 
+def _strings(value):
+    """요약 값 안의 문자열만 모은다. null(None)은 'null'이라는 영어 단어로 오인하지 않게 뺀다."""
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, dict):
+        value = list(value.values())
+    if isinstance(value, list):
+        return [text for item in value for text in _strings(item)]
+    return []
+
+
 def detect_foreign(summary, source_text):
     """요약 값에 원문에 없는 한자·가나·영문 단어가 있으면 True. JSON 키는 보지 않는다."""
-    values = json.dumps(list(summary.values()) if isinstance(summary, dict) else summary,
-                        ensure_ascii=False)
+    values = " ".join(_strings(summary))
     if any(char not in source_text for char in _HAN_OR_KANA.findall(values)):
         return True
     return any(word.lower() not in source_text.lower() for word in _LATIN_WORD.findall(values))
@@ -38,28 +50,37 @@ def detect_foreign(summary, source_text):
 def score_checklist(checklist, format_ok=True, foreign_auto=False):
     """체크리스트 하나를 지표로 바꾼다. 형식이 깨진 응답은 0점, 사용 불가로 둔다."""
     if not format_ok or checklist is None:
-        return {"format_ok": False, "usable": False, "coverage": 0.0, "hallucination": None,
-                "numeric_error": None, "foreign_language": None, "policy_violation": None,
+        return {"format_ok": False, "usable": False, "usable_reading": False, "coverage": 0.0,
+                "hallucination": None, "numeric_error": None, "foreign_language": None,
+                "field_error": None, "field_accuracy": None, "wrong_fields": [],
                 "awkward_sentence": None, "deduction_score": 0}
     statuses = [item["status"] for item in checklist["required_points"]]
     coverage = (statistics.mean(POINT_VALUE[status] for status in statuses)
                 if statuses else 1.0)
+    if "field_checks" in checklist:
+        checks = checklist["field_checks"]
+        wrong = [item["field"] for item in checks if not item["ok"]]
+        accuracy = (len(checks) - len(wrong)) / len(checks) if checks else 1.0
+    else:  # 채점 기준 v1·v2 기록: 칸별 판정 없이 정책 위반 하나만 있다.
+        wrong = ["(policy_violation)"] if checklist.get("policy_violation") else []
+        accuracy = None
     flags = {
         "hallucination": bool(checklist["unsupported_claims"])
         or any(item["violated"] for item in checklist["forbidden_claims"]),
         "numeric_error": bool(checklist["numeric_error"]),
         "foreign_language": bool(checklist["foreign_language"]) or foreign_auto,
-        "policy_violation": bool(checklist["policy_violation"]),
+        "field_error": bool(wrong),
         "awkward_sentence": bool(checklist["awkward_sentence"]),
     }
     point_penalty = min(DEDUCTIONS["coverage_cap"],
                         DEDUCTIONS["missing_point"] * statuses.count("missing")
                         + DEDUCTIONS["partial_point"] * statuses.count("partial"))
     score = max(0, 100 - point_penalty - sum(DEDUCTIONS[key] for key, on in flags.items() if on))
-    usable = (not flags["hallucination"] and not flags["numeric_error"]
-              and not flags["foreign_language"] and coverage >= USABLE_MIN_COVERAGE)
-    return {"format_ok": True, "usable": usable, "coverage": coverage, **flags,
-            "deduction_score": score}
+    usable_reading = (not flags["hallucination"] and not flags["numeric_error"]
+                      and not flags["foreign_language"] and coverage >= USABLE_MIN_COVERAGE)
+    return {"format_ok": True, "usable": usable_reading and not flags["field_error"],
+            "usable_reading": usable_reading, "coverage": coverage, **flags,
+            "field_accuracy": accuracy, "wrong_fields": wrong, "deduction_score": score}
 
 
 def summarize_scores(rows):
@@ -72,12 +93,21 @@ def summarize_scores(rows):
         values = [row[key] for row in items if row[key] is not None]
         return sum(values) / len(values) if values else None
 
+    accuracies = [row.get("field_accuracy") for row in parsed
+                  if row.get("field_accuracy") is not None]
+    wrong_fields = {}
+    for row in parsed:
+        for field in row.get("wrong_fields", []):
+            wrong_fields[field] = wrong_fields.get(field, 0) + 1
     return {"n": len(rows), "usable_rate": rate("usable", rows),
+            "usable_reading_rate": rate("usable_reading", rows),
             "coverage_mean": statistics.mean(row["coverage"] for row in rows),
             "hallucination_rate": rate("hallucination", parsed),
             "numeric_error_rate": rate("numeric_error", parsed),
             "foreign_language_rate": rate("foreign_language", parsed),
-            "policy_violation_rate": rate("policy_violation", parsed),
+            "field_error_rate": rate("field_error", parsed),
+            "field_accuracy_mean": statistics.mean(accuracies) if accuracies else None,
+            "wrong_field_counts": wrong_fields,
             "awkward_sentence_rate": rate("awkward_sentence", parsed),
             "deduction_score_mean": statistics.mean(row["deduction_score"] for row in rows),
             "format_fail_rate": 1 - len(parsed) / len(rows)}

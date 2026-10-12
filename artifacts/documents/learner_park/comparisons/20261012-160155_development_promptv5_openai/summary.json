@@ -1,0 +1,36 @@
+{
+  "split": "development",
+  "cases": 15,
+  "repeats": 1,
+  "prompt_version": "document_summary_v5",
+  "structured_output": true,
+  "classifier_run": "20261011-210721_roberta_lr1e-5_s42",
+  "misclassified_cases": [],
+  "quality_scored": false,
+  "targets": {
+    "openai": {
+      "model": "gpt-6-luna",
+      "model_type": "cloud",
+      "calls": 15,
+      "errors": 0,
+      "error_rate": 0.0,
+      "format_valid_strict_rate": 1.0,
+      "format_valid_lenient_rate": 1.0,
+      "generation_complete_rate": 1.0,
+      "latency_mean_sec": 2.5208485199138524,
+      "latency_p50_sec": 2.3403166998177767,
+      "latency_p95_sec": 4.333038300275803,
+      "ttft_mean_sec": 1.6685053466508786,
+      "tokens_per_second_mean": 145.28370845754264,
+      "prompt_tokens_mean": 913.8666666666667,
+      "completion_tokens_mean": 121.33333333333333,
+      "vram_mb_max": null,
+      "memory_mb_max": null,
+      "warmup_load_time_sec": null,
+      "api_cost_total_usd": 0.0022808000000000004,
+      "api_cost_per_1000_docs_usd": 0.15205333333333335,
+      "energy_wh_total_estimate": null
+    }
+  },
+  "finished_at": "2026-10-12T16:02:38+09:00"
+}

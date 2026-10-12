@@ -1,0 +1,172 @@
+{
+  "status": "provisional",
+  "quality_source": "llm",
+  "llm_trust_decision": null,
+  "comparison": "20261012-164245_eval_final_v6",
+  "prompt_version": "document_summary_v6",
+  "structured_output": true,
+  "selected": "openai",
+  "model_type": "cloud",
+  "reason": "품질 하한을 만족하는 로컬 모델이 없어 상용 모델 선택",
+  "cloud_reference": "openai",
+  "local_checks": {
+    "qwen2.5-7b": {
+      "usable_gap": 0.16666666666666663,
+      "hallucination_gap": -0.04166666666666667,
+      "passes": false
+    },
+    "qwen3-4b": {
+      "usable_gap": 0.2916666666666667,
+      "hallucination_gap": 0.125,
+      "passes": false
+    }
+  },
+  "rule": {
+    "local_max_usable_gap": 0.1,
+    "local_max_hallucination_gap": 0.1
+  },
+  "targets": {
+    "qwen2.5-7b": {
+      "n": 48,
+      "usable_rate": 0.5833333333333334,
+      "usable_reading_rate": 0.8541666666666666,
+      "coverage_mean": 0.9375,
+      "hallucination_rate": 0.020833333333333332,
+      "numeric_error_rate": 0.0,
+      "foreign_language_rate": 0.020833333333333332,
+      "field_error_rate": 0.4166666666666667,
+      "field_accuracy_mean": 0.875,
+      "wrong_field_counts": {
+        "schedule": 2,
+        "changes": 4,
+        "audience": 2,
+        "actions": 6,
+        "prerequisites": 2,
+        "decisions": 2,
+        "owners": 2,
+        "steps": 1,
+        "follow_ups": 2
+      },
+      "awkward_sentence_rate": 0.0625,
+      "deduction_score_mean": 88.91666666666667,
+      "format_fail_rate": 0.0
+    },
+    "qwen3-4b": {
+      "n": 48,
+      "usable_rate": 0.4583333333333333,
+      "usable_reading_rate": 0.7291666666666666,
+      "coverage_mean": 0.9618055555555556,
+      "hallucination_rate": 0.1875,
+      "numeric_error_rate": 0.0,
+      "foreign_language_rate": 0.0,
+      "field_error_rate": 0.4583333333333333,
+      "field_accuracy_mean": 0.8246527777777778,
+      "wrong_field_counts": {
+        "actions": 7,
+        "changes": 10,
+        "audience": 4,
+        "steps": 3,
+        "prerequisites": 2,
+        "decisions": 1,
+        "follow_ups": 5
+      },
+      "awkward_sentence_rate": 0.041666666666666664,
+      "deduction_score_mean": 85.75,
+      "format_fail_rate": 0.0
+    },
+    "openai": {
+      "n": 48,
+      "usable_rate": 0.75,
+      "usable_reading_rate": 0.9375,
+      "coverage_mean": 0.9930555555555556,
+      "hallucination_rate": 0.0625,
+      "numeric_error_rate": 0.0,
+      "foreign_language_rate": 0.0,
+      "field_error_rate": 0.25,
+      "field_accuracy_mean": 0.9201388888888888,
+      "wrong_field_counts": {
+        "steps": 3,
+        "decisions": 3,
+        "follow_ups": 5,
+        "audience": 1,
+        "actions": 1,
+        "prerequisites": 1
+      },
+      "awkward_sentence_rate": 0.0,
+      "deduction_score_mean": 93.58333333333333,
+      "format_fail_rate": 0.0
+    }
+  },
+  "operations": {
+    "qwen2.5-7b": {
+      "model": "qwen2.5:7b",
+      "model_type": "local",
+      "calls": 48,
+      "errors": 0,
+      "error_rate": 0.0,
+      "format_valid_strict_rate": 1.0,
+      "format_valid_lenient_rate": 1.0,
+      "generation_complete_rate": 1.0,
+      "latency_mean_sec": 2.2147152833349537,
+      "latency_p50_sec": 2.295175400096923,
+      "latency_p95_sec": 3.0443091997876763,
+      "ttft_mean_sec": 0.09798614791361615,
+      "tokens_per_second_mean": 67.5620978689468,
+      "prompt_tokens_mean": 1021.4166666666666,
+      "completion_tokens_mean": 142.72916666666666,
+      "vram_mb_max": 4528.099998474121,
+      "memory_mb_max": 4528.099998474121,
+      "warmup_load_time_sec": 2.4821421,
+      "api_cost_total_usd": 0.0,
+      "api_cost_per_1000_docs_usd": 0.0,
+      "energy_wh_total_estimate": null
+    },
+    "qwen3-4b": {
+      "model": "qwen3:4b-instruct-2507-q4_K_M",
+      "model_type": "local",
+      "calls": 48,
+      "errors": 0,
+      "error_rate": 0.0,
+      "format_valid_strict_rate": 1.0,
+      "format_valid_lenient_rate": 1.0,
+      "generation_complete_rate": 1.0,
+      "latency_mean_sec": 1.7416083145556815,
+      "latency_p50_sec": 1.7807980002835393,
+      "latency_p95_sec": 2.327171899843961,
+      "ttft_mean_sec": 0.09492274374739888,
+      "tokens_per_second_mean": 98.62994150183151,
+      "prompt_tokens_mean": 1000.4166666666666,
+      "completion_tokens_mean": 161.9375,
+      "vram_mb_max": 3030.9199991226196,
+      "memory_mb_max": 3030.9199991226196,
+      "warmup_load_time_sec": 2.7551503,
+      "api_cost_total_usd": 0.0,
+      "api_cost_per_1000_docs_usd": 0.0,
+      "energy_wh_total_estimate": null
+    },
+    "openai": {
+      "model": "gpt-6-luna",
+      "model_type": "cloud",
+      "calls": 48,
+      "errors": 0,
+      "error_rate": 0.0,
+      "format_valid_strict_rate": 1.0,
+      "format_valid_lenient_rate": 1.0,
+      "generation_complete_rate": 1.0,
+      "latency_mean_sec": 2.565114383372323,
+      "latency_p50_sec": 2.349941899999976,
+      "latency_p95_sec": 4.74043030012399,
+      "ttft_mean_sec": 1.5032984312274493,
+      "tokens_per_second_mean": 131.84698282597694,
+      "prompt_tokens_mean": 961.875,
+      "completion_tokens_mean": 126.54166666666667,
+      "vram_mb_max": null,
+      "memory_mb_max": null,
+      "warmup_load_time_sec": null,
+      "api_cost_total_usd": 0.007654,
+      "api_cost_per_1000_docs_usd": 0.15945833333333334,
+      "energy_wh_total_estimate": null
+    }
+  },
+  "selected_at": "2026-10-12T16:54:07+09:00"
+}

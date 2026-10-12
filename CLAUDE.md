@@ -10,7 +10,7 @@
 ## 환경
 - Windows 11, Python 3.12, `uv` 사용 (`uv run python steps/<file>.py`)
 - GPU: RTX 5060 Laptop **8GB VRAM**, RAM 32GB, torch cu128
-- Ollama 설치 모델: `qwen3:4b-instruct-2507-q4_K_M`(기본), `gemma3:4b`, `qwen2.5:7b`, `llama3.1:8b`
+- Ollama 설치 모델: `qwen3:4b-instruct-2507-q4_K_M`, `gemma3:4b`, `qwen2.5:7b`, `exaone3.5:7.8b`, `llama3.1:8b`
 - 비밀값은 `.env`(OPENAI_API_KEY 등). **키 값을 출력하거나 파일·로그에 쓰지 않는다.**
 
 ## 데이터 규칙 (반드시 지킬 것)
@@ -34,7 +34,7 @@
 | 7 | `step07_call_models.py` | Ollama / OpenAI 호출 (**OpenAI는 요금 발생**) |
 | 8 | `step08_connect_chain.py` | 분류 → 정책 → 프롬프트 LangChain 체인 |
 | 9 | `step09_compare.py` | 같은 입력으로 생성 모델 비교 기록 (openai 포함 시 **요금 발생**) |
-| 9b | `step09b_score.py` | 요약 품질 채점: `judge`(LLM, **요금 발생**) / `sheet`(사람 시트) / `aggregate`(집계) |
+| 9b | `step09b_score.py` | 요약 품질 채점: `judge`(LLM, **요금 발생**) / `sheet`(사람 시트) / `aggregate`(집계) / `select`(생성 모델 선택) |
 | 10 | `step10_serve_api.py` | FastAPI (`/health`, `/generate`, `/compare`) |
 | 11 | `step11_evaluate_final.py` | 고정된 분류기로 test 1회 평가 |
 
@@ -71,7 +71,7 @@ artifacts/{dataset}/
 - 실행 이름 형식: `{alias}_lr{lr}_s{seed}`
 
 ## 보고서 (`reports/`)
-- `model_selection_report.md`: 최종 제출용 보고서(그림 + 설명). 단계가 끝날 때마다 해당 장을 채운다(현재 3장 분류까지).
+- `model_selection_report.md`: 최종 제출용 보고서(그림 + 설명). 단계가 끝날 때마다 해당 장을 채운다.
 - `experiment_log_classification.md`: 분류 실험 상세 기록. 생성 실험도 `experiment_log_generation.md`로 같은 형식으로 남긴다.
 - `figures/`, `generated/`: `uv run python scripts/build_report.py`가 실험 JSON에서 자동 생성. 직접 수정하지 않고 스크립트를 고친다.
 - 보고서 수치는 반드시 artifacts의 JSON에서 가져온다. 라이선스 등 외부 정보는 출처를 확인하고 적는다.
@@ -93,39 +93,38 @@ artifacts/{dataset}/
 - ruff line-length 100.
 - 문의(inquiries) 주제는 사용하지 않는다. 연습 키트에서 온 문의 전용 코드는 정리 대상.
 
-## 프롬프트
-- 정책·프롬프트·출력 형식은 `steps/prompts/document_policies.py` 한 곳에 둔다(`POLICIES`, `SCHEMAS`, `build_prompt`, `parse_output`, `PROMPT_VERSION`).
-- 라벨별 출력 JSON: announcement{summary, audience, schedule, actions[], changes} / manual{summary, prerequisites[], steps[], cautions[]} / minutes{summary, discussion[], decisions[], owners[], follow_ups[]}. 없는 정보는 "미기재" 또는 [].
-- `parse_output`: strict(응답 그대로 유효) / lenient(```json 코드 블록만 걷어 내면 유효). 품질 채점은 lenient 결과를 쓴다.
-- 프롬프트를 바꾸면 `PROMPT_VERSION`도 바꾼다. eval 답변을 보고 프롬프트를 고치지 않는다.
+## 프롬프트 (`steps/prompts/`)
+- 정책·칸 규칙·출력 형식·프롬프트는 `document_policies.py` 한 곳에 둔다(`POLICIES`, `FIELD_GUIDES`, `SCHEMAS`, `build_prompt`, `parse_output`, `response_schema`, `PROMPT_VERSION`).
+- 현재 `document_summary_v6`: 칸 규칙 + 유형별 퓨샷 예시 2건(`few_shot_examples.py`, 원문은 train.csv에서 id로 읽음) + 구조화 출력.
+- 라벨별 출력 JSON: announcement{summary, audience|null, schedule|null, actions[], changes|null} / manual{summary, prerequisites[], steps[], cautions[]} / minutes{summary, discussion[], decisions[], owners[], follow_ups[]}. 맞는 칸이 없는 정보는 summary.
+- 칸 규칙 요약: 공지 audience는 문맥상 분명하면 풀어 쓰기, schedule은 미정도 그대로, actions는 대상자 행동만, changes는 실제로 달라진 것(이동·변경·중단·교체·정정)만 / 매뉴얼 prerequisites는 "먼저·~하기 전에·사전에·미리" 표시가 있을 때만(심화 데이터 결과를 보고 칸 유지 여부 재검토) / 회의록은 "하기로 했다"는 모두 decisions(담당자 있으면 owners에도, 겹침 허용), 결정을 미룬 것은 follow_ups 우선.
+- 프롬프트나 예시를 바꾸면 `PROMPT_VERSION`을 올린다. eval(최종 비교) 결과를 본 뒤에는 바꾸지 않는다.
+- 판정 규칙 원문과 근거: `reports/evaluation_rubric.md`.
 
 ## 생성 모델 (`lesson_settings.GENERATION_CANDIDATES`)
-- 로컬(Ollama): `qwen3-4b`, `gemma3-4b`, `qwen2.5-7b`, `exaone3.5-7.8b`, `llama3.1-8b`(한국어 약세 대조군) / 상용: `openai`(**요금 발생**, step09 기본 목록에서 제외)
-- step07: 스트리밍 호출로 TTFT, tokens/s, 토큰 수, Ollama 적재 시간·메모리(`/api/ps`)를 기록. 비용은 `lesson_settings`의 gpt-6-luna Standard 단가(입력 $0.10, 캐시 입력 $0.01, 출력 $0.50 /1M, 272K 초과 시 입력 2배·출력 1.5배, 2026-10-11 확인)와 실측 토큰으로 계산(`openai_cost`, `.env`로 덮어쓰기 가능). 로컬은 API 0 + `LOCAL_POWER_WATTS`로 전력량 추정
-- 준비 호출(warm-up): 모델마다 train 첫 문장으로 1회, `warmup.json`에만 기록하고 요약 지표에서 제외. 적재 시간은 콜드 스타트 지표로 따로 보고
-- step08: `create_chain`(분류→프롬프트), `create_service_chain`(분류→프롬프트→생성), `generate_prepared`(호출+형식 검사)
-- step09: `--split smoke|development|eval --targets ... --repeats N` → `artifacts/{dataset}/{learner}/comparisons/{시각}_{split}/`(config, warmup, results.jsonl, summary.json/md). 모델별로 준비 호출 후 측정, 끝나면 언로드. 기록은 needtocheck의 GEN 형식
-- 검수: `uv run python scripts/verify_service.py [폴더]` (호출 수, 프롬프트 공유, 채점 기준 비노출, 요약 일치)
+- 로컬(Ollama): `qwen3-4b`, `gemma3-4b`, `qwen2.5-7b`, `exaone3.5-7.8b`, `llama3.1-8b` / 상용: `openai`(gpt-6-luna, **요금 발생**, step09 기본 목록에서 제외)
+- step07: 스트리밍 호출로 TTFT, tokens/s, 토큰 수, Ollama 적재 시간·메모리(`/api/ps`)를 기록. `response_format`을 주면 구조화 출력(Ollama `format`, OpenAI `json_schema` strict). 비용은 gpt-6-luna Standard 단가(입력 $0.10, 캐시 입력 $0.01, 출력 $0.50 /1M, 272K 초과 가산, 2026-10-11 확인)와 실측 토큰으로 계산(`openai_cost`)
+- 준비 호출(warm-up): 모델마다 train 첫 문장으로 1회, `warmup.json`에만 기록하고 요약 지표에서 제외. 적재 시간은 콜드 스타트로 따로 보고
+- step08: `create_chain`(분류→프롬프트), `create_service_chain`(분류→프롬프트→생성), `generate_prepared`(호출+형식 검사). `STRUCTURED_OUTPUT=True`가 서비스 기본값
+- step09: `--split smoke|development|eval --targets ... --repeats N --structured --name` → `artifacts/{dataset}/{learner}/comparisons/{시각}_{split}_{name}/`(config, warmup, results.jsonl, summary.json/md). 모델별 준비 호출 후 측정, 끝나면 언로드
+- 검수: `uv run python scripts/verify_service.py [폴더]` (호출 수, 프롬프트 공유, 채점 기준이 프롬프트 지시문에 없는지, 요약 일치)
 
 ## 요약 품질 채점 (step09b, `common/quality.py`, `prompts/judge_prompt.py`)
-- **기준 원문은 `reports/evaluation_rubric.md`**. 채점 규칙을 바꾸면 이 문서·코드 상수·`JUDGE_VERSION`을 함께 바꾼다(eval 결과를 본 뒤에는 바꾸지 않음)
-- 사람과 LLM이 **같은 체크리스트**를 채움: required_points별 포함/부분/누락, forbidden_claims별 위반, 그 외 근거 없는 주장, 수치·날짜 오류, 외국어 섞임, 정책 위반, 어색한 문장
-- **주 지표 = 사용 가능률**: 형식 정상 + 환각 없음 + 수치 오류 없음 + 외국어 없음 + 핵심 포함률 ≥ 0.67. 함께 보고: 핵심 포함률(포함 1/부분 0.5), 환각률, 100점 감점 점수(환각 −30, 수치 −20, 외국어 −15, 정책 −5, 어색 −5, 누락 −8/부분 −4 최대 −25, 최대 감점 합계 정확히 100). 형식 실패는 0점·사용 불가. 외국어는 자동 탐지(원문에 없는 한자·가나·영문)와 OR
-- `judge`: `JUDGE_TARGET`(openai, 요금 발생, temperature 0)로 전체 응답 채점 → `judge.jsonl`, `quality_llm.json`. 이어서 실행하면 성공한 항목은 건너뜀. OpenAI도 후보라 자기 답변 편향 가능성을 한계로 적음
-- `sheet`: 반복 1회분 중 형식 정상 응답에서 모델×문서 유형별 균등 무작위 36건(seed 2026) → `human/human_sheet_rater1~4.csv`(블라인드, 채점자마다 순서 다름), `human_key.json`(채점 끝날 때까지 열지 않음), `README.md`(채점 안내)
-- `aggregate`: 4명 시트 → 항목별 다수결(동률은 보수적으로 문제 있음/부분, `ties`에 남겨 논의), Fleiss' kappa, LLM vs 사람 다수결 일치율·Cohen's kappa·PABAK·감점 점수 상관 → `quality_human.json`. `llm_trust_decision`: 사용 가능 판정 kappa ≥ 0.7(한쪽 판정이 85% 초과면 PABAK ≥ 0.7)이면 LLM 채점 144건으로, 아니면 사람 다수결 36건 우선으로 모델 비교
-- 채점 전 개발 데이터 3~5건으로 기준 맞추기(평가 데이터로 연습 금지)
-- `select`: 평가 기준 7·8장(로컬 우선 + 품질 하한: 상용 대비 사용 가능률 차이 ≤ 0.10, 환각률 차이 ≤ 0.10)으로 생성 모델 선택 → `generation_selected.json`(비교 폴더와 `selection/`). status: final(실제 사람 채점) / provisional(LLM만) / dummy
-- **가상 채점**: `scripts/make_dummy_human_sheets.py` → `human_dummy/`, `aggregate --dummy` → `quality_human_dummy.json`(is_dummy=true), `select --dummy`. 보고서·README에 반드시 "가상 채점(미리보기용)" 표시. 실제 시트 `human/`은 건드리지 않음
-- 2차 결과(eval_final): LLM 채점 기준 gpt-6-luna 0.81 vs 로컬 0.52 → 잠정 선택 gpt-6-luna. 실제 사람 채점 후 `aggregate` → `select`로 확정
-- 1차 완료(development, 프롬프트 v2→v3→v4, v4+구조화 출력): 기록은 `reports/experiment_log_generation.md`
-- 확정: 프롬프트 `document_summary_v4`, **구조화 출력 사용**(`STRUCTURED_OUTPUT=True`, `step09 --structured`, `prompts.response_schema`)
-- 2차: eval 24건 × 2회 × (llama3.1-8b, qwen2.5-7b, openai), `--structured`. eval 결과를 본 뒤 프롬프트·채점 기준을 바꾸지 않는다
+- **기준 원문은 `reports/evaluation_rubric.md`**. 채점 규칙을 바꾸면 이 문서·코드 상수·`JUDGE_VERSION`을 함께 바꾼다(eval 결과를 본 뒤에는 바꾸지 않음). 현재 `summary_checklist_v3`
+- 사람과 LLM이 **같은 체크리스트**: required_points별 포함/부분/누락, forbidden_claims별 위반, 그 외 근거 없는 주장, 수치·날짜 오류, 외국어 섞임, **칸별 판정**(summary 제외 칸마다 맞음/틀림+이유), 어색한 문장
+- **주 지표 = 사용 가능률**(자동화 기준): 형식 정상 + 환각 없음 + 수치 오류 없음 + 외국어 없음 + 핵심 포함률 ≥ 0.67 + **칸 오류 없음**. 보조: 읽기용 사용 가능률(칸 오류 제외), 칸 정확도·자주 틀리는 칸, 핵심 포함률, 환각률
+- 100점 감점 점수(발표용, 선택에 안 씀): 환각·수치·칸 오류 각 −20, 핵심 누락 개당 −8/부분 −4 최대 −20, 외국어·어색 각 −10 (최대 합계 100)
+- `judge`: `JUDGE_TARGET`(openai, temperature 0). 같은 채점 기준 버전으로 끝난 응답만 건너뜀 → 버전이 바뀌면 다시 채점. `judge.jsonl`에 버전별로 쌓이고 `quality_llm.json`은 현재 버전만
+- `sheet`: 최종 비교 반복 1회분에서 모델×유형별 균등 36건(seed 2026), 4명 블라인드 시트. 칸 판정은 `checked_fields`(미리 채움) 중 틀린 칸을 `wrong_fields`에 쉼표로
+- `aggregate`: 항목별·칸별 다수결(동률은 보수적으로), Fleiss' kappa, LLM vs 사람 일치율·Cohen's kappa·PABAK·감점 점수 상관 → `quality_human.json`. `llm_trust_decision`: 사용 가능 판정 kappa ≥ 0.7(한쪽 판정 85% 초과면 PABAK ≥ 0.7)이면 LLM 채점 144건, 아니면 사람 다수결 36건 우선
+- `select`: 로컬 우선 + 품질 하한(상용 대비 사용 가능률 차이 ≤ 0.10, 환각률 차이 ≤ 0.10) → `generation_selected.json`(비교 폴더와 `selection/`). status: final / provisional / dummy
+- **가상 채점**: `scripts/make_dummy_human_sheets.py` → `human_dummy/`, `aggregate --dummy`, `select --dummy`. 보고서·README에 반드시 "가상 채점(미리보기용)" 표시. 실제 시트 `human/`은 건드리지 않음
 
 ## 진행 상태 / 알려진 문제
-- [완료] 0단계 기반 정리: `.gitignore`(가중치만 제외), `pyproject.toml` 정리·의존성(joblib, matplotlib, psutil), 문의용 코드 제거, 프롬프트 분리
-- [완료] 1단계 분류: step03/04 자원·시간 기록(`experiment.json`)과 CLI, step05 베이스라인 포함 팀 단위 선정, step06 통합 로더, step11 지연·사례 기록, `verify_learning.py` 새 구조 대응
-- `data/manifest.json` 해시는 이전 데이터 버전 기준이라 현재 v2 데이터와 다름 → `verify_learning.py`는 일치 여부만 기록
-- 출력 스키마(answer/next_steps)가 요약에 맞지 않음 → 라벨별 요약 스키마로 교체 예정
-- step09는 ollama 1개 vs openai 고정 → 여러 로컬 모델 비교, 비용 계산, LLM 채점 + 블라인드 사람 채점 추가 예정
+- [완료] 0단계 기반 정리, 1단계 분류(29회 파인튜닝, 선정 klue/roberta-base lr 1e-5)
+- [진행] 생성 개발 비교: v2(프롬프트만) → 칸 구분 오류·형식 문제 → v5(칸 규칙 + 퓨샷 + null + 구조화 출력) → v6(회의록 우선순위, 맞는 칸 없으면 summary). 채점 기준 v3로 재채점. 기록은 `reports/experiment_log_generation.md`
+- eval 최종 비교: v6 개발 비교 상위 로컬 2개 + gpt-6-luna로 진행 예정. **v4로 한 번 실행한 eval 결과(`20261011-230905_eval_final`)가 남아 있음** → 보고서 한계 절에 "eval을 한 번 본 뒤 프롬프트를 바꿔 다시 비교했다"고 한 줄 적는다(삭제·은폐하지 않음)
+- 분류 test 평가(step11), 심화 데이터(documents_advanced) 실험, 서비스 시연 남음
+- 모든 작업이 끝나면 선정 실행을 뺀 분류 체크포인트를 정리(약 12GB)
+- `data/manifest.json` 해시는 이전 데이터 버전 기준 → `verify_learning.py`는 일치 여부만 기록
 - `tests/` 폴더 아직 없음 (pytest testpaths = `tests`)

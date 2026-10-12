@@ -32,9 +32,17 @@ def comparison_runs():
         if not quality:
             continue
         version = summary["prompt_version"].replace("document_summary_", "")
-        runs.append({"dir": directory, "summary": summary, "quality": quality,
-                     "label": version + ("+S" if summary.get("structured_output") else ""),
-                     "split": summary["split"]})
+        label = version + ("+S" if summary.get("structured_output") else "")
+        same = next((run for run in runs if run["split"] == summary["split"] == "development"
+                     and run["label"] == label), None)
+        if same:
+            # 같은 프롬프트로 모델만 나눠 돌린 개발 비교(예: 로컬과 gpt-6-luna)는 한 묶음으로 본다.
+            same["quality"]["targets"].update(quality["targets"])
+            same["summary"]["targets"].update(summary["targets"])
+            same["dirs"].append(directory)
+            continue
+        runs.append({"dir": directory, "dirs": [directory], "summary": summary, "quality": quality,
+                     "label": label, "split": summary["split"]})
     return runs
 
 
@@ -51,13 +59,20 @@ def plot_round1(runs, path):
     labels = [run["label"] for run in runs]
     aliases = ordered({a for run in runs for a in run["quality"]["targets"]})
     fig, axes = plt.subplots(1, 2, figsize=(12, 4.2))
+
+    def series(alias, key):
+        values = [run["quality"]["targets"].get(alias, {}).get(key) for run in runs]
+        return [float("nan") if value is None else value for value in values]
+
     for alias in aliases:
-        usable = [run["quality"]["targets"].get(alias, {}).get("usable_rate") for run in runs]
-        fails = [run["quality"]["targets"].get(alias, {}).get("format_fail_rate") for run in runs]
-        axes[0].plot(labels, usable, marker="o", color=GEN_COLORS.get(alias), label=alias)
-        axes[1].plot(labels, fails, marker="o", color=GEN_COLORS.get(alias), label=alias)
-    axes[0].set(title="Round 1 usable rate by prompt version", ylabel="usable rate", ylim=(0, 1))
-    axes[1].set(title="Round 1 format failure rate", ylabel="format failure rate", ylim=(0, 1))
+        style = {"marker": "s" if alias == "openai" else "o", "color": GEN_COLORS.get(alias),
+                 "linestyle": "--" if alias == "openai" else "-", "label": alias}
+        axes[0].plot(labels, series(alias, "usable_rate"), **style)
+        axes[1].plot(labels, series(alias, "usable_reading_rate"), **style)
+    axes[0].set(title="Development: usable rate (incl. field errors)", ylabel="usable rate",
+                ylim=(0, 1))
+    axes[1].set(title="Development: usable rate for reading (field errors ignored)",
+                ylabel="usable rate (reading)", ylim=(0, 1))
     for axis in axes:
         axis.set_xlabel("prompt version (+S = structured output)")
         axis.grid(alpha=0.3)
@@ -70,8 +85,9 @@ def plot_round1(runs, path):
 def plot_round2_quality(final, human, is_dummy, path):
     targets = final["quality"]["targets"]
     aliases = ordered(targets)
-    metrics = [("usable_rate", "usable"), ("coverage_mean", "coverage"),
-               ("hallucination_rate", "hallucination"), ("policy_violation_rate", "policy viol.")]
+    metrics = [("usable_rate", "usable"), ("usable_reading_rate", "usable (reading)"),
+               ("coverage_mean", "coverage"), ("hallucination_rate", "hallucination"),
+               ("field_error_rate", "field error")]
     fig, axis = plt.subplots(figsize=(10, 4.5))
     width = 0.8 / len(aliases)
     for i, alias in enumerate(aliases):
@@ -87,7 +103,7 @@ def plot_round2_quality(final, human, is_dummy, path):
                          else None)
     axis.set_xticks(range(len(metrics)), [name for _, name in metrics])
     axis.set(ylim=(0, 1.1), ylabel="rate",
-             title="Round 2 (eval) summary quality" + (" — human = DUMMY preview" if is_dummy
+             title="Final comparison (eval) summary quality" + (" — human = DUMMY preview" if is_dummy
                                                        else ""))
     axis.grid(axis="y", alpha=0.3)
     axis.legend(fontsize=8)
@@ -112,8 +128,8 @@ def plot_round2_tradeoff(final, selected, path):
                       xytext=(10, -4), textcoords="offset points", fontsize=8)
     # x축을 0부터 그려 몇백 ms 차이가 과장되어 보이지 않게 한다.
     axis.set_xlim(0, max(ops[a]["latency_mean_sec"] for a in targets) * 1.5)
-    axis.set(xlabel="mean response time (s)", ylabel="usable rate (LLM judge)",
-             title="Round 2: quality vs speed (square = cloud, black edge = selected)",
+    axis.set(xlabel="mean response time (s)", ylabel="usable rate incl. field errors (LLM judge)",
+             title="Final comparison: quality vs speed (square = cloud, black edge = selected)",
              ylim=(0, 1.05))
     axis.grid(alpha=0.3)
     fig.tight_layout()
@@ -132,32 +148,39 @@ def write_tables(round1, final, human, is_dummy, selection, path):
              f"`scripts/build_report.py`가 생성. 생성 시각 {now_iso()}. 직접 수정하지 마세요.", ""]
     if round1:
         aliases = ordered({a for run in round1 for a in run["quality"]["targets"]})
-        lines += ["## 1차 비교 (development 15건): 사용 가능률 / 형식 실패율", "",
+        lines += [("## 개발 비교 (development 15건): 사용 가능률 / 읽기용 사용 가능률 / 칸 정확도 / "
+                   "형식 실패율"), "",
                   "| 모델 | " + " | ".join(run["label"] for run in round1) + " |",
                   "|---|" + "---|" * len(round1)]
         for alias in aliases:
             cells = []
             for run in round1:
                 row = run["quality"]["targets"].get(alias)
-                cells.append(f"{_f(row['usable_rate'], 2)} / {_f(row['format_fail_rate'], 2)}"
-                             if row else "-")
+                cells.append(f"{_f(row['usable_rate'], 2)} / {_f(row.get('usable_reading_rate'), 2)}"
+                             f" / {_f(row.get('field_accuracy_mean'), 2)}"
+                             f" / {_f(row['format_fail_rate'], 2)}" if row else "-")
             lines.append(f"| {alias} | " + " | ".join(cells) + " |")
         lines.append("")
     if final:
         ops, targets = final["summary"]["targets"], final["quality"]["targets"]
         s = final["summary"]
-        lines += [(f"## 2차 비교 (eval {s['cases']}건 × {s['repeats']}회, 프롬프트 "
+        lines += [(f"## 최종 비교 (eval {s['cases']}건 × {s['repeats']}회, 프롬프트 "
                   f"`{s['prompt_version']}`, 구조화 출력 {'사용' if s.get('structured_output') else '미사용'})"),
                   "", "### 품질 (LLM 채점, 전체 응답)", "",
-                  ("| 모델 | 유형 | 사용 가능률 | 핵심 포함률 | 환각률 | 수치 오류 | 외국어 | 정책 위반 | "
-                  "어색한 문장 | 감점 점수 | 형식 실패 |"), "|---|" + "---|" * 10]
+                  ("| 모델 | 유형 | 사용 가능률 | 읽기용 사용 가능률 | 핵심 포함률 | 환각률 | 수치 오류 | "
+                   "칸 오류 | 칸 정확도 | 외국어 | 어색한 문장 | 감점 점수 | 형식 실패 |"),
+                  "|---|" + "---|" * 12]
         for alias in ordered(targets):
             t = targets[alias]
             lines.append(f"| {alias} | {ops[alias]['model_type']} | {_f(t['usable_rate'])} | "
+                         f"{_f(t.get('usable_reading_rate'))} | "
                          f"{_f(t['coverage_mean'])} | {_f(t['hallucination_rate'])} | "
-                         f"{_f(t['numeric_error_rate'])} | {_f(t['foreign_language_rate'])} | "
-                         f"{_f(t['policy_violation_rate'])} | {_f(t['awkward_sentence_rate'])} | "
+                         f"{_f(t['numeric_error_rate'])} | {_f(t.get('field_error_rate'))} | "
+                         f"{_f(t.get('field_accuracy_mean'))} | {_f(t['foreign_language_rate'])} | "
+                         f"{_f(t['awkward_sentence_rate'])} | "
                          f"{_f(t['deduction_score_mean'], 1)} | {_f(t['format_fail_rate'])} |")
+        lines += ["", ("- 사용 가능률: 칸 오류까지 없는 응답의 비율(자동화 기준, 주 지표). "
+                  "읽기용 사용 가능률: 칸 오류를 빼고 판정한 비율(사람이 읽기만 하는 기준)."), ""]
         lines += ["", "### 운영 지표", "",
                   ("| 모델 | 응답 평균(s) | 응답 p95(s) | TTFT(s) | 토큰/s | 입력 토큰 | 출력 토큰 | "
                   "VRAM(MB) | 콜드 스타트(s) | 1,000건 API 비용($) | 오류율 |"), "|---|" + "---|" * 10]

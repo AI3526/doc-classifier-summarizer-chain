@@ -1,0 +1,80 @@
+{
+  "judge_version": "summary_checklist_v3",
+  "judge_target": "openai",
+  "judged": 144,
+  "judge_errors": 0,
+  "judge_cost_total_usd": 0.0245399,
+  "targets": {
+    "qwen2.5-7b": {
+      "n": 48,
+      "usable_rate": 0.5833333333333334,
+      "usable_reading_rate": 0.8541666666666666,
+      "coverage_mean": 0.9375,
+      "hallucination_rate": 0.020833333333333332,
+      "numeric_error_rate": 0.0,
+      "foreign_language_rate": 0.020833333333333332,
+      "field_error_rate": 0.4166666666666667,
+      "field_accuracy_mean": 0.875,
+      "wrong_field_counts": {
+        "schedule": 2,
+        "changes": 4,
+        "audience": 2,
+        "actions": 6,
+        "prerequisites": 2,
+        "decisions": 2,
+        "owners": 2,
+        "steps": 1,
+        "follow_ups": 2
+      },
+      "awkward_sentence_rate": 0.0625,
+      "deduction_score_mean": 88.91666666666667,
+      "format_fail_rate": 0.0
+    },
+    "qwen3-4b": {
+      "n": 48,
+      "usable_rate": 0.4583333333333333,
+      "usable_reading_rate": 0.7291666666666666,
+      "coverage_mean": 0.9618055555555556,
+      "hallucination_rate": 0.1875,
+      "numeric_error_rate": 0.0,
+      "foreign_language_rate": 0.0,
+      "field_error_rate": 0.4583333333333333,
+      "field_accuracy_mean": 0.8246527777777778,
+      "wrong_field_counts": {
+        "actions": 7,
+        "changes": 10,
+        "audience": 4,
+        "steps": 3,
+        "prerequisites": 2,
+        "decisions": 1,
+        "follow_ups": 5
+      },
+      "awkward_sentence_rate": 0.041666666666666664,
+      "deduction_score_mean": 85.75,
+      "format_fail_rate": 0.0
+    },
+    "openai": {
+      "n": 48,
+      "usable_rate": 0.75,
+      "usable_reading_rate": 0.9375,
+      "coverage_mean": 0.9930555555555556,
+      "hallucination_rate": 0.0625,
+      "numeric_error_rate": 0.0,
+      "foreign_language_rate": 0.0,
+      "field_error_rate": 0.25,
+      "field_accuracy_mean": 0.9201388888888888,
+      "wrong_field_counts": {
+        "steps": 3,
+        "decisions": 3,
+        "follow_ups": 5,
+        "audience": 1,
+        "actions": 1,
+        "prerequisites": 1
+      },
+      "awkward_sentence_rate": 0.0,
+      "deduction_score_mean": 93.58333333333333,
+      "format_fail_rate": 0.0
+    }
+  },
+  "updated_at": "2026-10-12T16:53:26+09:00"
+}

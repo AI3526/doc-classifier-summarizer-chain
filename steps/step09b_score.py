@@ -37,7 +37,7 @@ from common.quality import (
     summarize_scores,
 )
 from common.records import now_iso, write_json
-from prompts.judge_prompt import JUDGE_VERSION, Checklist, build_judge_prompt
+from prompts.judge_prompt import JUDGE_VERSION, Checklist, build_judge_prompt, checked_fields
 from pydantic import ValidationError
 from step07_call_models import call_model
 
@@ -45,7 +45,7 @@ HUMAN_ITEMS = 36
 HUMAN_RATERS = 4
 SAMPLE_SEED = 2026
 STATUS_KO = {"포함": "included", "부분": "partial", "누락": "missing"}
-FLAG_COLUMNS = ("numeric_error", "foreign_language", "policy_violation", "awkward_sentence")
+FLAG_COLUMNS = ("numeric_error", "foreign_language", "awkward_sentence")
 _FENCE = re.compile(r"^\s*```(?:json)?\s*(.*?)\s*```\s*$", re.DOTALL)
 
 
@@ -71,7 +71,7 @@ def foreign_auto(record):
 
 # ---------- 1) LLM 채점 ----------
 
-def parse_checklist(text, n_points, n_claims):
+def parse_checklist(text, n_points, n_claims, fields):
     match = _FENCE.match(text or "")
     checklist = Checklist.model_validate_json(match.group(1) if match else text).model_dump()
     if sorted(item["index"] for item in checklist["required_points"]) != list(range(1, n_points + 1)):
@@ -83,6 +83,9 @@ def parse_checklist(text, n_points, n_claims):
     checklist["forbidden_claims"] += [{"index": i, "violated": False}
                                       for i in range(1, n_claims + 1) if i not in claimed]
     checklist["forbidden_claims"].sort(key=lambda item: item["index"])
+    # 칸 판정은 판정 대상 칸마다 정확히 하나씩 있어야 한다. 빠지면 그 응답은 다시 채점한다.
+    if sorted(item["field"] for item in checklist["field_checks"]) != sorted(fields):
+        raise ValueError("칸 판정이 판정 대상 칸과 맞지 않습니다.")
     return checklist
 
 
@@ -101,7 +104,8 @@ def judge_record(record, attempts=2):
         if result["status"] != "SUCCESS":
             continue
         try:
-            checklist = parse_checklist(result["text"], len(points), len(claims))
+            checklist = parse_checklist(result["text"], len(points), len(claims),
+                                        checked_fields(record["input_data"]["predicted_label"]))
             error = None
             break
         except (ValidationError, ValueError) as exc:
@@ -115,10 +119,8 @@ def run_judge(directory):
     if not records[0]["scoring_reference"].get("required_points"):
         raise ValueError("이 비교 입력에는 채점 기준(required_points)이 없습니다.")
     output = directory / "judge.jsonl"
-    done = set()
-    if output.exists():
-        done = {json.loads(line)["experiment_id"] for line in output.open(encoding="utf-8")
-                if line.strip() and json.loads(line)["judge_status"] == "SUCCESS"}
+    # 같은 채점 기준 버전으로 이미 끝난 응답만 건너뛴다. 기준이 바뀌면 다시 채점한다.
+    done = set(latest_judgements(directory, JUDGE_VERSION, finished_only=True))         if output.exists() else set()
     with output.open("a", encoding="utf-8") as stream:
         for index, record in enumerate(records, start=1):
             if record["experiment_id"] in done:
@@ -146,17 +148,28 @@ def run_judge(directory):
     return write_llm_quality(directory)
 
 
-def latest_judgements(directory):
+def latest_judgements(directory, version=None, finished_only=False):
+    """응답별 마지막 채점 결과. version을 주면 그 채점 기준 버전만,
+
+    생략하면 현재 버전(JUDGE_VERSION) 결과가 있으면 그것만, 없으면(예전 비교 폴더) 있는 결과를 쓴다.
+    """
+    all_rows = [json.loads(line) for line in (Path(directory) / "judge.jsonl").open(encoding="utf-8")
+                if line.strip()]
+    if version is None:
+        has_current = any(row.get("judge_version") == JUDGE_VERSION for row in all_rows)
+        version = JUDGE_VERSION if has_current else None
     rows = {}
-    for line in (Path(directory) / "judge.jsonl").open(encoding="utf-8"):
-        if line.strip():
-            row = json.loads(line)
-            rows[row["experiment_id"]] = row  # 같은 응답을 다시 채점했다면 마지막 결과를 쓴다.
+    for row in all_rows:
+        if version and row.get("judge_version", "summary_checklist_v1") != version:
+            continue
+        if finished_only and row["judge_status"] not in ("SUCCESS", "SKIPPED_FORMAT"):
+            continue
+        rows[row["experiment_id"]] = row  # 같은 응답을 다시 채점했다면 마지막 결과를 쓴다.
     return rows
 
 
 def write_llm_quality(directory):
-    rows = latest_judgements(directory)
+    rows = latest_judgements(directory, JUDGE_VERSION)
     scored = [row for row in rows.values() if row["metrics"] is not None]
     by_alias = {}
     for row in scored:
@@ -200,7 +213,8 @@ def make_sheets(directory):
     columns = (["item_id", "document_type", "source_text", "summary", "required_points",
                 "forbidden_claims"] + [f"rp{i}" for i in range(1, n_points + 1)]
                + [f"fc{i}" for i in range(1, n_claims + 1)]
-               + ["unsupported_claims", *FLAG_COLUMNS, "notes"])
+               + ["unsupported_claims", *FLAG_COLUMNS, "checked_fields", "wrong_fields",
+                  "wrong_field_reasons", "notes"])
     sheet_dir = directory / "human"
     sheet_dir.mkdir(exist_ok=True)
     by_id = {row["experiment_id"]: row for row in items}
@@ -223,6 +237,7 @@ def make_sheets(directory):
                                                  enumerate(reference["required_points"], 1)),
                     "forbidden_claims": "\n".join(f"{i}. {c}" for i, c in
                                                   enumerate(reference["forbidden_claims"], 1)),
+                    "checked_fields": ", ".join(checked_fields(row["input_data"]["predicted_label"])),
                 })
     # 정답 대조표는 채점이 끝날 때까지 열지 않는다.
     write_json(sheet_dir / "human_key.json",
@@ -248,7 +263,8 @@ GUIDE = """# 사람 채점 안내
 | unsupported_claims | 문장 인용, 없으면 빈칸 | 금지 주장 외에 원문에 근거가 없는 내용 |
 | numeric_error | 1 / 0 | 수치·날짜·시간·장소·담당자가 원문과 다름 |
 | foreign_language | 1 / 0 | 외국어 문장이나 불필요한 외국어 단어가 섞임(원문의 고유명사·약어 제외) |
-| policy_violation | 1 / 0 | 제안을 결정으로 씀, 원문에 있는 정보를 미기재로 둠, 엉뚱한 칸에 넣음 |
+| wrong_fields | 칸 이름, 쉼표로 구분. 모두 맞으면 빈칸 | checked_fields에 적힌 칸 중 칸 규칙대로 채우지 않은 칸(예: `actions, changes`). 규칙은 `reports/evaluation_rubric.md`의 칸 규칙 표 |
+| wrong_field_reasons | 자유 | 틀린 칸마다 이유 한 줄 |
 | awkward_sentence | 1 / 0 | 문법이 틀리거나 뜻이 잘 통하지 않는 문장 |
 | notes | 자유 | 판단 근거나 애매했던 점 |
 
@@ -281,8 +297,15 @@ def read_sheet(path, n_points, n_claims):
             problems.append(f"{Path(path).name} {item}: 잘못된 값 {exc}")
             continue
         unsupported = [row["unsupported_claims"].strip()] if row["unsupported_claims"].strip() else []
+        fields = [name.strip() for name in row["checked_fields"].split(",") if name.strip()]
+        wrong = {name.strip() for name in row["wrong_fields"].split(",") if name.strip()}
+        if not wrong <= set(fields):
+            problems.append(f"{Path(path).name} {item}: wrong_fields에 판정 대상이 아닌 칸 "
+                            f"{sorted(wrong - set(fields))}")
+            continue
+        field_checks = [{"field": name, "ok": name not in wrong, "reason": ""} for name in fields]
         result[item] = {"required_points": points, "forbidden_claims": claims,
-                        "unsupported_claims": unsupported, **flags}
+                        "unsupported_claims": unsupported, "field_checks": field_checks, **flags}
     return result, problems
 
 
@@ -347,6 +370,14 @@ def aggregate(directory, dummy=False):
             merged[field], tied = majority([c[field] for c in per_rater], True)
             if tied:
                 ties.append(f"{item_id} {field}")
+        # 칸마다 다수결. 동률이면 보수적으로 '틀림'으로 정한다.
+        merged["field_checks"] = []
+        for check in per_rater[0]["field_checks"]:
+            ok, tied = majority([next(c["ok"] for c in rater["field_checks"]
+                                      if c["field"] == check["field"]) for rater in per_rater], False)
+            merged["field_checks"].append({"field": check["field"], "ok": ok, "reason": ""})
+            if tied:
+                ties.append(f"{item_id} field:{check['field']}")
         human = score_checklist(merged, True, foreign_auto(record))
         llm = (judgements.get(experiment_id) or {}).get("metrics")
         items.append({"item_id": item_id, "experiment_id": experiment_id,

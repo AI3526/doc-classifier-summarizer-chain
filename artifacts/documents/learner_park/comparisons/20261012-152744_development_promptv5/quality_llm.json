@@ -1,0 +1,130 @@
+{
+  "judge_version": "summary_checklist_v3",
+  "judge_target": "openai",
+  "judged": 75,
+  "judge_errors": 0,
+  "judge_cost_total_usd": 0.0142256,
+  "targets": {
+    "qwen3-4b": {
+      "n": 15,
+      "usable_rate": 0.4,
+      "usable_reading_rate": 0.6666666666666666,
+      "coverage_mean": 0.8888888888888888,
+      "hallucination_rate": 0.2,
+      "numeric_error_rate": 0.0,
+      "foreign_language_rate": 0.0,
+      "field_error_rate": 0.3333333333333333,
+      "field_accuracy_mean": 0.8388888888888889,
+      "wrong_field_counts": {
+        "changes": 1,
+        "prerequisites": 1,
+        "steps": 1,
+        "decisions": 2,
+        "follow_ups": 3,
+        "owners": 1
+      },
+      "awkward_sentence_rate": 0.0,
+      "deduction_score_mean": 86.66666666666667,
+      "format_fail_rate": 0.0
+    },
+    "gemma3-4b": {
+      "n": 15,
+      "usable_rate": 0.26666666666666666,
+      "usable_reading_rate": 0.6,
+      "coverage_mean": 0.8666666666666667,
+      "hallucination_rate": 0.2,
+      "numeric_error_rate": 0.0,
+      "foreign_language_rate": 0.0,
+      "field_error_rate": 0.6666666666666666,
+      "field_accuracy_mean": 0.7,
+      "wrong_field_counts": {
+        "audience": 1,
+        "actions": 3,
+        "changes": 1,
+        "schedule": 1,
+        "prerequisites": 2,
+        "steps": 1,
+        "decisions": 4,
+        "follow_ups": 3,
+        "owners": 1
+      },
+      "awkward_sentence_rate": 0.06666666666666667,
+      "deduction_score_mean": 78.8,
+      "format_fail_rate": 0.0
+    },
+    "qwen2.5-7b": {
+      "n": 15,
+      "usable_rate": 0.4,
+      "usable_reading_rate": 0.6666666666666666,
+      "coverage_mean": 0.9444444444444444,
+      "hallucination_rate": 0.2,
+      "numeric_error_rate": 0.0,
+      "foreign_language_rate": 0.0,
+      "field_error_rate": 0.5333333333333333,
+      "field_accuracy_mean": 0.7611111111111111,
+      "wrong_field_counts": {
+        "actions": 1,
+        "changes": 2,
+        "schedule": 1,
+        "prerequisites": 2,
+        "steps": 2,
+        "decisions": 2,
+        "owners": 2,
+        "follow_ups": 1
+      },
+      "awkward_sentence_rate": 0.0,
+      "deduction_score_mean": 84,
+      "format_fail_rate": 0.0
+    },
+    "exaone3.5-7.8b": {
+      "n": 15,
+      "usable_rate": 0.2,
+      "usable_reading_rate": 0.3333333333333333,
+      "coverage_mean": 0.8888888888888888,
+      "hallucination_rate": 0.6,
+      "numeric_error_rate": 0.0,
+      "foreign_language_rate": 0.0,
+      "field_error_rate": 0.8,
+      "field_accuracy_mean": 0.7,
+      "wrong_field_counts": {
+        "changes": 1,
+        "schedule": 2,
+        "actions": 1,
+        "cautions": 4,
+        "prerequisites": 1,
+        "steps": 1,
+        "decisions": 3,
+        "follow_ups": 3
+      },
+      "awkward_sentence_rate": 0.0,
+      "deduction_score_mean": 69.33333333333333,
+      "format_fail_rate": 0.0
+    },
+    "llama3.1-8b": {
+      "n": 15,
+      "usable_rate": 0.13333333333333333,
+      "usable_reading_rate": 0.5333333333333333,
+      "coverage_mean": 0.7888888888888889,
+      "hallucination_rate": 0.06666666666666667,
+      "numeric_error_rate": 0.0,
+      "foreign_language_rate": 0.0,
+      "field_error_rate": 0.6666666666666666,
+      "field_accuracy_mean": 0.7111111111111111,
+      "wrong_field_counts": {
+        "actions": 1,
+        "schedule": 1,
+        "steps": 4,
+        "prerequisites": 1,
+        "cautions": 2,
+        "decisions": 2,
+        "follow_ups": 2,
+        "discussion": 1,
+        "owners": 1
+      },
+      "awkward_sentence_rate": 0.0,
+      "deduction_score_mean": 80.26666666666667,
+      "format_fail_rate": 0.0
+    }
+  },
+  "updated_at": "2026-10-12T16:25:24+09:00"
+}
