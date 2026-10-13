@@ -143,6 +143,6 @@ artifacts/{dataset}/
 - [완료] 긴 문서 실험(2026-10-13): 선정 분류기 + 본문 추출 심화 validation 0.917(원문 0.567), 재학습 안 함(60건으로 차이 판별 불가). 심화 생성 평가 v6, 긴 문서 시간·비용, 손익분기(로컬 근거는 비용보다 기밀), prerequisites 칸 유지. 서비스에 본문 추출 반영, 요청 예시 15건
 - [완료] 분류 test(2026-10-13): 기본 선정 0.983 / 기준 0.967, 심화(본문 추출) 선정 0.883 / 기준 0.900. 심화 데이터는 한 group_id에 3개 라벨이라 `check_splits(mixed_group_labels=True)`. step05 재선정 막힘
 - 남은 일: 사람 블라인드 채점(36건 × 시트 4개, 혼자 채점) → `aggregate` → `select`, Docker 배포(`reports/deployment_design.md`)
-- 모든 작업이 끝나면 선정 실행을 뺀 분류 체크포인트를 정리(약 12GB)
+- [완료] 체크포인트 정리(2026-10-13): 선정 실행(roberta_lr1e-5_s42) 가중치만 남기고 28개(약 11GB) 삭제. 지표·기록은 유지. `verify_learning.py`는 지운 실행을 weights_deleted로 기록(전체 검수 기록은 커밋 478c305 이전 이력에 있음)
 - `data/manifest.json` 해시는 이전 데이터 버전 기준 → `verify_learning.py`는 일치 여부만 기록
 - `tests/` 폴더 아직 없음 (pytest testpaths = `tests`)

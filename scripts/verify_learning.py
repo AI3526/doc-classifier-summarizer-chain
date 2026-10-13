@@ -118,8 +118,14 @@ def main():
     report = {"data": check_original_data(DATA_DIR),
               "selection": verify_selection(SELECTION_DIR), "runs": []}
     for candidate in selection["candidates"]:
-        if candidate["kind"] == "transformer" and candidate["weights_available"]:
-            report["runs"].append(verify_run(OUTPUT_ROOT / candidate["run_dir"]))
+        if candidate["kind"] != "transformer" or not candidate["weights_available"]:
+            continue
+        run_dir = OUTPUT_ROOT / candidate["run_dir"]
+        # test 평가 뒤 선정 실행만 남기고 가중치를 정리했다. 지운 실행은 건너뛰고 기록만 남긴다.
+        if not (run_dir / "checkpoint" / "model.safetensors").exists():
+            report["runs"].append({"run_dir": candidate["run_dir"], "status": "weights_deleted"})
+            continue
+        report["runs"].append(verify_run(run_dir))
     target = SELECTION_DIR / "learning_verification.json"
     target.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     print("데이터 원본, 학습 가중치, 선택 기록 검수 완료:", target)
