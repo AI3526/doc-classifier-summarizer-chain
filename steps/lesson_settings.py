@@ -60,6 +60,9 @@ STRUCTURED_OUTPUT = True
 # 생성 모델이 연결 실패·시간 초과면 대체 모델로 넘기되, 기밀 문서는 로컬 모델 사이에서만 넘긴다.
 CONFIDENTIAL_TARGET = "qwen2.5-7b"  # 최종 비교에서 환각이 가장 적고 읽기용 기준을 통과한 로컬 모델
 LOCAL_FALLBACK_TARGET = "qwen3-4b"  # 로컬 모델의 대체(최종 비교의 두 번째 로컬 후보)
+# 긴 문서 전처리: 참고 자료("이전 운영의 보관 자료")를 떼고 이번 본문만 분류·요약한다.
+# 심화 데이터 실험에서 기존 분류기 정확도 0.567 → 0.917, 요약에 참고 자료가 섞이는 문제 해소.
+EXTRACT_BODY = True
 # 요약 품질 LLM 채점 모델. 후보이기도 해서 자기 답변을 후하게 볼 수 있음을 한계로 적는다.
 JUDGE_TARGET = "openai"
 TEMPERATURE = 0.2

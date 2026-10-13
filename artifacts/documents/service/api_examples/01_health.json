@@ -29,10 +29,18 @@
         "qwen3-4b"
       ]
     },
+    "targets": {
+      "qwen3-4b": "ollama",
+      "gemma3-4b": "ollama",
+      "qwen2.5-7b": "ollama",
+      "exaone3.5-7.8b": "ollama",
+      "llama3.1-8b": "ollama",
+      "openai": "openai"
+    },
     "structured_output": true,
     "ollama_reachable": true,
     "openai_key_configured": true
   },
   "note": "",
-  "recorded_at": "2026-10-12T17:32:48+09:00"
+  "recorded_at": "2026-10-13T13:05:47+09:00"
 }

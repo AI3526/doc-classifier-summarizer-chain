@@ -16,7 +16,7 @@
 ## 데이터 규칙 (반드시 지킬 것)
 - 필수 실험은 `data/documents` (train 360 / validation 120 / test 120, 라벨 균형, 텍스트 ~100자).
 - `data/documents_advanced`(평균 ~900자, 최대 1877자)는 **선택 과제**: 긴 문서의 비용·성능 근거용.
-- `test.csv`는 **step11에서만** 읽는다. 모델 선택·튜닝에 test 결과를 쓰지 않는다.
+- `test.csv`는 **step11에서만** 읽는다. 모델 선택·튜닝에 test 결과를 쓰지 않는다. 기본(`--track basic`)과 심화(`--track advanced`)를 각각 1회.
 - 분류 입력은 `text`만 사용. `id`, `group_id`, `source`는 특징에 넣지 않는다.
 - 생성 JSONL의 `expected_label`, `required_points`, `forbidden_claims`, `rubric_note`는 **채점 전용**. 프롬프트나 모델 입력에 넣지 않는다.
 - 서비스의 정책 분기는 정답 라벨이 아니라 **분류기의 실제 예측**을 사용한다.
@@ -31,15 +31,17 @@
 | 4 | `step04_train_classifier.py` | 사전학습 모델 전체 파인튜닝 (GPU). `--model bert roberta --lr 1e-5 2e-5 5e-5 --seed 42` → 모델×학습률×seed 조합을 차례로, 실패해도 계속 |
 | 5 | `step05_select_model.py` | 팀 전체 실행(베이스라인 포함)을 모아 validation 기준 선정 → `selection/` |
 | 6 | `step06_predict.py` | 선정 분류기 로드·단건 예측 (베이스라인/BERT 모두 `load_run`으로) |
+| 6b | `step06b_check_long_documents.py` | 선정 분류기를 재학습 없이 심화 validation에 적용: 원문 vs 본문만 → `artifacts/documents_advanced/transfer/` |
 | 7 | `step07_call_models.py` | Ollama / OpenAI 호출 (**OpenAI는 요금 발생**) |
 | 8 | `step08_connect_chain.py` | 분류 → 정책 → 프롬프트 LangChain 체인 |
 | 9 | `step09_compare.py` | 같은 입력으로 생성 모델 비교 기록 (openai 포함 시 **요금 발생**) |
+| 9c | `step09c_long_documents.py` | 심화 validation 60건으로 긴 문서 시간·토큰·비용(원문 vs 본문만, 품질 채점 없음, openai는 **요금 발생**) |
 | 9b | `step09b_score.py` | 요약 품질 채점: `judge`(LLM, **요금 발생**) / `sheet`(사람 시트) / `aggregate`(집계) / `select`(생성 모델 선택) |
 | 10 | `step10_serve_api.py` | FastAPI (`/health`, `/classify`, `/summarize`(=`/generate`), `/compare`). 기본 생성 모델은 `selection/generation_selected.json`(dummy 제외). 기밀 문서 라우팅·대체 경로 |
 | 화면 | `app/streamlit_app.py` | `uv run streamlit run app/streamlit_app.py` (API 서버를 먼저 띄움). 문서 하나 요약 / CSV 일괄 처리 |
-| 11 | `step11_evaluate_final.py` | 고정된 분류기로 test 1회 평가 |
+| 11 | `step11_evaluate_final.py` | 고정된 분류기로 test 1회 평가. `--track advanced`는 `artifacts/documents_advanced/selection/selected.json`(선정 분류기 + 본문 추출, test 전 고정)으로 심화 test |
 
-`scripts/verify_learning.py`, `scripts/verify_service.py`는 학습·비교 기록 검수용, `scripts/build_datasets.py`는 데이터 생성 원본(수정하지 않음).
+`scripts/break_even.py`는 손익분기(실측 비용·시간 + 서버 가정, 출처 기록), `scripts/build_output_review.py`는 비교 폴더를 원문·칸별 요약·LLM 판정 읽기 문서로(사람 채점 전 폴더는 거부), `scripts/verify_learning.py`, `scripts/verify_service.py`는 학습·비교 기록 검수용, `scripts/build_datasets.py`는 데이터 생성 원본(수정하지 않음).
 
 ## 결과 폴더
 ```
@@ -73,6 +75,8 @@ artifacts/{dataset}/
 
 ## 보고서 (`reports/`)
 - `model_selection_report.md`: 최종 제출용 보고서(그림 + 설명). 단계가 끝날 때마다 해당 장을 채운다.
+- `deployment_design.md`: 사내망 배포 설계(**미구현**, 긴 문서 실험·test 평가 뒤 구현). Docker Compose, 사내 SSO(OIDC)·허가 그룹만 상용 모델, 감사 로그(가명 ID), 기밀 자동 판별(보안 등급→규칙→로컬 LLM, 올리기만), 동시 사용 대응, 가중치는 서버 폴더 읽기 전용 볼륨 + 해시 확인
+- `experiment_log_long_documents.md`: 긴 문서(심화) 실험 기록. 보고서 7장 근거
 - `experiment_log_classification.md`: 분류 실험 상세 기록. 생성 실험도 `experiment_log_generation.md`로 같은 형식으로 남긴다.
 - `figures/`, `generated/`: `uv run python scripts/build_report.py`가 실험 JSON에서 자동 생성. 직접 수정하지 않고 스크립트를 고친다.
 - 보고서 수치는 반드시 artifacts의 JSON에서 가져온다. 라이선스 등 외부 정보는 출처를 확인하고 적는다.
@@ -107,6 +111,7 @@ artifacts/{dataset}/
 - step07: 스트리밍 호출로 TTFT, tokens/s, 토큰 수, Ollama 적재 시간·메모리(`/api/ps`)를 기록. `response_format`을 주면 구조화 출력(Ollama `format`, OpenAI `json_schema` strict). 비용은 gpt-6-luna Standard 단가(입력 $0.10, 캐시 입력 $0.01, 출력 $0.50 /1M, 272K 초과 가산, 2026-10-11 확인)와 실측 토큰으로 계산(`openai_cost`)
 - 준비 호출(warm-up): 모델마다 train 첫 문장으로 1회, `warmup.json`에만 기록하고 요약 지표에서 제외. 적재 시간은 콜드 스타트로 따로 보고
 - step08: `create_chain`(분류→프롬프트), `create_service_chain`(분류→프롬프트→생성), `generate_prepared`(호출+형식 검사), `create_routed_chain`(분류→프롬프트→`RunnableBranch`(기밀?)→`with_fallbacks` 생성). `STRUCTURED_OUTPUT=True`가 서비스 기본값
+- step09: `advanced_development`/`advanced_eval` split은 심화 생성 데이터(헷갈리는 짧은 문서) → `artifacts/documents_advanced/learner_park/comparisons/`
 - step09: `--split smoke|development|eval --targets ... --repeats N --structured --name` → `artifacts/{dataset}/{learner}/comparisons/{시각}_{split}_{name}/`(config, warmup, results.jsonl, summary.json/md). 모델별 준비 호출 후 측정, 끝나면 언로드
 - 검수: `uv run python scripts/verify_service.py [폴더]` (호출 수, 프롬프트 공유, 채점 기준이 프롬프트 지시문에 없는지, 요약 일치)
 
@@ -122,9 +127,10 @@ artifacts/{dataset}/
 - **가상 채점**: `scripts/make_dummy_human_sheets.py` → `human_dummy/`, `aggregate --dummy`, `select --dummy`. 보고서·README에 반드시 "가상 채점(미리보기용)" 표시. 실제 시트 `human/`은 건드리지 않음
 
 ## 서비스 (step10, `scripts/api_examples.py`, `scripts/measure_service_memory.py`)
+- **본문 추출**(`EXTRACT_BODY=True`, `common.preprocess.extract_body`): 체인 첫 단계에서 "이전 운영의 보관 자료" 구간(본문 뒤면 바로 앞 안내 문장 줄부터 끝 표시까지)을 지우고 본문 표시 문구를 뺀다. 표시가 없으면 원문 그대로. 응답 `preprocessing`{body_extracted, original_chars, used_chars} + 경고. 측정용으로 끌 때는 `create_chain(classifier, extract=False)`
 - **하이브리드 라우팅**(`target` 생략 시 `create_routed_chain`): 기밀(`confidential=true`) → `CONFIDENTIAL_TARGET`(qwen2.5-7b) → `LOCAL_FALLBACK_TARGET`(qwen3-4b), 로컬만. 일반 → 기본 생성 모델 → 같은 로컬 순서. **기밀 문서는 절대 상용 모델로 넘기지 않는다**(`routing_plans`가 ollama만 허용). 연결 실패·시간 초과(`RETRYABLE_ERRORS`)만 다음 모델로, 형식 불일치는 넘기지 않음. `with_fallbacks`는 모두 실패하면 첫 예외를 다시 던지므로 시도 기록은 요청별 공유 `attempt_log`에 남긴다. 응답 `routing`{mode, confidential, plan, used_target, fallback_used, attempts}
 - `target`을 지정하면 `create_service_chain`으로 그 모델만. 기밀 + 상용 모델 지정은 422 `confidential_requires_local`. 실패 매핑: 입력 오류 422 `invalid_request`, 연결 실패 503 `generation_unavailable`, 시간 초과 504 `generation_timeout`, 기타 502 `generation_failed`, 형식 불일치 502 `invalid_output`. 실패해도 분류 결과와 실패 기록을 돌려준다. 확신도 < 0.6이면 경고
-- `api_examples.py`: TestClient로 정상 4 + 라우팅 2 + 잘못된 입력 4 + 호출 실패 2(Ollama 주소를 닫힌 포트로, 시간 제한 0.001초) + 대체 경로 2(기밀·로컬 모두 불가 503, API 키를 잠시 지워 상용 실패→로컬 전환) 실행 → `artifacts/{dataset}/service/api_examples/`, `reports/generated/api_examples.md` (openai 1건 요금 소액)
+- `api_examples.py`: TestClient로 정상 4 + 라우팅 2 + 긴 문서 1(심화 validation, 본문 추출) + 잘못된 입력 4 + 호출 실패 2(Ollama 주소를 닫힌 포트로, 시간 제한 0.001초) + 대체 경로 2(기밀·로컬 모두 불가 503, API 키를 잠시 지워 상용 실패→로컬 전환) 실행 → `artifacts/{dataset}/service/api_examples/`, `reports/generated/api_examples.md` (openai 1건 요금 소액)
 - `measure_service_memory.py`: 분류기(CPU) RAM은 한 번 분류한 뒤 측정(메모리 매핑 때문), 로컬 LLM VRAM은 `/api/ps`, GPU 전체는 nvidia-smi → `service/memory.json`, `reports/generated/service_memory.md`
 - 화면 `app/streamlit_app.py`: API만 호출(`SUMMARY_API_URL`, 기본 `http://127.0.0.1:8000`). 탭 ① 문서 하나(예시 불러오기, 기밀 체크, 모델 선택: 자동/직접) ② CSV 일괄(`text` 열 필수, `id` 선택, 진행률, 결과 CSV utf-8-sig). 예시 CSV `data/demo/batch_sample.csv`는 generation_development의 id·text 15건. **test.csv는 화면에도 쓰지 않는다.** Streamlit은 `width="stretch"`(`use_container_width` 폐기 예정). 시험은 `streamlit.testing.v1.AppTest`
 
@@ -133,8 +139,9 @@ artifacts/{dataset}/
 - [진행] 생성 개발 비교: v2(프롬프트만) → 칸 구분 오류·형식 문제 → v5(칸 규칙 + 퓨샷 + null + 구조화 출력) → v6(회의록 우선순위, 맞는 칸 없으면 summary). 채점 기준 v3로 재채점. 기록은 `reports/experiment_log_generation.md`
 - eval 최종 비교: v6 개발 비교 상위 로컬 2개 + gpt-6-luna로 진행 예정. **v4로 한 번 실행한 eval 결과(`20261011-230905_eval_final`)가 남아 있음** → 보고서 한계 절에 "eval을 한 번 본 뒤 프롬프트를 바꿔 다시 비교했다"고 한 줄 적는다(삭제·은폐하지 않음)
 - [완료] 서비스 마무리: API 엔드포인트·오류 처리, 동시 실행 메모리(분류기 365MB CPU + qwen2.5 4.5GB VRAM)
-- [완료] 하이브리드 라우팅(기밀→로컬만, 대체 경로), Streamlit 화면, 요청 예시 14건
-- 남은 일: 사람 블라인드 채점(36건 × 시트 4개, 혼자 채점) → `aggregate` → `select`, 심화 데이터(documents_advanced) 실험, 분류 test 평가(step11, 심화 실험 뒤)
+- [완료] 하이브리드 라우팅(기밀→로컬만, 대체 경로), Streamlit 화면
+- [완료] 긴 문서 실험(2026-10-13): 선정 분류기 + 본문 추출 심화 validation 0.917(원문 0.567), 재학습 안 함(60건으로 차이 판별 불가). 심화 생성 평가 v6, 긴 문서 시간·비용, 손익분기(로컬 근거는 비용보다 기밀), prerequisites 칸 유지. 서비스에 본문 추출 반영, 요청 예시 15건
+- 남은 일: 분류 test 평가(step11 기본·심화 각 1회), 사람 블라인드 채점(36건 × 시트 4개, 혼자 채점) → `aggregate` → `select`, Docker 배포(`reports/deployment_design.md`)
 - 모든 작업이 끝나면 선정 실행을 뺀 분류 체크포인트를 정리(약 12GB)
 - `data/manifest.json` 해시는 이전 데이터 버전 기준 → `verify_learning.py`는 일치 여부만 기록
 - `tests/` 폴더 아직 없음 (pytest testpaths = `tests`)

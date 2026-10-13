@@ -1,0 +1,503 @@
+{
+  "created_at": "2026-10-13T13:01:17+09:00",
+  "inputs": [
+    "artifacts\\documents\\learner_park\\comparisons\\20261012-164245_eval_final_v6\\summary.json",
+    "artifacts\\documents_advanced\\learner_park\\comparisons\\20261013-123937_long_documents\\summary.json"
+  ],
+  "local_target": "qwen2.5-7b",
+  "cloud_target": "openai",
+  "assumptions": {
+    "krw_per_usd": 1400,
+    "electricity_krw_per_kwh": 182,
+    "depreciation_months": 36,
+    "maintenance_rate_per_year": 0.1,
+    "ops_labor_usd_per_month": 1000,
+    "hours_per_month": 720,
+    "servers": {
+      "small": {
+        "name": "RTX 5090 32GB 1장 워크스테이션형 서버",
+        "price_usd": 8000,
+        "power_kw": 0.8,
+        "basis": "완성 워크스테이션 약 $6,000~9,500 (카드 품귀로 출시가보다 높음)"
+      },
+      "medium": {
+        "name": "L40S 48GB 1장 서버",
+        "price_usd": 15000,
+        "power_kw": 0.6,
+        "basis": "카드 약 $7,500, 4장 서버(Dell R760xa) 약 $47,000~49,000 → 1장 서버 추정"
+      },
+      "large": {
+        "name": "H100 80GB PCIe 1장 서버",
+        "price_usd": 40000,
+        "power_kw": 0.7,
+        "basis": "카드 약 $22,000~32,000 + 서버 본체 추정. 7B 모델에는 과한 구성"
+      }
+    },
+    "power_note": "24시간 최대 소비전력으로 계산(상한)",
+    "capacity_note": "노트북 RTX 5060 실측 응답 시간, 한 번에 한 건 처리(보수적)"
+  },
+  "scenarios": {
+    "short": {
+      "label": "짧은 문서(기본 데이터), 평균 약 100자",
+      "cloud_cost_per_doc": 0.00015945833333333334,
+      "local_latency_sec": 2.2147152833349537,
+      "prompt_tokens": 961.875
+    },
+    "raw": {
+      "label": "긴 문서 원문 (참고 자료 포함), 평균 852자",
+      "cloud_cost_per_doc": 0.00025604333333333334,
+      "local_latency_sec": 4.293228053379183,
+      "prompt_tokens": 1380.7666666666667
+    },
+    "body": {
+      "label": "긴 문서 본문만, 평균 280자",
+      "cloud_cost_per_doc": 0.00020391200000000002,
+      "local_latency_sec": 3.7026788733666764,
+      "prompt_tokens": 1060.8666666666666
+    }
+  },
+  "results": [
+    {
+      "server": "small",
+      "with_labor": false,
+      "scenario": "short",
+      "cloud_price_multiplier": 1,
+      "monthly_cost_usd": 363.7688888888889,
+      "power_cost_usd": 74.88,
+      "cloud_cost_per_1000_docs_usd": 0.15945833333333334,
+      "break_even_docs_per_month": 2281278.634265308,
+      "capacity_docs_per_month_laptop": 1170353.5978209013,
+      "servers_needed_at_break_even": 1.9492217040327422
+    },
+    {
+      "server": "small",
+      "with_labor": false,
+      "scenario": "short",
+      "cloud_price_multiplier": 10,
+      "monthly_cost_usd": 363.7688888888889,
+      "power_cost_usd": 74.88,
+      "cloud_cost_per_1000_docs_usd": 1.5945833333333332,
+      "break_even_docs_per_month": 228127.86342653082,
+      "capacity_docs_per_month_laptop": 1170353.5978209013,
+      "servers_needed_at_break_even": 0.19492217040327425
+    },
+    {
+      "server": "small",
+      "with_labor": false,
+      "scenario": "raw",
+      "cloud_price_multiplier": 1,
+      "monthly_cost_usd": 363.7688888888889,
+      "power_cost_usd": 74.88,
+      "cloud_cost_per_1000_docs_usd": 0.25604333333333334,
+      "break_even_docs_per_month": 1420731.7337777026,
+      "capacity_docs_per_month_laptop": 603741.5128599672,
+      "servers_needed_at_break_even": 2.353211935100493
+    },
+    {
+      "server": "small",
+      "with_labor": false,
+      "scenario": "raw",
+      "cloud_price_multiplier": 10,
+      "monthly_cost_usd": 363.7688888888889,
+      "power_cost_usd": 74.88,
+      "cloud_cost_per_1000_docs_usd": 2.560433333333333,
+      "break_even_docs_per_month": 142073.17337777026,
+      "capacity_docs_per_month_laptop": 603741.5128599672,
+      "servers_needed_at_break_even": 0.23532119351004932
+    },
+    {
+      "server": "small",
+      "with_labor": false,
+      "scenario": "body",
+      "cloud_price_multiplier": 1,
+      "monthly_cost_usd": 363.7688888888889,
+      "power_cost_usd": 74.88,
+      "cloud_cost_per_1000_docs_usd": 0.203912,
+      "break_even_docs_per_month": 1783950.3751073447,
+      "capacity_docs_per_month_laptop": 700033.7022592545,
+      "servers_needed_at_break_even": 2.5483778414523623
+    },
+    {
+      "server": "small",
+      "with_labor": false,
+      "scenario": "body",
+      "cloud_price_multiplier": 10,
+      "monthly_cost_usd": 363.7688888888889,
+      "power_cost_usd": 74.88,
+      "cloud_cost_per_1000_docs_usd": 2.03912,
+      "break_even_docs_per_month": 178395.03751073446,
+      "capacity_docs_per_month_laptop": 700033.7022592545,
+      "servers_needed_at_break_even": 0.2548377841452362
+    },
+    {
+      "server": "small",
+      "with_labor": true,
+      "scenario": "short",
+      "cloud_price_multiplier": 1,
+      "monthly_cost_usd": 1363.7688888888888,
+      "power_cost_usd": 74.88,
+      "cloud_cost_per_1000_docs_usd": 0.15945833333333334,
+      "break_even_docs_per_month": 8552509.36329588,
+      "capacity_docs_per_month_laptop": 1170353.5978209013,
+      "servers_needed_at_break_even": 7.307628548517237
+    },
+    {
+      "server": "small",
+      "with_labor": true,
+      "scenario": "short",
+      "cloud_price_multiplier": 10,
+      "monthly_cost_usd": 1363.7688888888888,
+      "power_cost_usd": 74.88,
+      "cloud_cost_per_1000_docs_usd": 1.5945833333333332,
+      "break_even_docs_per_month": 855250.936329588,
+      "capacity_docs_per_month_laptop": 1170353.5978209013,
+      "servers_needed_at_break_even": 0.7307628548517238
+    },
+    {
+      "server": "small",
+      "with_labor": true,
+      "scenario": "raw",
+      "cloud_price_multiplier": 1,
+      "monthly_cost_usd": 1363.7688888888888,
+      "power_cost_usd": 74.88,
+      "cloud_cost_per_1000_docs_usd": 0.25604333333333334,
+      "break_even_docs_per_month": 5326320.631490329,
+      "capacity_docs_per_month_laptop": 603741.5128599672,
+      "servers_needed_at_break_even": 8.822187174539586
+    },
+    {
+      "server": "small",
+      "with_labor": true,
+      "scenario": "raw",
+      "cloud_price_multiplier": 10,
+      "monthly_cost_usd": 1363.7688888888888,
+      "power_cost_usd": 74.88,
+      "cloud_cost_per_1000_docs_usd": 2.560433333333333,
+      "break_even_docs_per_month": 532632.0631490329,
+      "capacity_docs_per_month_laptop": 603741.5128599672,
+      "servers_needed_at_break_even": 0.8822187174539585
+    },
+    {
+      "server": "small",
+      "with_labor": true,
+      "scenario": "body",
+      "cloud_price_multiplier": 1,
+      "monthly_cost_usd": 1363.7688888888888,
+      "power_cost_usd": 74.88,
+      "cloud_cost_per_1000_docs_usd": 0.203912,
+      "break_even_docs_per_month": 6688026.6433014665,
+      "capacity_docs_per_month_laptop": 700033.7022592545,
+      "servers_needed_at_break_even": 9.55386379500995
+    },
+    {
+      "server": "small",
+      "with_labor": true,
+      "scenario": "body",
+      "cloud_price_multiplier": 10,
+      "monthly_cost_usd": 1363.7688888888888,
+      "power_cost_usd": 74.88,
+      "cloud_cost_per_1000_docs_usd": 2.03912,
+      "break_even_docs_per_month": 668802.6643301466,
+      "capacity_docs_per_month_laptop": 700033.7022592545,
+      "servers_needed_at_break_even": 0.9553863795009949
+    },
+    {
+      "server": "medium",
+      "with_labor": false,
+      "scenario": "short",
+      "cloud_price_multiplier": 1,
+      "monthly_cost_usd": 597.8266666666667,
+      "power_cost_usd": 56.16,
+      "cloud_cost_per_1000_docs_usd": 0.15945833333333334,
+      "break_even_docs_per_month": 3749108.962633917,
+      "capacity_docs_per_month_laptop": 1170353.5978209013,
+      "servers_needed_at_break_even": 3.2033985024820177
+    },
+    {
+      "server": "medium",
+      "with_labor": false,
+      "scenario": "short",
+      "cloud_price_multiplier": 10,
+      "monthly_cost_usd": 597.8266666666667,
+      "power_cost_usd": 56.16,
+      "cloud_cost_per_1000_docs_usd": 1.5945833333333332,
+      "break_even_docs_per_month": 374910.8962633917,
+      "capacity_docs_per_month_laptop": 1170353.5978209013,
+      "servers_needed_at_break_even": 0.3203398502482018
+    },
+    {
+      "server": "medium",
+      "with_labor": false,
+      "scenario": "raw",
+      "cloud_price_multiplier": 1,
+      "monthly_cost_usd": 597.8266666666667,
+      "power_cost_usd": 56.16,
+      "cloud_cost_per_1000_docs_usd": 0.25604333333333334,
+      "break_even_docs_per_month": 2334865.192089881,
+      "capacity_docs_per_month_laptop": 603741.5128599672,
+      "servers_needed_at_break_even": 3.8673259041430756
+    },
+    {
+      "server": "medium",
+      "with_labor": false,
+      "scenario": "raw",
+      "cloud_price_multiplier": 10,
+      "monthly_cost_usd": 597.8266666666667,
+      "power_cost_usd": 56.16,
+      "cloud_cost_per_1000_docs_usd": 2.560433333333333,
+      "break_even_docs_per_month": 233486.5192089881,
+      "capacity_docs_per_month_laptop": 603741.5128599672,
+      "servers_needed_at_break_even": 0.3867325904143076
+    },
+    {
+      "server": "medium",
+      "with_labor": false,
+      "scenario": "body",
+      "cloud_price_multiplier": 1,
+      "monthly_cost_usd": 597.8266666666667,
+      "power_cost_usd": 56.16,
+      "cloud_cost_per_1000_docs_usd": 0.203912,
+      "break_even_docs_per_month": 2931787.5684935986,
+      "capacity_docs_per_month_laptop": 700033.7022592545,
+      "servers_needed_at_break_even": 4.1880663159954885
+    },
+    {
+      "server": "medium",
+      "with_labor": false,
+      "scenario": "body",
+      "cloud_price_multiplier": 10,
+      "monthly_cost_usd": 597.8266666666667,
+      "power_cost_usd": 56.16,
+      "cloud_cost_per_1000_docs_usd": 2.03912,
+      "break_even_docs_per_month": 293178.75684935984,
+      "capacity_docs_per_month_laptop": 700033.7022592545,
+      "servers_needed_at_break_even": 0.4188066315995488
+    },
+    {
+      "server": "medium",
+      "with_labor": true,
+      "scenario": "short",
+      "cloud_price_multiplier": 1,
+      "monthly_cost_usd": 1597.8266666666668,
+      "power_cost_usd": 56.16,
+      "cloud_cost_per_1000_docs_usd": 0.15945833333333334,
+      "break_even_docs_per_month": 10020339.691664489,
+      "capacity_docs_per_month_laptop": 1170353.5978209013,
+      "servers_needed_at_break_even": 8.561805346966514
+    },
+    {
+      "server": "medium",
+      "with_labor": true,
+      "scenario": "short",
+      "cloud_price_multiplier": 10,
+      "monthly_cost_usd": 1597.8266666666668,
+      "power_cost_usd": 56.16,
+      "cloud_cost_per_1000_docs_usd": 1.5945833333333332,
+      "break_even_docs_per_month": 1002033.969166449,
+      "capacity_docs_per_month_laptop": 1170353.5978209013,
+      "servers_needed_at_break_even": 0.8561805346966515
+    },
+    {
+      "server": "medium",
+      "with_labor": true,
+      "scenario": "raw",
+      "cloud_price_multiplier": 1,
+      "monthly_cost_usd": 1597.8266666666668,
+      "power_cost_usd": 56.16,
+      "cloud_cost_per_1000_docs_usd": 0.25604333333333334,
+      "break_even_docs_per_month": 6240454.089802508,
+      "capacity_docs_per_month_laptop": 603741.5128599672,
+      "servers_needed_at_break_even": 10.33630114358217
+    },
+    {
+      "server": "medium",
+      "with_labor": true,
+      "scenario": "raw",
+      "cloud_price_multiplier": 10,
+      "monthly_cost_usd": 1597.8266666666668,
+      "power_cost_usd": 56.16,
+      "cloud_cost_per_1000_docs_usd": 2.560433333333333,
+      "break_even_docs_per_month": 624045.4089802508,
+      "capacity_docs_per_month_laptop": 603741.5128599672,
+      "servers_needed_at_break_even": 1.033630114358217
+    },
+    {
+      "server": "medium",
+      "with_labor": true,
+      "scenario": "body",
+      "cloud_price_multiplier": 1,
+      "monthly_cost_usd": 1597.8266666666668,
+      "power_cost_usd": 56.16,
+      "cloud_cost_per_1000_docs_usd": 0.203912,
+      "break_even_docs_per_month": 7835863.836687721,
+      "capacity_docs_per_month_laptop": 700033.7022592545,
+      "servers_needed_at_break_even": 11.193552269553077
+    },
+    {
+      "server": "medium",
+      "with_labor": true,
+      "scenario": "body",
+      "cloud_price_multiplier": 10,
+      "monthly_cost_usd": 1597.8266666666668,
+      "power_cost_usd": 56.16,
+      "cloud_cost_per_1000_docs_usd": 2.03912,
+      "break_even_docs_per_month": 783586.3836687722,
+      "capacity_docs_per_month_laptop": 700033.7022592545,
+      "servers_needed_at_break_even": 1.1193552269553078
+    },
+    {
+      "server": "large",
+      "with_labor": false,
+      "scenario": "short",
+      "cloud_price_multiplier": 1,
+      "monthly_cost_usd": 1509.9644444444443,
+      "power_cost_usd": 65.52,
+      "cloud_cost_per_1000_docs_usd": 0.15945833333333334,
+      "break_even_docs_per_month": 9469335.423743576,
+      "capacity_docs_per_month_laptop": 1170353.5978209013,
+      "servers_needed_at_break_even": 8.09100381403934
+    },
+    {
+      "server": "large",
+      "with_labor": false,
+      "scenario": "short",
+      "cloud_price_multiplier": 10,
+      "monthly_cost_usd": 1509.9644444444443,
+      "power_cost_usd": 65.52,
+      "cloud_cost_per_1000_docs_usd": 1.5945833333333332,
+      "break_even_docs_per_month": 946933.5423743576,
+      "capacity_docs_per_month_laptop": 1170353.5978209013,
+      "servers_needed_at_break_even": 0.8091003814039339
+    },
+    {
+      "server": "large",
+      "with_labor": false,
+      "scenario": "raw",
+      "cloud_price_multiplier": 1,
+      "monthly_cost_usd": 1509.9644444444443,
+      "power_cost_usd": 65.52,
+      "cloud_cost_per_1000_docs_usd": 0.25604333333333334,
+      "break_even_docs_per_month": 5897300.3701630365,
+      "capacity_docs_per_month_laptop": 603741.5128599672,
+      "servers_needed_at_break_even": 9.767922603544518
+    },
+    {
+      "server": "large",
+      "with_labor": false,
+      "scenario": "raw",
+      "cloud_price_multiplier": 10,
+      "monthly_cost_usd": 1509.9644444444443,
+      "power_cost_usd": 65.52,
+      "cloud_cost_per_1000_docs_usd": 2.560433333333333,
+      "break_even_docs_per_month": 589730.0370163036,
+      "capacity_docs_per_month_laptop": 603741.5128599672,
+      "servers_needed_at_break_even": 0.9767922603544518
+    },
+    {
+      "server": "large",
+      "with_labor": false,
+      "scenario": "body",
+      "cloud_price_multiplier": 1,
+      "monthly_cost_usd": 1509.9644444444443,
+      "power_cost_usd": 65.52,
+      "cloud_cost_per_1000_docs_usd": 0.203912,
+      "break_even_docs_per_month": 7404980.797816922,
+      "capacity_docs_per_month_laptop": 700033.7022592545,
+      "servers_needed_at_break_even": 10.578034705926942
+    },
+    {
+      "server": "large",
+      "with_labor": false,
+      "scenario": "body",
+      "cloud_price_multiplier": 10,
+      "monthly_cost_usd": 1509.9644444444443,
+      "power_cost_usd": 65.52,
+      "cloud_cost_per_1000_docs_usd": 2.03912,
+      "break_even_docs_per_month": 740498.0797816922,
+      "capacity_docs_per_month_laptop": 700033.7022592545,
+      "servers_needed_at_break_even": 1.0578034705926942
+    },
+    {
+      "server": "large",
+      "with_labor": true,
+      "scenario": "short",
+      "cloud_price_multiplier": 1,
+      "monthly_cost_usd": 2509.9644444444443,
+      "power_cost_usd": 65.52,
+      "cloud_cost_per_1000_docs_usd": 0.15945833333333334,
+      "break_even_docs_per_month": 15740566.152774148,
+      "capacity_docs_per_month_laptop": 1170353.5978209013,
+      "servers_needed_at_break_even": 13.449410658523835
+    },
+    {
+      "server": "large",
+      "with_labor": true,
+      "scenario": "short",
+      "cloud_price_multiplier": 10,
+      "monthly_cost_usd": 2509.9644444444443,
+      "power_cost_usd": 65.52,
+      "cloud_cost_per_1000_docs_usd": 1.5945833333333332,
+      "break_even_docs_per_month": 1574056.615277415,
+      "capacity_docs_per_month_laptop": 1170353.5978209013,
+      "servers_needed_at_break_even": 1.3449410658523837
+    },
+    {
+      "server": "large",
+      "with_labor": true,
+      "scenario": "raw",
+      "cloud_price_multiplier": 1,
+      "monthly_cost_usd": 2509.9644444444443,
+      "power_cost_usd": 65.52,
+      "cloud_cost_per_1000_docs_usd": 0.25604333333333334,
+      "break_even_docs_per_month": 9802889.267875662,
+      "capacity_docs_per_month_laptop": 603741.5128599672,
+      "servers_needed_at_break_even": 16.23689784298361
+    },
+    {
+      "server": "large",
+      "with_labor": true,
+      "scenario": "raw",
+      "cloud_price_multiplier": 10,
+      "monthly_cost_usd": 2509.9644444444443,
+      "power_cost_usd": 65.52,
+      "cloud_cost_per_1000_docs_usd": 2.560433333333333,
+      "break_even_docs_per_month": 980288.9267875664,
+      "capacity_docs_per_month_laptop": 603741.5128599672,
+      "servers_needed_at_break_even": 1.6236897842983613
+    },
+    {
+      "server": "large",
+      "with_labor": true,
+      "scenario": "body",
+      "cloud_price_multiplier": 1,
+      "monthly_cost_usd": 2509.9644444444443,
+      "power_cost_usd": 65.52,
+      "cloud_cost_per_1000_docs_usd": 0.203912,
+      "break_even_docs_per_month": 12309057.066011045,
+      "capacity_docs_per_month_laptop": 700033.7022592545,
+      "servers_needed_at_break_even": 17.58352065948453
+    },
+    {
+      "server": "large",
+      "with_labor": true,
+      "scenario": "body",
+      "cloud_price_multiplier": 10,
+      "monthly_cost_usd": 2509.9644444444443,
+      "power_cost_usd": 65.52,
+      "cloud_cost_per_1000_docs_usd": 2.03912,
+      "break_even_docs_per_month": 1230905.7066011045,
+      "capacity_docs_per_month_laptop": 700033.7022592545,
+      "servers_needed_at_break_even": 1.758352065948453
+    }
+  ],
+  "sources": [
+    "https://modal.com/blog/nvidia-l40s-price-article",
+    "https://www.hardwaredealz.com/hardware/gpu/nvidia-l40s-48gb/nvidia-48gb-gddr6-4x-dp/preisvergleich.2493",
+    "https://techradar.com/pro/rtx-5090s-are-going-for-as-much-as-usd9000-as-ai-server-builders-reportedly-buy-nvidias-flagship-by-the-pallet-but-the-photos-behind-the-story-may-be-ai-generated",
+    "https://book.petronellatech.com/blog/how-to-build-custom-ai-workstation-2026/",
+    "https://www.morphllm.com/nvidia-h100",
+    "https://gpuperhour.com/blog/nvidia-h100-price",
+    "https://www.hankyung.com/article/202603238972Y",
+    "https://blog.haezoom.com/notice_30/"
+  ]
+}

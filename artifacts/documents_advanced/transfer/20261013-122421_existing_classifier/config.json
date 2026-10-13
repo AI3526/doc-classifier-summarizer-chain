@@ -1,0 +1,33 @@
+{
+  "purpose": "선정 분류기를 재학습 없이 긴 문서에 적용: 원문 vs 본문만",
+  "dataset": "documents_advanced",
+  "split": "validation",
+  "rows": 60,
+  "layouts": {
+    "body_first": 18,
+    "reference_first": 24,
+    "short": 18
+  },
+  "conditions": {
+    "raw": "원문 그대로",
+    "body": "common.preprocess.extract_body로 참고 자료 제거"
+  },
+  "models": {
+    "selected": "documents/learner_park/runs/20261011-210721_roberta_lr1e-5_s42",
+    "baseline": "documents/learner_park/runs/20261011-210534_baseline_char2-5"
+  },
+  "environment": {
+    "python": "3.12.13",
+    "os": "Windows-11-10.0.26200-SP0",
+    "cpu": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel",
+    "cpu_threads_torch": 24,
+    "ram_total_gb": 31.4,
+    "gpu": "NVIDIA GeForce RTX 5060 Laptop GPU",
+    "packages": {
+      "torch": "2.11.0+cu128",
+      "transformers": "4.57.6",
+      "scikit-learn": "1.9.1"
+    }
+  },
+  "created_at": "2026-10-13T12:24:31+09:00"
+}

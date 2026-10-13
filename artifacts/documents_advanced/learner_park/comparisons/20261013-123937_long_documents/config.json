@@ -1,0 +1,79 @@
+{
+  "purpose": "긴 문서 생성 시간·토큰·비용: 원문 vs 본문만",
+  "dataset": "documents_advanced",
+  "split": "validation",
+  "rows": 60,
+  "prompt_version": "document_summary_v6",
+  "structured_output": true,
+  "classifier_run": "20261011-210721_roberta_lr1e-5_s42",
+  "conditions": {
+    "raw": "원문 그대로 분류·요약",
+    "body": "참고 자료를 뗀 본문으로 분류·요약"
+  },
+  "quality_scored": false,
+  "targets": [
+    {
+      "alias": "qwen2.5-7b",
+      "provider": "ollama",
+      "model": "qwen2.5:7b"
+    },
+    {
+      "alias": "qwen3-4b",
+      "provider": "ollama",
+      "model": "qwen3:4b-instruct-2507-q4_K_M"
+    },
+    {
+      "alias": "openai",
+      "provider": "openai",
+      "model": "gpt-6-luna"
+    }
+  ],
+  "execution_conditions": {
+    "qwen2.5-7b": {
+      "prompt_version": "document_summary_v6",
+      "structured_output": true,
+      "temperature": 0.2,
+      "max_tokens": 512,
+      "timeout_sec": 120.0,
+      "stream": true,
+      "quantization": "Q4_K_M",
+      "parameter_size": "7.6B",
+      "family": "qwen2",
+      "num_ctx": 4096,
+      "keep_alive": "5m",
+      "hardware": "NVIDIA GeForce RTX 5060 Laptop GPU / RAM 31.4GB",
+      "measurement": "로컬 HTTP 호출, 모델 적재 후(준비 호출 제외) 시간"
+    },
+    "qwen3-4b": {
+      "prompt_version": "document_summary_v6",
+      "structured_output": true,
+      "temperature": 0.2,
+      "max_tokens": 512,
+      "timeout_sec": 120.0,
+      "stream": true,
+      "quantization": "Q4_K_M",
+      "parameter_size": "4.0B",
+      "family": "qwen3",
+      "num_ctx": 4096,
+      "keep_alive": "5m",
+      "hardware": "NVIDIA GeForce RTX 5060 Laptop GPU / RAM 31.4GB",
+      "measurement": "로컬 HTTP 호출, 모델 적재 후(준비 호출 제외) 시간"
+    },
+    "openai": {
+      "prompt_version": "document_summary_v6",
+      "structured_output": true,
+      "temperature": 0.2,
+      "max_tokens": 512,
+      "timeout_sec": 120.0,
+      "stream": true,
+      "api": "responses",
+      "reasoning_effort": "none",
+      "store": false,
+      "max_retries": 0,
+      "quantization": null,
+      "hardware": "OpenAI 클라우드",
+      "measurement": "네트워크 왕복을 포함한 클라이언트 측 시간"
+    }
+  },
+  "started_at": "2026-10-13T12:39:42+09:00"
+}

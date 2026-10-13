@@ -23,6 +23,11 @@
       },
       "low_confidence": false
     },
+    "preprocessing": {
+      "body_extracted": false,
+      "original_chars": 112,
+      "used_chars": 112
+    },
     "prompt_version": "document_summary_v6",
     "routing": {
       "mode": "auto",
@@ -67,8 +72,8 @@
         "follow_ups": []
       },
       "format_valid": true,
-      "latency_sec": 3.318320699967444,
-      "ttft_sec": 0.2736633000895381,
+      "latency_sec": 3.2665162002667785,
+      "ttft_sec": 0.23523400025442243,
       "prompt_tokens": 1081,
       "completion_tokens": 204,
       "api_cost_usd": 0.0
@@ -76,8 +81,8 @@
     "warnings": [
       "openai이(가) 응답하지 않아 qwen2.5-7b(으)로 처리했습니다."
     ],
-    "elapsed_sec": 3.3778295000083745
+    "elapsed_sec": 3.3232367001473904
   },
   "note": "일반 문서, 상용 모델 사용 불가(키 없음)를 재현 → 로컬 모델로 넘김",
-  "recorded_at": "2026-10-12T17:33:05+09:00"
+  "recorded_at": "2026-10-13T13:06:11+09:00"
 }

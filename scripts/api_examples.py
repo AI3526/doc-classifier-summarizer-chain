@@ -1,7 +1,7 @@
 """API의 정상 요청과 실패 요청 예시를 실제로 실행해 저장한다.
 
 서버를 따로 띄우지 않고 FastAPI TestClient로 같은 앱을 실행한다(시작 시 분류기 로딩 포함).
-입력은 generation_development.jsonl의 text만 쓴다. openai 대상 요청은 요금이 소액 발생한다.
+입력은 generation_development.jsonl의 text만 쓴다(긴 문서 예시는 심화 validation 1건). openai 대상 요청은 요금이 소액 발생한다.
 실패 상황은 설정을 잠시 바꿔 재현한다: Ollama 주소를 닫힌 포트로(연결 실패), 시간 제한을 아주 짧게(시간 초과).
 
 uv run python scripts/api_examples.py
@@ -17,9 +17,10 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "steps"))
 
 import lesson_settings as lesson
+from common.preprocess import document_layout
 from common.records import now_iso, write_json
 from fastapi.testclient import TestClient
-from step01_read_data import read_jsonl
+from step01_read_data import read_jsonl, read_rows
 from step10_serve_api import app
 
 OUTPUT = lesson.OUTPUT_ROOT / lesson.DATASET / "service" / "api_examples"
@@ -32,6 +33,11 @@ def main():
     for case in cases:
         by_label.setdefault(case["expected_label"], case["text"])  # 유형별 첫 문서(text만 사용)
     OUTPUT.mkdir(parents=True, exist_ok=True)
+    for old in OUTPUT.glob("*.json"):  # 번호가 바뀌어도 예전 예시가 남지 않게 한다.
+        old.unlink()
+    long_document = next(row["text"] for row in
+                         read_rows(lesson.ROOT / "data" / "documents_advanced" / "validation.csv")
+                         if document_layout(row["text"]) == "reference_first")
     examples = []
 
     def run(name, kind, method, path, payload=None, note=""):
@@ -59,6 +65,9 @@ def main():
         run("confidential_cloud_rejected", "라우팅", "POST", "/summarize",
             {"text": by_label["announcement"], "confidential": True, "target": "openai"},
             "기밀 문서를 상용 모델로 지정한 요청은 거부")
+        run("long_document_body_extracted", "긴 문서", "POST", "/summarize",
+            {"text": long_document, "target": "qwen2.5-7b"},
+            "참고 자료가 앞에 붙은 긴 문서 → 본문만 분류·요약")
         run("blank_text", "잘못된 입력", "POST", "/classify", {"text": "   "})
         run("too_long_text", "잘못된 입력", "POST", "/summarize",
             {"text": "가" * (lesson.MAX_INPUT_CHARS + 1)})
@@ -118,6 +127,9 @@ def main():
                        f"(확신도 {body['classification']['confidence']:.2f})")
         else:
             outcome = f"기본 생성 모델 {body.get('default_target')} ({body.get('default_target_status')})"
+        pre = body.get("preprocessing") if isinstance(body, dict) else None
+        if pre and pre["body_extracted"]:
+            outcome += f" — 본문 추출 {pre['original_chars']}자 → {pre['used_chars']}자"
         attempts = (body.get("routing") or {}).get("attempts", []) if isinstance(body, dict) else []
         if len(attempts) > 1 or (attempts and error):
             outcome += " — 시도: " + " → ".join(

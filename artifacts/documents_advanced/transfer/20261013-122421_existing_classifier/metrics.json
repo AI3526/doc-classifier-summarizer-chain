@@ -1,0 +1,390 @@
+{
+  "selected_raw": {
+    "run_dir": "documents/learner_park/runs/20261011-210721_roberta_lr1e-5_s42",
+    "kind": "transformer",
+    "max_length": 192,
+    "condition": "raw",
+    "scores": {
+      "accuracy": 0.5666666666666667,
+      "macro_f1": 0.5601205857019811,
+      "weighted_f1": 0.560120585701981,
+      "per_class": {
+        "announcement": {
+          "precision": 0.5217391304347826,
+          "recall": 0.6,
+          "f1-score": 0.5581395348837209,
+          "support": 20.0
+        },
+        "manual": {
+          "precision": 0.6666666666666666,
+          "recall": 0.4,
+          "f1-score": 0.5,
+          "support": 20.0
+        },
+        "minutes": {
+          "precision": 0.56,
+          "recall": 0.7,
+          "f1-score": 0.6222222222222222,
+          "support": 20.0
+        },
+        "accuracy": 0.5666666666666667,
+        "macro avg": {
+          "precision": 0.5828019323671497,
+          "recall": 0.5666666666666667,
+          "f1-score": 0.5601205857019811,
+          "support": 60.0
+        },
+        "weighted avg": {
+          "precision": 0.5828019323671498,
+          "recall": 0.5666666666666667,
+          "f1-score": 0.560120585701981,
+          "support": 60.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          12,
+          2,
+          6
+        ],
+        [
+          7,
+          8,
+          5
+        ],
+        [
+          4,
+          2,
+          14
+        ]
+      ],
+      "confusion_matrix_axes": {
+        "rows": "actual",
+        "columns": "predicted",
+        "labels": [
+          "announcement",
+          "manual",
+          "minutes"
+        ]
+      }
+    },
+    "accuracy_by_layout": {
+      "body_first": {
+        "correct": 13,
+        "total": 18,
+        "accuracy": 0.7222222222222222
+      },
+      "reference_first": {
+        "correct": 4,
+        "total": 24,
+        "accuracy": 0.16666666666666666
+      },
+      "short": {
+        "correct": 17,
+        "total": 18,
+        "accuracy": 0.9444444444444444
+      }
+    },
+    "truncated_rows": 40,
+    "inference_latency": {
+      "mean_ms": 37.259851659958564,
+      "p50_ms": 41.024299804121256,
+      "p95_ms": 48.74699981883168,
+      "samples": 60,
+      "warmup_calls": 3,
+      "scope": "1건씩 전처리부터 예측 라벨까지, 모델 로딩 제외 (본문 추출 포함)",
+      "device": "cpu"
+    }
+  },
+  "selected_body": {
+    "run_dir": "documents/learner_park/runs/20261011-210721_roberta_lr1e-5_s42",
+    "kind": "transformer",
+    "max_length": 192,
+    "condition": "body",
+    "scores": {
+      "accuracy": 0.9166666666666666,
+      "macro_f1": 0.913947840777109,
+      "weighted_f1": 0.9139478407771091,
+      "per_class": {
+        "announcement": {
+          "precision": 0.8333333333333334,
+          "recall": 1.0,
+          "f1-score": 0.9090909090909091,
+          "support": 20.0
+        },
+        "manual": {
+          "precision": 1.0,
+          "recall": 0.75,
+          "f1-score": 0.8571428571428571,
+          "support": 20.0
+        },
+        "minutes": {
+          "precision": 0.9523809523809523,
+          "recall": 1.0,
+          "f1-score": 0.975609756097561,
+          "support": 20.0
+        },
+        "accuracy": 0.9166666666666666,
+        "macro avg": {
+          "precision": 0.9285714285714285,
+          "recall": 0.9166666666666666,
+          "f1-score": 0.913947840777109,
+          "support": 60.0
+        },
+        "weighted avg": {
+          "precision": 0.9285714285714287,
+          "recall": 0.9166666666666666,
+          "f1-score": 0.9139478407771091,
+          "support": 60.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          20,
+          0,
+          0
+        ],
+        [
+          4,
+          15,
+          1
+        ],
+        [
+          0,
+          0,
+          20
+        ]
+      ],
+      "confusion_matrix_axes": {
+        "rows": "actual",
+        "columns": "predicted",
+        "labels": [
+          "announcement",
+          "manual",
+          "minutes"
+        ]
+      }
+    },
+    "accuracy_by_layout": {
+      "body_first": {
+        "correct": 17,
+        "total": 18,
+        "accuracy": 0.9444444444444444
+      },
+      "reference_first": {
+        "correct": 21,
+        "total": 24,
+        "accuracy": 0.875
+      },
+      "short": {
+        "correct": 17,
+        "total": 18,
+        "accuracy": 0.9444444444444444
+      }
+    },
+    "truncated_rows": 12,
+    "inference_latency": {
+      "mean_ms": 31.447670003399253,
+      "p50_ms": 34.077499993145466,
+      "p95_ms": 43.871600180864334,
+      "samples": 60,
+      "warmup_calls": 3,
+      "scope": "1건씩 전처리부터 예측 라벨까지, 모델 로딩 제외 (본문 추출 포함)",
+      "device": "cpu"
+    }
+  },
+  "baseline_raw": {
+    "run_dir": "documents/learner_park/runs/20261011-210534_baseline_char2-5",
+    "kind": "baseline",
+    "max_length": null,
+    "condition": "raw",
+    "scores": {
+      "accuracy": 0.43333333333333335,
+      "macro_f1": 0.42875675911390193,
+      "weighted_f1": 0.428756759113902,
+      "per_class": {
+        "announcement": {
+          "precision": 0.41379310344827586,
+          "recall": 0.6,
+          "f1-score": 0.4897959183673469,
+          "support": 20.0
+        },
+        "manual": {
+          "precision": 0.5833333333333334,
+          "recall": 0.35,
+          "f1-score": 0.4375,
+          "support": 20.0
+        },
+        "minutes": {
+          "precision": 0.3684210526315789,
+          "recall": 0.35,
+          "f1-score": 0.358974358974359,
+          "support": 20.0
+        },
+        "accuracy": 0.43333333333333335,
+        "macro avg": {
+          "precision": 0.45518249647106274,
+          "recall": 0.4333333333333333,
+          "f1-score": 0.42875675911390193,
+          "support": 60.0
+        },
+        "weighted avg": {
+          "precision": 0.4551824964710628,
+          "recall": 0.43333333333333335,
+          "f1-score": 0.428756759113902,
+          "support": 60.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          12,
+          4,
+          4
+        ],
+        [
+          5,
+          7,
+          8
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "confusion_matrix_axes": {
+        "rows": "actual",
+        "columns": "predicted",
+        "labels": [
+          "announcement",
+          "manual",
+          "minutes"
+        ]
+      }
+    },
+    "accuracy_by_layout": {
+      "body_first": {
+        "correct": 5,
+        "total": 18,
+        "accuracy": 0.2777777777777778
+      },
+      "reference_first": {
+        "correct": 3,
+        "total": 24,
+        "accuracy": 0.125
+      },
+      "short": {
+        "correct": 18,
+        "total": 18,
+        "accuracy": 1.0
+      }
+    },
+    "truncated_rows": 0,
+    "inference_latency": {
+      "mean_ms": 0.9722899956007799,
+      "p50_ms": 1.0183998383581638,
+      "p95_ms": 1.5157000161707401,
+      "samples": 60,
+      "warmup_calls": 3,
+      "scope": "1건씩 전처리부터 예측 라벨까지, 모델 로딩 제외 (본문 추출 포함)",
+      "device": "cpu"
+    }
+  },
+  "baseline_body": {
+    "run_dir": "documents/learner_park/runs/20261011-210534_baseline_char2-5",
+    "kind": "baseline",
+    "max_length": null,
+    "condition": "body",
+    "scores": {
+      "accuracy": 0.9166666666666666,
+      "macro_f1": 0.9183920762868131,
+      "weighted_f1": 0.9183920762868131,
+      "per_class": {
+        "announcement": {
+          "precision": 0.8,
+          "recall": 1.0,
+          "f1-score": 0.8888888888888888,
+          "support": 20.0
+        },
+        "manual": {
+          "precision": 1.0,
+          "recall": 0.85,
+          "f1-score": 0.918918918918919,
+          "support": 20.0
+        },
+        "minutes": {
+          "precision": 1.0,
+          "recall": 0.9,
+          "f1-score": 0.9473684210526315,
+          "support": 20.0
+        },
+        "accuracy": 0.9166666666666666,
+        "macro avg": {
+          "precision": 0.9333333333333332,
+          "recall": 0.9166666666666666,
+          "f1-score": 0.9183920762868131,
+          "support": 60.0
+        },
+        "weighted avg": {
+          "precision": 0.9333333333333333,
+          "recall": 0.9166666666666666,
+          "f1-score": 0.9183920762868131,
+          "support": 60.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          20,
+          0,
+          0
+        ],
+        [
+          3,
+          17,
+          0
+        ],
+        [
+          2,
+          0,
+          18
+        ]
+      ],
+      "confusion_matrix_axes": {
+        "rows": "actual",
+        "columns": "predicted",
+        "labels": [
+          "announcement",
+          "manual",
+          "minutes"
+        ]
+      }
+    },
+    "accuracy_by_layout": {
+      "body_first": {
+        "correct": 17,
+        "total": 18,
+        "accuracy": 0.9444444444444444
+      },
+      "reference_first": {
+        "correct": 20,
+        "total": 24,
+        "accuracy": 0.8333333333333334
+      },
+      "short": {
+        "correct": 18,
+        "total": 18,
+        "accuracy": 1.0
+      }
+    },
+    "truncated_rows": 0,
+    "inference_latency": {
+      "mean_ms": 0.5279649902756015,
+      "p50_ms": 0.5256999284029007,
+      "p95_ms": 0.7055001333355904,
+      "samples": 60,
+      "warmup_calls": 3,
+      "scope": "1건씩 전처리부터 예측 라벨까지, 모델 로딩 제외 (본문 추출 포함)",
+      "device": "cpu"
+    }
+  }
+}

@@ -188,6 +188,8 @@ with batch_tab:
                     "confidence": round((body.get("classification") or {}).get("confidence", 0), 3),
                     "used_model": routing.get("used_target", ""),
                     "fallback_used": routing.get("fallback_used", False),
+                    "body_extracted": (body.get("preprocessing") or {}).get("body_extracted",
+                                                                            False),
                     "elapsed_sec": round(body.get("elapsed_sec", 0), 2),
                     "summary": (body.get("generation") or {}).get("summary", {}).get("summary", "")
                     if ok else "",

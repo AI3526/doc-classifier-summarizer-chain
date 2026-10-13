@@ -1,0 +1,32 @@
+{
+  "qwen2.5-7b": {
+    "alias": "qwen2.5-7b",
+    "sample_id": "documents-v2-announcement-train-009-v1",
+    "excluded_from_metrics": true,
+    "status": "SUCCESS",
+    "error": null,
+    "error_message": null,
+    "load_time_sec": 5.3716318,
+    "total_time_sec": 7.499623599927872
+  },
+  "qwen3-4b": {
+    "alias": "qwen3-4b",
+    "sample_id": "documents-v2-announcement-train-009-v1",
+    "excluded_from_metrics": true,
+    "status": "SUCCESS",
+    "error": null,
+    "error_message": null,
+    "load_time_sec": 2.6435837,
+    "total_time_sec": 4.122886300086975
+  },
+  "openai": {
+    "alias": "openai",
+    "sample_id": "documents-v2-announcement-train-009-v1",
+    "excluded_from_metrics": true,
+    "status": "SUCCESS",
+    "error": null,
+    "error_message": null,
+    "load_time_sec": null,
+    "total_time_sec": 3.3048356999643147
+  }
+}

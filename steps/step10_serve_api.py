@@ -171,8 +171,17 @@ def classify(body: TextRequest, request: Request):
     warnings = (["분류 확신도가 낮습니다. 결과를 확인하세요."] if classification["low_confidence"]
                 else []) + (["입력이 길어 분류기에서 일부가 잘렸습니다."]
                             if classification["truncated"] else [])
-    return {"classification": classification, "policy": prepared["policy"],
-            "warnings": warnings, "elapsed_sec": time.perf_counter() - started}
+    warnings += preprocessing_warnings(prepared["preprocessing"])
+    return {"classification": classification, "preprocessing": prepared["preprocessing"],
+            "policy": prepared["policy"], "warnings": warnings,
+            "elapsed_sec": time.perf_counter() - started}
+
+
+def preprocessing_warnings(preprocessing):
+    if not preprocessing["body_extracted"]:
+        return []
+    return [(f"참고 자료 구간을 빼고 본문만 분류·요약했습니다 "
+            f"({preprocessing['original_chars']}자 → {preprocessing['used_chars']}자).")]
 
 
 def is_local(target):
@@ -209,6 +218,7 @@ def summarize(body: SummarizeRequest, request: Request):
         status, code, message = generation_failure(exc.generation)
         return error_response(status, code, f"{message} 대체 모델도 응답하지 않았습니다.",
                               classification=classification_view(exc.item["classification"]),
+                              preprocessing=exc.item.get("preprocessing"),
                               routing={**routing, "attempts": exc.attempts},
                               elapsed_sec=time.perf_counter() - started)
     except Exception as exc:  # noqa: BLE001 - 분류 단계 실패
@@ -227,18 +237,19 @@ def summarize(body: SummarizeRequest, request: Request):
         status, code, message = failure
         # 실패해도 분류 결과와 실패한 호출의 기록은 돌려준다.
         return error_response(status, code, message, classification=classification,
-                              routing=routing,
+                              preprocessing=result.get("preprocessing"), routing=routing,
                               generation={**view, "error": generation["error"],
                                           "error_message": generation["error_message"]},
                               elapsed_sec=time.perf_counter() - started)
     warnings = (["분류 확신도가 낮습니다. 요약 형식이 문서와 맞는지 확인하세요."]
                 if classification["low_confidence"] else [])
+    warnings += preprocessing_warnings(result["preprocessing"])
     if routing["fallback_used"]:
         warnings.append(f"{attempts[0]['target']}이(가) 응답하지 않아 {used}(으)로 처리했습니다.")
     if state.default_status == "provisional" and not body.target and not body.confidential             and used == state.default_target:
         warnings.append("기본 생성 모델은 사람 채점 전 잠정 선택입니다.")
-    return {"classification": classification, "prompt_version": result["prompt_version"],
-            "routing": routing, "generation": view, "warnings": warnings,
+    return {"classification": classification, "preprocessing": result["preprocessing"],
+            "prompt_version": result["prompt_version"], "routing": routing, "generation": view, "warnings": warnings,
             "elapsed_sec": time.perf_counter() - started}
 
 
@@ -251,6 +262,7 @@ def compare(body: CompareRequest, request: Request):
              for row, target in zip(result["results"], body.targets, strict=True)]
     failed = any(generation_failure(row) for row in result["results"])
     return JSONResponse({"classification": classification_view(prepared["classification"]),
+                         "preprocessing": prepared["preprocessing"],
                          "prompt_version": result["prompt_version"], "results": views},
                         status_code=502 if failed else 200)
 

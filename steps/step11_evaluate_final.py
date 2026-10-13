@@ -3,30 +3,40 @@
 step05에서 고정한 선정 분류기와 기준 모델을 같은 test로 평가한다.
 이 점수를 보고 모델이나 설정을 다시 고르지 않는다.
 
+심화 트랙(--track advanced)은 artifacts/documents_advanced/selection/selected.json에 test 전에 고정한
+결정(기본 데이터에서 선정한 분류기 + 본문 추출 전처리)으로 심화 test를 한 번 평가한다.
+
 VS Code 터미널에서 프로젝트 폴더를 기준으로 실행한다.
 uv run python steps/step11_evaluate_final.py
+uv run python steps/step11_evaluate_final.py --track advanced
 """
 
+import argparse
 import csv
 from pathlib import Path
 
 from common.metrics import classification_scores, save_errors
 from common.plots import plot_confusion_matrix
+from common.preprocess import extract_body
 from common.records import now_iso, read_json, write_json
 from common.resources import measure_latency
-from lesson_settings import DATA_DIR, OUTPUT_ROOT, SELECTION_DIR
+from lesson_settings import DATA_DIR, OUTPUT_ROOT, ROOT, SELECTION_DIR
 from step01_read_data import read_labels, read_rows
 from step02_check_data import check_splits
 from step06_predict import load_run, predict_text
 
 REVIEW_CASES = 5
+TRACKS = {"basic": (DATA_DIR, SELECTION_DIR),
+          "advanced": (ROOT / "data" / "documents_advanced",
+                       OUTPUT_ROOT / "documents_advanced" / "selection")}
+PREPROCESSING = {None: lambda text: text, "extract_body": extract_body}
 
 
-def evaluate_bundle(bundle, rows, label2id, labels):
-    results = [predict_text(row["text"], bundle) for row in rows]
+def evaluate_bundle(bundle, rows, label2id, labels, prepare=PREPROCESSING[None]):
+    results = [predict_text(prepare(row["text"]), bundle) for row in rows]
     actual = [label2id[row["label"]] for row in rows]
     predictions = [label2id[result["label"]] for result in results]
-    latency = measure_latency(lambda text: predict_text(text, bundle),
+    latency = measure_latency(lambda text: predict_text(prepare(text), bundle),
                               [row["text"] for row in rows])
     return {"scores": classification_scores(actual, predictions, labels),
             "inference_latency": {**latency, "device": "cpu"},
@@ -68,6 +78,8 @@ def evaluate_final(data_dir=DATA_DIR, selection_dir=SELECTION_DIR):
     if not selection_path.exists():
         raise RuntimeError("먼저 step05_select_model.py에서 사용할 실험을 고르세요.")
     selection = read_json(selection_path)
+    preprocessing = selection.get("preprocessing")
+    prepare = PREPROCESSING[preprocessing]
 
     # test를 읽기 전에 선택한 모델과 기준 모델을 모두 불러올 수 있는지 확인한다.
     bundles = {name: load_run(OUTPUT_ROOT / selection[name]["run_dir"])
@@ -84,9 +96,9 @@ def evaluate_final(data_dir=DATA_DIR, selection_dir=SELECTION_DIR):
     label2id = {label: index for index, label in enumerate(labels)}
 
     report = {"split": "test", "rows": len(test_rows), "evaluated_at": now_iso(),
-              "selection_rule": selection["rule"]}
+              "selection_rule": selection["rule"], "preprocessing": preprocessing}
     for name, bundle in bundles.items():
-        result, predictions = evaluate_bundle(bundle, test_rows, label2id, labels)
+        result, predictions = evaluate_bundle(bundle, test_rows, label2id, labels, prepare)
         report[name] = {"run_dir": selection[name]["run_dir"], **result}
         plot_confusion_matrix(result["scores"]["confusion_matrix"], labels,
                               selection_dir / f"confusion_test_{name}.png",
@@ -107,7 +119,10 @@ def evaluate_final(data_dir=DATA_DIR, selection_dir=SELECTION_DIR):
 
 
 def main():
-    evaluate_final()
+    parser = argparse.ArgumentParser(description="고정한 분류기로 test 1회 평가")
+    parser.add_argument("--track", choices=list(TRACKS), default="basic")
+    data_dir, selection_dir = TRACKS[parser.parse_args().track]
+    evaluate_final(data_dir, selection_dir)
 
 
 if __name__ == "__main__":

@@ -14,6 +14,7 @@ import argparse
 import json
 
 import lesson_settings as lesson
+from common.preprocess import extract_body
 from langchain_core.runnables import RunnableBranch, RunnableLambda
 from prompts.document_policies import (
     POLICIES,
@@ -37,17 +38,22 @@ def apply_policy(item):
             "prompt": build_prompt(item["text"], label)}
 
 
-def create_chain(classifier):
+def create_chain(classifier, extract=lesson.EXTRACT_BODY):
     """분류 → 정책·프롬프트까지. 같은 준비 결과를 여러 생성 모델에 줄 때 쓴다.
 
     입력은 문서 문자열, 또는 {"text": ..., 그 밖의 값(예: confidential)} 딕셔너리.
+    extract=True면 참고 자료 구간을 떼고 본문만 분류·요약한다(표시가 없으면 원문 그대로).
     """
     def classify(value):
         extra = {key: item for key, item in value.items() if key != "text"}             if isinstance(value, dict) else {}
-        text = (value["text"] if isinstance(value, dict) else value).strip()
+        original = (value["text"] if isinstance(value, dict) else value).strip()
+        text = extract_body(original) if extract else original
+        preprocessing = {"body_extracted": text != original, "original_chars": len(original),
+                         "used_chars": len(text)}
         classification = predict_text(text, classifier)
         # 분류 결과만 반환하면 뒤 단계에서 원문을 잃으므로 함께 전달한다.
-        return {**extra, "text": text, "classification": classification}
+        return {**extra, "text": text, "classification": classification,
+                "preprocessing": preprocessing}
 
     # 왼쪽 함수가 반환한 딕셔너리가 오른쪽 함수의 인자가 된다.
     return RunnableLambda(classify) | RunnableLambda(apply_policy)

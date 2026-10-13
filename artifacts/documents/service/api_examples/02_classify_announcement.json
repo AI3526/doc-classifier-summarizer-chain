@@ -23,10 +23,15 @@
       },
       "low_confidence": false
     },
+    "preprocessing": {
+      "body_extracted": false,
+      "original_chars": 95,
+      "used_chars": 95
+    },
     "policy": "공지는 대상, 일정, 대상자가 할 일, 달라진 점을 중심으로 요약한다. 문서에 없는 날짜나 주관자, 확정 사항은 만들지 않는다.",
     "warnings": [],
-    "elapsed_sec": 0.09723949991166592
+    "elapsed_sec": 0.09721449995413423
   },
   "note": "",
-  "recorded_at": "2026-10-12T17:32:48+09:00"
+  "recorded_at": "2026-10-13T13:05:47+09:00"
 }

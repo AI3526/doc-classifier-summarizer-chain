@@ -4,6 +4,8 @@
 - smoke: steps/examples의 2건. 코드가 도는지만 확인한다.
 - development: generation_development.jsonl 15건. 1차 비교와 프롬프트 개발에 쓴다.
 - eval: generation_eval.jsonl 24건. 최종 비교. 이 답변을 보고 프롬프트를 고치지 않는다.
+- advanced_development / advanced_eval: 심화 데이터(documents_advanced)의 생성 6건 / 12건.
+  헷갈리는 문장이 섞인 짧은 문서. 결과는 artifacts/documents_advanced/ 아래에 따로 저장한다.
 
 모델마다 준비 호출로 먼저 메모리에 올린 뒤 측정하고, 끝나면 내린다(로컬 모델).
 분류는 입력마다 한 번만 하고, 같은 프롬프트를 모든 모델이 공유한다.
@@ -14,6 +16,7 @@ uv run python steps/step09_compare.py --split smoke
 uv run python steps/step09_compare.py --split development
 uv run python steps/step09_compare.py --split eval --targets qwen2.5-7b exaone3.5-7.8b openai --repeats 2
 uv run python steps/step09_compare.py --split development --structured   # 구조화 출력
+uv run python steps/step09_compare.py --split advanced_eval --targets qwen2.5-7b qwen3-4b openai --repeats 2 --structured
 """
 
 import argparse
@@ -29,10 +32,13 @@ from step06_predict import load_classifier
 from step07_call_models import call_model, execution_conditions, ollama_unload, resolve_target
 from step08_connect_chain import MAX_INPUT_CHARS, create_chain, generate_prepared
 
+ADVANCED_DIR = lesson.ROOT / "data" / "documents_advanced"
 SPLITS = {
     "smoke": lesson.DEVELOPMENT_INPUT,
     "development": lesson.DATA_DIR / "generation_development.jsonl",
     "eval": lesson.DATA_DIR / "generation_eval.jsonl",
+    "advanced_development": ADVANCED_DIR / "generation_development.jsonl",
+    "advanced_eval": ADVANCED_DIR / "generation_eval.jsonl",
 }
 # 비용이 드는 openai는 기본 목록에서 빼고, 필요할 때 --targets로 직접 넣는다.
 DEFAULT_TARGETS = [name for name, spec in lesson.GENERATION_CANDIDATES.items()
@@ -253,8 +259,9 @@ def main():
     cases = read_cases(SPLITS[args.split])
     classifier = load_classifier()
     # artifacts/{dataset}/{learner}/comparisons/{시각}_{split}_{name}
-    output_dir = new_run_dir(lesson.LEARNER_DIR, "_".join(filter(None, [args.split, args.name])),
-                             subdir="comparisons")
+    dataset = "documents_advanced" if args.split.startswith("advanced_") else lesson.DATASET
+    output_dir = new_run_dir(lesson.OUTPUT_ROOT / dataset / lesson.LEARNER,
+                             "_".join(filter(None, [args.split, args.name])), subdir="comparisons")
     summary = run_comparison(create_chain(classifier), cases, args.targets, output_dir,
                              args.split, args.repeats, classifier["identity"]["run_name"],
                              args.structured)

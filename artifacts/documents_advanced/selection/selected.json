@@ -1,0 +1,89 @@
+{
+  "track": "advanced",
+  "decided_at": "2026-10-13T13:08:11+09:00",
+  "test_seen": false,
+  "selected": {
+    "run_dir": "documents/learner_park/runs/20261011-210721_roberta_lr1e-5_s42",
+    "learner": "learner_park",
+    "run_name": "20261011-210721_roberta_lr1e-5_s42",
+    "kind": "transformer",
+    "model": "klue/roberta-base",
+    "model_alias": "roberta",
+    "learning_rate": 1e-05,
+    "epochs": 5,
+    "batch_size": 4,
+    "accumulation_steps": 4,
+    "max_length": 192,
+    "ngram_range": null,
+    "seed": 42,
+    "best_epoch": 4,
+    "validation_accuracy": 1.0,
+    "validation_macro_f1": 1.0,
+    "validation_weighted_f1": 1.0,
+    "train_time_sec": 25.621647499967366,
+    "cpu_latency_ms": 23.798641632311046,
+    "peak_vram_mb": 2132.15673828125,
+    "params": 110620419,
+    "weights_available": true,
+    "labels": [
+      "announcement",
+      "manual",
+      "minutes"
+    ],
+    "dataset": "documents"
+  },
+  "baseline_reference": {
+    "run_dir": "documents/learner_park/runs/20261011-210534_baseline_char2-5",
+    "learner": "learner_park",
+    "run_name": "20261011-210534_baseline_char2-5",
+    "kind": "baseline",
+    "model": "tfidf-char+logistic-regression",
+    "model_alias": "baseline",
+    "learning_rate": null,
+    "epochs": null,
+    "batch_size": null,
+    "accumulation_steps": null,
+    "max_length": null,
+    "ngram_range": [
+      2,
+      5
+    ],
+    "seed": 42,
+    "best_epoch": null,
+    "validation_accuracy": 0.95,
+    "validation_macro_f1": 0.9499687304565354,
+    "validation_weighted_f1": 0.9499687304565353,
+    "train_time_sec": 0.17990480037406087,
+    "cpu_latency_ms": 0.3321816329844296,
+    "peak_vram_mb": null,
+    "params": 118710,
+    "weights_available": true,
+    "labels": [
+      "announcement",
+      "manual",
+      "minutes"
+    ],
+    "dataset": "documents"
+  },
+  "preprocessing": "extract_body",
+  "rule": "심화 트랙: 기본 데이터에서 선정한 분류기를 재학습 없이 쓰고, 참고 자료를 뗀 본문만 입력한다. 심화 validation에서 원문 0.567 → 본문 0.917(기준 모델 0.433 → 0.917). 재학습(기본+심화 합쳐 학습)은 validation 60건으로 차이를 가리기 어려워 하지 않음. test를 본 뒤 바꾸지 않는다.",
+  "validation_evidence": {
+    "transfer_run": "documents_advanced/transfer/20261013-122421_existing_classifier",
+    "selected_raw": {
+      "accuracy": 0.5666666666666667,
+      "macro_f1": 0.5601205857019811
+    },
+    "selected_body": {
+      "accuracy": 0.9166666666666666,
+      "macro_f1": 0.913947840777109
+    },
+    "baseline_raw": {
+      "accuracy": 0.43333333333333335,
+      "macro_f1": 0.42875675911390193
+    },
+    "baseline_body": {
+      "accuracy": 0.9166666666666666,
+      "macro_f1": 0.9183920762868131
+    }
+  }
+}

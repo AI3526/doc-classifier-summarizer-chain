@@ -54,6 +54,20 @@ flowchart LR
 
 ![생성 모델 품질](reports/figures/generation/round2_quality.png)
 
+### 긴 문서 (심화 데이터, 선택 과제)
+
+긴 문서는 **다른 유형의 참고 자료("이전 운영의 보관 자료") + 이번 본문**으로 되어 있습니다. 참고 자료를 떼고 본문만 쓰는 전처리를 서비스에 넣었습니다.
+
+| | 원문 그대로 | 본문만 추출 |
+|---|---|---|
+| 선정 분류기(재학습 없음) 정확도, 심화 validation 60건 | 0.567 | **0.917** |
+| 요약에 참고 자료가 섞인 응답 (qwen2.5-7b, 긴 문서) | 18 / 41건 | **0 / 42건** |
+| 상용 API 1,000건 비용 (gpt-6-luna) | $0.256 | **$0.204** |
+| 로컬 평균 응답 시간 (qwen2.5-7b) | 4.29초 | **3.70초** |
+
+- **손익분기**(서버 장비값은 추정): 가장 싼 GPU 서버(RTX 5090 1장, 약 $8,000)도 긴 문서 기준 **월 약 178만 건**부터 상용보다 쌉니다. 지금 상용 단가로는 비용만으로 로컬을 정당화하기 어렵고, 로컬의 근거는 **기밀 문서를 외부로 보내지 않는 운영 조건**입니다. 상용 단가가 10배인 모델과 비교하면 월 약 18만 건입니다([손익분기 표](reports/generated/break_even.md)).
+- 헷갈리는 문장이 섞인 심화 생성 평가에서 로컬 모델의 칸 오류가 크게 늘었습니다(qwen2.5-7b 사용 가능률 0.21, 읽기용 0.88 / gpt-6-luna 0.67, 0.92).
+
 ## 실행 방법
 
 **준비**: Python 3.12, [uv](https://docs.astral.sh/uv/), NVIDIA GPU(분류 학습), [Ollama](https://ollama.com/)(로컬 생성)
@@ -74,14 +88,19 @@ ollama pull qwen2.5:7b      # 비교에 쓰는 로컬 모델: llama3.1:8b, gemma
 | 파인튜닝 | `uv run python steps/step04_train_classifier.py --model bert roberta electra-s electra-b deberta-ko --lr 1e-5 2e-5 5e-5` | 모델 × 학습률 |
 | seed 반복 | `uv run python steps/step04_train_classifier.py --band --extra-seeds 43 44` | 동점 범위 설정에 seed 추가 |
 | 분류기 선정 | `uv run python steps/step05_select_model.py` | 팀 전체 실행 비교 → `artifacts/documents/selection/` |
+| 긴 문서 분류 | `uv run python steps/step06b_check_long_documents.py` | 선정 분류기를 심화 validation에 적용(원문 vs 본문만) |
 | 체인 시험 | `uv run python steps/step08_connect_chain.py --target qwen2.5-7b` | 분류 → 정책 → 생성 1건 |
 | 생성 비교 | `uv run python steps/step09_compare.py --split eval --targets qwen2.5-7b qwen3-4b openai --repeats 2 --structured` | openai 포함 시 **요금 발생** |
+| 심화 생성 비교 | `uv run python steps/step09_compare.py --split advanced_eval --targets qwen2.5-7b qwen3-4b openai --repeats 2 --structured` | 헷갈리는 짧은 문서, openai 포함 시 **요금 발생** |
+| 긴 문서 시간·비용 | `uv run python steps/step09c_long_documents.py --targets qwen2.5-7b qwen3-4b openai` | 원문 vs 본문만, openai 포함 시 **요금 발생** |
 | 품질 채점 | `uv run python steps/step09b_score.py judge` → `sheet` → `aggregate` → `select` | LLM 채점, 사람 채점 시트, 집계, 생성 모델 선택 |
 | API | `uv run python steps/step10_serve_api.py` | `http://127.0.0.1:8000/docs` |
 | 화면 | `uv run streamlit run app/streamlit_app.py` | API를 띄운 뒤 다른 터미널에서. `http://localhost:8501` |
 | API 예시 | `uv run python scripts/api_examples.py` | 정상·라우팅·잘못된 입력·호출 실패·대체 경로 응답 저장 |
 | 메모리 측정 | `uv run python scripts/measure_service_memory.py` | 분류기 + 로컬 LLM 동시 실행 |
-| test 평가 | `uv run python steps/step11_evaluate_final.py` | 모델을 확정한 뒤 1회만 |
+| test 평가 | `uv run python steps/step11_evaluate_final.py` (`--track advanced`) | 모델을 확정한 뒤 1회만. 심화는 본문 추출로 따로 1회 |
+| 손익분기 | `uv run python scripts/break_even.py` | 실측 비용·시간 + 서버 가정 → `reports/generated/break_even.md` |
+| 결과 읽기 문서 | `uv run python scripts/build_output_review.py --dir <비교 폴더>` | 원문 + 칸별 요약 + LLM 판정. 사람 채점 전 폴더는 만들지 않음 |
 | 보고서 그림 | `uv run python scripts/build_report.py` | `reports/figures/`, `reports/generated/` |
 
 ## API
@@ -137,6 +156,7 @@ reports/               보고서, 실험 기록, 평가 기준, 그림
 | [모델 선정 보고서](reports/model_selection_report.md) | 문제 정의부터 분류·생성 비교, 선정 이유, 한계까지 |
 | [분류 실험 기록](reports/experiment_log_classification.md) | 설정, 29회 파인튜닝 결과, 선정 과정, 오류 분석 |
 | [생성 실험 기록](reports/experiment_log_generation.md) | 프롬프트 v2·v5·v6(칸 규칙, 퓨샷, 구조화 출력), 개발·최종 비교 |
+| [긴 문서 실험 기록](reports/experiment_log_long_documents.md) | 심화 데이터 구조, 본문 추출, 심화 생성 평가, 긴 문서 시간·비용, 손익분기 |
 | [요약 평가 기준](reports/evaluation_rubric.md) | 칸 규칙, 체크리스트, 사용 가능률(칸 오류 포함), 감점표, 사람·LLM 채점 절차, 선택 규칙 |
 
 ## 데이터
@@ -151,4 +171,5 @@ reports/               보고서, 실험 기록, 평가 기준, 그림
 - 생성 품질의 LLM 채점 모델(gpt-6-luna)이 비교 후보이기도 해, 자기 답변을 후하게 봤을 가능성이 있습니다. 블라인드 사람 채점으로 점검할 예정입니다.
 - 평가 데이터를 이전 프롬프트로 한 번 실행해 결과를 본 뒤 프롬프트를 개선해 다시 비교했습니다(보고서 5.5장).
 - 칸 규칙은 팀이 정한 기준이고 정답 출력이 없습니다. 데이터 문서가 이 칸 구조를 염두에 두고 쓰이지 않아 규칙의 경계에 걸리는 문장이 있습니다.
-- 기본 데이터는 문서가 짧아(약 100자) 긴 문서의 비용·성능 차이는 심화 데이터 실험에서 확인합니다.
+- 본문 추출은 데이터의 표시("이전 운영의 보관 자료" 등)에 의존합니다. 표시가 없는 실제 문서에는 다른 방법이 필요합니다.
+- 손익분기의 서버 장비값·전력·인력은 추정이고, 서버 GPU의 실제 처리량은 측정하지 않았습니다.
