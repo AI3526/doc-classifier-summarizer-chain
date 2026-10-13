@@ -3,7 +3,7 @@
 - 실험일: 2026-10-11
 - 실행 학습자 폴더: `artifacts/documents/learner_park/`
 - 범위: 기준 모델(TF-IDF + 로지스틱 회귀) 1회, 사전학습 모델 파인튜닝 29회, validation 기준 선정
-- test 평가: **아직 하지 않음** (선택 실험까지 마친 뒤 1회만 실행 예정)
+- test 평가: 2026-10-13 1회. 선정 0.983 / 기준 모델 0.967 (13장)
 - 이 문서의 모든 수치는 `artifacts/documents/**/experiment.json`과 `scripts/build_report.py`가 만든 [분류 실험 표](generated/classification_tables.md)에서 가져왔다.
 
 ---
@@ -28,7 +28,7 @@
 |---|---|---|---|
 | train | 360 | 각 120 | 학습 |
 | validation | 120 | 각 40 | 모델 비교·선정, 체크포인트 선택 |
-| test | 120 | 각 40 | 최종 평가 (이번 실험에서는 읽지 않음) |
+| test | 120 | 각 40 | 최종 평가 (선정을 고정한 뒤 13장에서 1회) |
 
 - 라벨 정의(`data/documents/labels.json`)
   - announcement: 대상자에게 일정, 변경, 참여, 주의사항을 알리는 문서
@@ -230,3 +230,17 @@ uv run python scripts/build_report.py
 | `artifacts/documents/selection/` | `selected.json`, `comparison.md/csv`, `comparison_by_config.csv`, 혼동행렬, `learning_verification.json` |
 | `reports/generated/classification_tables.md` | 모델별·설정별·실행별 표 |
 | `reports/figures/classification/` | 보고서용 그림 |
+
+## 13. 최종 평가 (test, 1회)
+
+- 실행: `uv run python steps/step11_evaluate_final.py` (2026-10-13), 결과 `artifacts/documents/selection/test_*.{json,csv,png}`
+- 고정: 선정 `20261011-210721_roberta_lr1e-5_s42`, 기준 모델 `20261011-210534_baseline_char2-5`. 이 결과로 다시 고르지 않는다(step05 재선정 막힘).
+
+| 모델 | Accuracy | Macro-F1 | Weighted-F1 | CPU 1건 추론 | 혼동행렬 (행 = 정답 announcement / manual / minutes) |
+|---|---|---|---|---|---|
+| klue/roberta-base (선정) | 0.9833 | 0.9833 | 0.9833 | 18.3ms | [[40, 0, 0], [2, 38, 0], [0, 0, 40]] |
+| TF-IDF + 로지스틱 회귀 (기준) | 0.9667 | 0.9666 | 0.9666 | 0.5ms | [[36, 4, 0], [0, 40, 0], [0, 0, 40]] |
+
+- 선정 분류기 오답 2건은 같은 상황("재료 요청 철회")의 두 문서로, 대상자에게 할 일을 알리는 문장이라 공지로 예측했다(확신도 0.95, 0.75).
+- 기준 모델은 반대로 공지 4건을 매뉴얼로 틀렸다.
+- 심화 test(본문 추출) 결과는 [긴 문서 실험 기록](experiment_log_long_documents.md) 8장.

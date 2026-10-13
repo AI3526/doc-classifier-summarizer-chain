@@ -1,0 +1,161 @@
+{
+  "split": "test",
+  "rows": 120,
+  "evaluated_at": "2026-10-13T13:19:30+09:00",
+  "selection_rule": "설정별 validation macro F1 평균의 최고점에서 0.01 이내이고 seed 3개 이상인 설정 중, 가장 빠른 CPU 추론 시간의 1.2배 이내 설정에서 평균 macro F1 → 표준편차 → 파라미터 수 순으로 선택, 그 안에서 macro F1이 가장 높은 seed",
+  "preprocessing": null,
+  "selected": {
+    "run_dir": "documents/learner_park/runs/20261011-210721_roberta_lr1e-5_s42",
+    "scores": {
+      "accuracy": 0.9833333333333333,
+      "macro_f1": 0.9833229101521784,
+      "weighted_f1": 0.9833229101521784,
+      "per_class": {
+        "announcement": {
+          "precision": 0.9523809523809523,
+          "recall": 1.0,
+          "f1-score": 0.975609756097561,
+          "support": 40.0
+        },
+        "manual": {
+          "precision": 1.0,
+          "recall": 0.95,
+          "f1-score": 0.9743589743589743,
+          "support": 40.0
+        },
+        "minutes": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 40.0
+        },
+        "accuracy": 0.9833333333333333,
+        "macro avg": {
+          "precision": 0.9841269841269842,
+          "recall": 0.9833333333333334,
+          "f1-score": 0.9833229101521784,
+          "support": 120.0
+        },
+        "weighted avg": {
+          "precision": 0.9841269841269842,
+          "recall": 0.9833333333333333,
+          "f1-score": 0.9833229101521784,
+          "support": 120.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          40,
+          0,
+          0
+        ],
+        [
+          2,
+          38,
+          0
+        ],
+        [
+          0,
+          0,
+          40
+        ]
+      ],
+      "confusion_matrix_axes": {
+        "rows": "actual",
+        "columns": "predicted",
+        "labels": [
+          "announcement",
+          "manual",
+          "minutes"
+        ]
+      }
+    },
+    "inference_latency": {
+      "mean_ms": 18.266894144471735,
+      "p50_ms": 18.212399911135435,
+      "p95_ms": 20.757100079208612,
+      "samples": 120,
+      "warmup_calls": 3,
+      "scope": "1건씩 전처리부터 예측 라벨까지, 모델 로딩 제외",
+      "device": "cpu"
+    },
+    "truncated_rows": 0
+  },
+  "baseline_reference": {
+    "run_dir": "documents/learner_park/runs/20261011-210534_baseline_char2-5",
+    "scores": {
+      "accuracy": 0.9666666666666667,
+      "macro_f1": 0.9665831244778613,
+      "weighted_f1": 0.9665831244778613,
+      "per_class": {
+        "announcement": {
+          "precision": 1.0,
+          "recall": 0.9,
+          "f1-score": 0.9473684210526315,
+          "support": 40.0
+        },
+        "manual": {
+          "precision": 0.9090909090909091,
+          "recall": 1.0,
+          "f1-score": 0.9523809523809523,
+          "support": 40.0
+        },
+        "minutes": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 40.0
+        },
+        "accuracy": 0.9666666666666667,
+        "macro avg": {
+          "precision": 0.9696969696969697,
+          "recall": 0.9666666666666667,
+          "f1-score": 0.9665831244778613,
+          "support": 120.0
+        },
+        "weighted avg": {
+          "precision": 0.9696969696969696,
+          "recall": 0.9666666666666667,
+          "f1-score": 0.9665831244778613,
+          "support": 120.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          36,
+          4,
+          0
+        ],
+        [
+          0,
+          40,
+          0
+        ],
+        [
+          0,
+          0,
+          40
+        ]
+      ],
+      "confusion_matrix_axes": {
+        "rows": "actual",
+        "columns": "predicted",
+        "labels": [
+          "announcement",
+          "manual",
+          "minutes"
+        ]
+      }
+    },
+    "inference_latency": {
+      "mean_ms": 0.4687875082405905,
+      "p50_ms": 0.46140002086758614,
+      "p95_ms": 0.5359002389013767,
+      "samples": 120,
+      "warmup_calls": 3,
+      "scope": "1건씩 전처리부터 예측 라벨까지, 모델 로딩 제외",
+      "device": "cpu"
+    },
+    "truncated_rows": 0
+  }
+}

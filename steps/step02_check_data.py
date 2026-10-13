@@ -15,7 +15,13 @@ DATA_DIR = ROOT / "data" / DATASET
 REQUIRED_COLUMNS = {"id", "text", "label", "group_id", "source"}
 
 
-def check_splits(splits: dict[str, list[dict]], labels: list[str]) -> dict:
+def check_splits(splits: dict[str, list[dict]], labels: list[str],
+                 mixed_group_labels: bool = False) -> dict:
+    """분할 검사. mixed_group_labels=True면 한 상황 묶음에 여러 라벨을 허용한다.
+
+    심화 데이터는 같은 상황을 공지·매뉴얼·회의록으로 각각 쓴 3건이 한 묶음이다.
+    묶음이 분할을 넘나들지 않는지(group_id 중복)는 어느 경우에나 검사한다.
+    """
     seen = {"id": set(), "group_id": set(), "text": set()}
     report = {}
     for split_name, rows in splits.items():
@@ -42,7 +48,7 @@ def check_splits(splits: dict[str, list[dict]], labels: list[str]) -> dict:
         group_labels = {}
         for row in rows:
             group_labels.setdefault(row["group_id"], set()).add(row["label"])
-        if any(len(values) != 1 for values in group_labels.values()):
+        if not mixed_group_labels and any(len(values) != 1 for values in group_labels.values()):
             raise ValueError(f"{split_name}: 한 상황 묶음에 서로 다른 라벨이 있습니다.")
         for key, previous in seen.items():
             overlap = previous & current[key]

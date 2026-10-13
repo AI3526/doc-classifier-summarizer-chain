@@ -69,7 +69,7 @@ def save_predictions(directory, rows, results):
                 writer.writerow({"case_type": case_type, **row, "analysis_note": ""})
 
 
-def evaluate_final(data_dir=DATA_DIR, selection_dir=SELECTION_DIR):
+def evaluate_final(data_dir=DATA_DIR, selection_dir=SELECTION_DIR, mixed_group_labels=False):
     data_dir, selection_dir = Path(data_dir), Path(selection_dir)
     metrics_path = selection_dir / "test_metrics.json"
     if metrics_path.exists():
@@ -92,7 +92,8 @@ def evaluate_final(data_dir=DATA_DIR, selection_dir=SELECTION_DIR):
 
     # test 점수는 최종 보고에만 쓴다.
     test_rows = read_rows(data_dir / "test.csv")
-    check_splits({"train": train, "validation": validation, "test": test_rows}, labels)
+    check_splits({"train": train, "validation": validation, "test": test_rows}, labels,
+                 mixed_group_labels)
     label2id = {label: index for index, label in enumerate(labels)}
 
     report = {"split": "test", "rows": len(test_rows), "evaluated_at": now_iso(),
@@ -121,8 +122,10 @@ def evaluate_final(data_dir=DATA_DIR, selection_dir=SELECTION_DIR):
 def main():
     parser = argparse.ArgumentParser(description="고정한 분류기로 test 1회 평가")
     parser.add_argument("--track", choices=list(TRACKS), default="basic")
-    data_dir, selection_dir = TRACKS[parser.parse_args().track]
-    evaluate_final(data_dir, selection_dir)
+    track = parser.parse_args().track
+    data_dir, selection_dir = TRACKS[track]
+    # 심화 데이터는 한 상황 묶음이 공지·매뉴얼·회의록 3건으로 되어 있다.
+    evaluate_final(data_dir, selection_dir, mixed_group_labels=track == "advanced")
 
 
 if __name__ == "__main__":

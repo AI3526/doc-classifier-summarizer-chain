@@ -1,7 +1,7 @@
 # 긴 문서 실험 기록 (documents_advanced, 선택 과제)
 
 - 실험일: 2026-10-13
-- 데이터: `data/documents_advanced` (train 180 / validation 60 / test 60, 생성 개발 6 / 평가 12). **심화 test는 아직 읽지 않았다.**
+- 데이터: `data/documents_advanced` (train 180 / validation 60 / test 60, 생성 개발 6 / 평가 12). 심화 test는 결정을 고정한 뒤 8장에서 1회 평가했다.
 - 분류기: 기본 데이터에서 선정한 `20261011-210721_roberta_lr1e-5_s42`(재학습 없음), 기준 모델 `20261011-210534_baseline_char2-5`
 - 생성 조건: 기본 데이터 최종 비교와 같다(프롬프트 `document_summary_v6`, 구조화 출력, temperature 0.2, 최대 출력 512토큰, 장비 RTX 5060 Laptop 8GB). 채점 `summary_checklist_v3`
 - 보고서 요약: [모델 선정 보고서 7장](model_selection_report.md)
@@ -127,3 +127,18 @@
 
 - `lesson_settings.EXTRACT_BODY = True`, `step08.create_chain(extract=...)`의 첫 단계에서 본문 추출. API 응답에 `preprocessing`(본문 추출 여부, 원래·사용 글자 수)과 경고.
 - API 예시 7번: 심화 validation의 참고 먼저 문서(1,380자) → 본문 272자, 회의록으로 분류, qwen2.5-7b 3.9초 ([API 요청 예시](generated/api_examples.md)).
+
+## 8. 심화 test (60건, 1회)
+
+- 실행: `uv run python steps/step11_evaluate_final.py --track advanced` (2026-10-13), 결과 `artifacts/documents_advanced/selection/test_*`
+- 고정 결정: `artifacts/documents_advanced/selection/selected.json` (선정 분류기 + 본문 추출, test 전 기록)
+- 데이터 검사 조정: 심화 데이터는 한 상황 묶음(group_id)이 공지·매뉴얼·회의록 3건으로 되어 있어(train 60묶음, validation 20묶음 모두), 기본 데이터용 "한 묶음에 라벨 하나" 검사에서 멈췄다. 점수 계산 전에 멈췄고, 이 검사만 심화 트랙에서 끄고(`check_splits(mixed_group_labels=True)`) 분할 사이 id·group_id·text 중복 검사는 유지해 다시 실행했다.
+
+| 모델 | Accuracy | Macro-F1 | 192토큰 잘림 | CPU 1건 추론 (본문 추출 포함) | 혼동행렬 (행 = 정답 announcement / manual / minutes) |
+|---|---|---|---|---|---|
+| 선정 분류기 + 본문 | 0.8833 | 0.8822 | 10 | 31.3ms | [[18, 0, 2], [5, 15, 0], [0, 0, 20]] |
+| 기준 모델 + 본문 | 0.9000 | 0.9010 | – | 0.6ms | [[18, 0, 2], [3, 17, 0], [1, 0, 19]] |
+
+- 구조별(선정): 참고 먼저 27/30, 본문 먼저 10/12, 짧은 문서 16/18
+- 오답 7건: 매뉴얼 → 공지 5(배경 설명으로 시작, 시각·조건이 적힌 절차), 공지 → 회의록 2("검토했습니다 … 하기로 했고"로 시작). 2건은 본문이 192토큰을 넘어 잘림
+- validation 0.917 → test 0.883(2건 차이). 기준 모델이 1건 더 맞혔지만 60건에서 구분할 수 없는 차이다.

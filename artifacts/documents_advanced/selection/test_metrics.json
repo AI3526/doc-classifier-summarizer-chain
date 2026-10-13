@@ -1,0 +1,161 @@
+{
+  "split": "test",
+  "rows": 60,
+  "evaluated_at": "2026-10-13T13:20:25+09:00",
+  "selection_rule": "심화 트랙: 기본 데이터에서 선정한 분류기를 재학습 없이 쓰고, 참고 자료를 뗀 본문만 입력한다. 심화 validation에서 원문 0.567 → 본문 0.917(기준 모델 0.433 → 0.917). 재학습(기본+심화 합쳐 학습)은 validation 60건으로 차이를 가리기 어려워 하지 않음. test를 본 뒤 바꾸지 않는다.",
+  "preprocessing": "extract_body",
+  "selected": {
+    "run_dir": "documents/learner_park/runs/20261011-210721_roberta_lr1e-5_s42",
+    "scores": {
+      "accuracy": 0.8833333333333333,
+      "macro_f1": 0.8822443706164637,
+      "weighted_f1": 0.8822443706164637,
+      "per_class": {
+        "announcement": {
+          "precision": 0.782608695652174,
+          "recall": 0.9,
+          "f1-score": 0.8372093023255814,
+          "support": 20.0
+        },
+        "manual": {
+          "precision": 1.0,
+          "recall": 0.75,
+          "f1-score": 0.8571428571428571,
+          "support": 20.0
+        },
+        "minutes": {
+          "precision": 0.9090909090909091,
+          "recall": 1.0,
+          "f1-score": 0.9523809523809523,
+          "support": 20.0
+        },
+        "accuracy": 0.8833333333333333,
+        "macro avg": {
+          "precision": 0.8972332015810277,
+          "recall": 0.8833333333333333,
+          "f1-score": 0.8822443706164637,
+          "support": 60.0
+        },
+        "weighted avg": {
+          "precision": 0.8972332015810276,
+          "recall": 0.8833333333333333,
+          "f1-score": 0.8822443706164637,
+          "support": 60.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          18,
+          0,
+          2
+        ],
+        [
+          5,
+          15,
+          0
+        ],
+        [
+          0,
+          0,
+          20
+        ]
+      ],
+      "confusion_matrix_axes": {
+        "rows": "actual",
+        "columns": "predicted",
+        "labels": [
+          "announcement",
+          "manual",
+          "minutes"
+        ]
+      }
+    },
+    "inference_latency": {
+      "mean_ms": 31.26855172837774,
+      "p50_ms": 29.960600193589926,
+      "p95_ms": 43.27990021556616,
+      "samples": 60,
+      "warmup_calls": 3,
+      "scope": "1건씩 전처리부터 예측 라벨까지, 모델 로딩 제외",
+      "device": "cpu"
+    },
+    "truncated_rows": 10
+  },
+  "baseline_reference": {
+    "run_dir": "documents/learner_park/runs/20261011-210534_baseline_char2-5",
+    "scores": {
+      "accuracy": 0.9,
+      "macro_f1": 0.9009636814514863,
+      "weighted_f1": 0.9009636814514864,
+      "per_class": {
+        "announcement": {
+          "precision": 0.8181818181818182,
+          "recall": 0.9,
+          "f1-score": 0.8571428571428571,
+          "support": 20.0
+        },
+        "manual": {
+          "precision": 1.0,
+          "recall": 0.85,
+          "f1-score": 0.918918918918919,
+          "support": 20.0
+        },
+        "minutes": {
+          "precision": 0.9047619047619048,
+          "recall": 0.95,
+          "f1-score": 0.926829268292683,
+          "support": 20.0
+        },
+        "accuracy": 0.9,
+        "macro avg": {
+          "precision": 0.9076479076479077,
+          "recall": 0.9,
+          "f1-score": 0.9009636814514863,
+          "support": 60.0
+        },
+        "weighted avg": {
+          "precision": 0.9076479076479076,
+          "recall": 0.9,
+          "f1-score": 0.9009636814514864,
+          "support": 60.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          18,
+          0,
+          2
+        ],
+        [
+          3,
+          17,
+          0
+        ],
+        [
+          1,
+          0,
+          19
+        ]
+      ],
+      "confusion_matrix_axes": {
+        "rows": "actual",
+        "columns": "predicted",
+        "labels": [
+          "announcement",
+          "manual",
+          "minutes"
+        ]
+      }
+    },
+    "inference_latency": {
+      "mean_ms": 0.6304633260394136,
+      "p50_ms": 0.6347000598907471,
+      "p95_ms": 0.7913000881671906,
+      "samples": 60,
+      "warmup_calls": 3,
+      "scope": "1건씩 전처리부터 예측 라벨까지, 모델 로딩 제외",
+      "device": "cpu"
+    },
+    "truncated_rows": 0
+  }
+}
