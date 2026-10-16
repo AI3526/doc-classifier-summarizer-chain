@@ -221,7 +221,7 @@ def write_tables(round1, final, human, is_dummy, selection, path):
                   f"{', 치우침 → PABAK' if trust['skewed'] else ''}) → "
                   f"{'LLM 채점 사용' if trust['use_llm_scores'] else '사람 다수결 우선'}"), ""]
     if selection:
-        status = {"final": "확정", "provisional": "잠정(사람 채점 전)",
+        status = {"final": "확정", "provisional": "잠정(LLM 채점만 반영)",
                   "dummy": f"미리보기 {DUMMY_MARK}"}[selection["status"]]
         lines += [f"## 생성 모델 선택: **{selection['selected']}** ({status})", "",
                   f"- 품질 출처: {'LLM 채점' if selection['quality_source'] == 'llm' else '사람 다수결'}",

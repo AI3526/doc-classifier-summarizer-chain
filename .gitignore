@@ -20,3 +20,7 @@ dist/
 *.egg-info/
 projectoutline.md
 needtocheck.md
+# Claude Code 작업 지침(개인 작업 메모)
+CLAUDE.md
+# VS Code 작업 영역 파일(내 컴퓨터의 폴더 경로가 들어 있음)
+*.code-workspace

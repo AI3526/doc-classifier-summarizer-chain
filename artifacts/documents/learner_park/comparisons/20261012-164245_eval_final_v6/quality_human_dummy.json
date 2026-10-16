@@ -8,17 +8,19 @@
       "alias": "qwen3-4b",
       "human": {
         "format_ok": true,
-        "usable": true,
-        "usable_reading": true,
-        "coverage": 1.0,
+        "usable": false,
+        "usable_reading": false,
+        "coverage": 0.6666666666666666,
         "hallucination": false,
         "numeric_error": false,
         "foreign_language": false,
-        "field_error": false,
+        "field_error": true,
         "awkward_sentence": false,
-        "field_accuracy": 1.0,
-        "wrong_fields": [],
-        "deduction_score": 100
+        "field_accuracy": 0.6666666666666666,
+        "wrong_fields": [
+          "prerequisites"
+        ],
+        "deduction_score": 72
       },
       "llm": {
         "format_ok": true,
@@ -41,17 +43,17 @@
       "alias": "openai",
       "human": {
         "format_ok": true,
-        "usable": false,
-        "usable_reading": false,
+        "usable": true,
+        "usable_reading": true,
         "coverage": 1.0,
-        "hallucination": true,
+        "hallucination": false,
         "numeric_error": false,
         "foreign_language": false,
         "field_error": false,
         "awkward_sentence": false,
         "field_accuracy": 1.0,
         "wrong_fields": [],
-        "deduction_score": 80
+        "deduction_score": 100
       },
       "llm": {
         "format_ok": true,
@@ -119,10 +121,9 @@
         "foreign_language": false,
         "field_error": true,
         "awkward_sentence": false,
-        "field_accuracy": 0.5,
+        "field_accuracy": 0.75,
         "wrong_fields": [
-          "audience",
-          "actions"
+          "audience"
         ],
         "deduction_score": 60
       },
@@ -149,20 +150,17 @@
       "alias": "openai",
       "human": {
         "format_ok": true,
-        "usable": false,
-        "usable_reading": false,
+        "usable": true,
+        "usable_reading": true,
         "coverage": 1.0,
         "hallucination": false,
-        "numeric_error": true,
+        "numeric_error": false,
         "foreign_language": false,
-        "field_error": true,
+        "field_error": false,
         "awkward_sentence": false,
-        "field_accuracy": 0.5,
-        "wrong_fields": [
-          "decisions",
-          "owners"
-        ],
-        "deduction_score": 60
+        "field_accuracy": 1.0,
+        "wrong_fields": [],
+        "deduction_score": 100
       },
       "llm": {
         "format_ok": true,
@@ -220,19 +218,17 @@
       "alias": "openai",
       "human": {
         "format_ok": true,
-        "usable": false,
+        "usable": true,
         "usable_reading": true,
-        "coverage": 0.8333333333333334,
+        "coverage": 1.0,
         "hallucination": false,
         "numeric_error": false,
         "foreign_language": false,
-        "field_error": true,
+        "field_error": false,
         "awkward_sentence": false,
-        "field_accuracy": 0.75,
-        "wrong_fields": [
-          "follow_ups"
-        ],
-        "deduction_score": 76
+        "field_accuracy": 1.0,
+        "wrong_fields": [],
+        "deduction_score": 100
       },
       "llm": {
         "format_ok": true,
@@ -290,17 +286,17 @@
       "alias": "openai",
       "human": {
         "format_ok": true,
-        "usable": false,
-        "usable_reading": false,
+        "usable": true,
+        "usable_reading": true,
         "coverage": 1.0,
-        "hallucination": true,
+        "hallucination": false,
         "numeric_error": false,
         "foreign_language": false,
         "field_error": false,
         "awkward_sentence": false,
         "field_accuracy": 1.0,
         "wrong_fields": [],
-        "deduction_score": 80
+        "deduction_score": 100
       },
       "llm": {
         "format_ok": true,
@@ -324,17 +320,15 @@
       "human": {
         "format_ok": true,
         "usable": false,
-        "usable_reading": true,
+        "usable_reading": false,
         "coverage": 1.0,
-        "hallucination": false,
+        "hallucination": true,
         "numeric_error": false,
         "foreign_language": false,
-        "field_error": true,
+        "field_error": false,
         "awkward_sentence": false,
-        "field_accuracy": 0.75,
-        "wrong_fields": [
-          "follow_ups"
-        ],
+        "field_accuracy": 1.0,
+        "wrong_fields": [],
         "deduction_score": 80
       },
       "llm": {
@@ -426,17 +420,19 @@
       "alias": "openai",
       "human": {
         "format_ok": true,
-        "usable": true,
+        "usable": false,
         "usable_reading": true,
         "coverage": 1.0,
         "hallucination": false,
         "numeric_error": false,
         "foreign_language": false,
-        "field_error": false,
+        "field_error": true,
         "awkward_sentence": false,
-        "field_accuracy": 1.0,
-        "wrong_fields": [],
-        "deduction_score": 100
+        "field_accuracy": 0.75,
+        "wrong_fields": [
+          "actions"
+        ],
+        "deduction_score": 80
       },
       "llm": {
         "format_ok": true,
@@ -492,19 +488,17 @@
       "alias": "openai",
       "human": {
         "format_ok": true,
-        "usable": false,
+        "usable": true,
         "usable_reading": true,
         "coverage": 1.0,
         "hallucination": false,
         "numeric_error": false,
         "foreign_language": false,
-        "field_error": true,
+        "field_error": false,
         "awkward_sentence": false,
-        "field_accuracy": 0.6666666666666666,
-        "wrong_fields": [
-          "steps"
-        ],
-        "deduction_score": 80
+        "field_accuracy": 1.0,
+        "wrong_fields": [],
+        "deduction_score": 100
       },
       "llm": {
         "format_ok": true,
@@ -529,19 +523,17 @@
       "alias": "openai",
       "human": {
         "format_ok": true,
-        "usable": false,
-        "usable_reading": false,
+        "usable": true,
+        "usable_reading": true,
         "coverage": 1.0,
         "hallucination": false,
         "numeric_error": false,
-        "foreign_language": true,
-        "field_error": true,
-        "awkward_sentence": true,
-        "field_accuracy": 0.75,
-        "wrong_fields": [
-          "changes"
-        ],
-        "deduction_score": 60
+        "foreign_language": false,
+        "field_error": false,
+        "awkward_sentence": false,
+        "field_accuracy": 1.0,
+        "wrong_fields": [],
+        "deduction_score": 100
       },
       "llm": {
         "format_ok": true,
@@ -571,10 +563,10 @@
         "numeric_error": false,
         "foreign_language": false,
         "field_error": false,
-        "awkward_sentence": false,
+        "awkward_sentence": true,
         "field_accuracy": 1.0,
         "wrong_fields": [],
-        "deduction_score": 100
+        "deduction_score": 90
       },
       "llm": {
         "format_ok": true,
@@ -630,19 +622,17 @@
       "alias": "qwen3-4b",
       "human": {
         "format_ok": true,
-        "usable": false,
+        "usable": true,
         "usable_reading": true,
         "coverage": 0.8333333333333334,
         "hallucination": false,
         "numeric_error": false,
         "foreign_language": false,
-        "field_error": true,
+        "field_error": false,
         "awkward_sentence": false,
-        "field_accuracy": 0.6666666666666666,
-        "wrong_fields": [
-          "steps"
-        ],
-        "deduction_score": 76
+        "field_accuracy": 1.0,
+        "wrong_fields": [],
+        "deduction_score": 96
       },
       "llm": {
         "format_ok": true,
@@ -675,9 +665,10 @@
         "foreign_language": false,
         "field_error": true,
         "awkward_sentence": false,
-        "field_accuracy": 0.75,
+        "field_accuracy": 0.5,
         "wrong_fields": [
-          "changes"
+          "audience",
+          "actions"
         ],
         "deduction_score": 80
       },
@@ -737,17 +728,17 @@
       "alias": "qwen2.5-7b",
       "human": {
         "format_ok": true,
-        "usable": false,
-        "usable_reading": false,
+        "usable": true,
+        "usable_reading": true,
         "coverage": 1.0,
         "hallucination": false,
-        "numeric_error": true,
+        "numeric_error": false,
         "foreign_language": false,
         "field_error": false,
         "awkward_sentence": false,
         "field_accuracy": 1.0,
         "wrong_fields": [],
-        "deduction_score": 80
+        "deduction_score": 100
       },
       "llm": {
         "format_ok": true,
@@ -771,18 +762,18 @@
       "human": {
         "format_ok": true,
         "usable": false,
-        "usable_reading": true,
-        "coverage": 1.0,
-        "hallucination": false,
+        "usable_reading": false,
+        "coverage": 0.8333333333333334,
+        "hallucination": true,
         "numeric_error": false,
         "foreign_language": false,
         "field_error": true,
-        "awkward_sentence": false,
+        "awkward_sentence": true,
         "field_accuracy": 0.75,
         "wrong_fields": [
           "changes"
         ],
-        "deduction_score": 80
+        "deduction_score": 46
       },
       "llm": {
         "format_ok": true,
@@ -809,17 +800,18 @@
         "format_ok": true,
         "usable": false,
         "usable_reading": false,
-        "coverage": 1.0,
-        "hallucination": false,
+        "coverage": 0.0,
+        "hallucination": true,
         "numeric_error": false,
         "foreign_language": true,
         "field_error": true,
         "awkward_sentence": true,
-        "field_accuracy": 0.6666666666666666,
+        "field_accuracy": 0.3333333333333333,
         "wrong_fields": [
-          "prerequisites"
+          "steps",
+          "cautions"
         ],
-        "deduction_score": 60
+        "deduction_score": 20
       },
       "llm": {
         "format_ok": true,
@@ -844,20 +836,17 @@
       "alias": "qwen2.5-7b",
       "human": {
         "format_ok": true,
-        "usable": false,
+        "usable": true,
         "usable_reading": true,
         "coverage": 0.8333333333333334,
         "hallucination": false,
         "numeric_error": false,
         "foreign_language": false,
-        "field_error": true,
-        "awkward_sentence": true,
-        "field_accuracy": 0.5,
-        "wrong_fields": [
-          "audience",
-          "actions"
-        ],
-        "deduction_score": 66
+        "field_error": false,
+        "awkward_sentence": false,
+        "field_accuracy": 1.0,
+        "wrong_fields": [],
+        "deduction_score": 96
       },
       "llm": {
         "format_ok": true,
@@ -923,10 +912,9 @@
         "foreign_language": false,
         "field_error": true,
         "awkward_sentence": false,
-        "field_accuracy": 0.5,
+        "field_accuracy": 0.75,
         "wrong_fields": [
-          "actions",
-          "changes"
+          "schedule"
         ],
         "deduction_score": 60
       },
@@ -954,20 +942,17 @@
       "alias": "qwen2.5-7b",
       "human": {
         "format_ok": true,
-        "usable": false,
+        "usable": true,
         "usable_reading": true,
         "coverage": 0.8333333333333334,
         "hallucination": false,
         "numeric_error": false,
         "foreign_language": false,
-        "field_error": true,
+        "field_error": false,
         "awkward_sentence": false,
-        "field_accuracy": 0.5,
-        "wrong_fields": [
-          "actions",
-          "changes"
-        ],
-        "deduction_score": 76
+        "field_accuracy": 1.0,
+        "wrong_fields": [],
+        "deduction_score": 96
       },
       "llm": {
         "format_ok": true,
@@ -1026,17 +1011,15 @@
       "human": {
         "format_ok": true,
         "usable": false,
-        "usable_reading": true,
+        "usable_reading": false,
         "coverage": 1.0,
-        "hallucination": false,
+        "hallucination": true,
         "numeric_error": false,
         "foreign_language": false,
-        "field_error": true,
+        "field_error": false,
         "awkward_sentence": false,
-        "field_accuracy": 0.75,
-        "wrong_fields": [
-          "follow_ups"
-        ],
+        "field_accuracy": 1.0,
+        "wrong_fields": [],
         "deduction_score": 80
       },
       "llm": {
@@ -1061,16 +1044,18 @@
       "human": {
         "format_ok": true,
         "usable": false,
-        "usable_reading": false,
-        "coverage": 0.8333333333333334,
-        "hallucination": true,
+        "usable_reading": true,
+        "coverage": 1.0,
+        "hallucination": false,
         "numeric_error": false,
         "foreign_language": false,
-        "field_error": false,
-        "awkward_sentence": false,
-        "field_accuracy": 1.0,
-        "wrong_fields": [],
-        "deduction_score": 76
+        "field_error": true,
+        "awkward_sentence": true,
+        "field_accuracy": 0.6666666666666666,
+        "wrong_fields": [
+          "prerequisites"
+        ],
+        "deduction_score": 70
       },
       "llm": {
         "format_ok": true,
@@ -1093,19 +1078,17 @@
       "alias": "openai",
       "human": {
         "format_ok": true,
-        "usable": false,
-        "usable_reading": false,
+        "usable": true,
+        "usable_reading": true,
         "coverage": 1.0,
         "hallucination": false,
-        "numeric_error": true,
+        "numeric_error": false,
         "foreign_language": false,
-        "field_error": true,
+        "field_error": false,
         "awkward_sentence": false,
-        "field_accuracy": 0.6666666666666666,
-        "wrong_fields": [
-          "prerequisites"
-        ],
-        "deduction_score": 60
+        "field_accuracy": 1.0,
+        "wrong_fields": [],
+        "deduction_score": 100
       },
       "llm": {
         "format_ok": true,
@@ -1135,10 +1118,10 @@
         "numeric_error": false,
         "foreign_language": false,
         "field_error": false,
-        "awkward_sentence": false,
+        "awkward_sentence": true,
         "field_accuracy": 1.0,
         "wrong_fields": [],
-        "deduction_score": 100
+        "deduction_score": 90
       },
       "llm": {
         "format_ok": true,
@@ -1161,17 +1144,20 @@
       "alias": "qwen3-4b",
       "human": {
         "format_ok": true,
-        "usable": true,
+        "usable": false,
         "usable_reading": true,
         "coverage": 1.0,
         "hallucination": false,
         "numeric_error": false,
         "foreign_language": false,
-        "field_error": false,
+        "field_error": true,
         "awkward_sentence": false,
-        "field_accuracy": 1.0,
-        "wrong_fields": [],
-        "deduction_score": 100
+        "field_accuracy": 0.5,
+        "wrong_fields": [
+          "decisions",
+          "follow_ups"
+        ],
+        "deduction_score": 80
       },
       "llm": {
         "format_ok": true,
@@ -1234,10 +1220,10 @@
         "numeric_error": false,
         "foreign_language": false,
         "field_error": false,
-        "awkward_sentence": false,
+        "awkward_sentence": true,
         "field_accuracy": 1.0,
         "wrong_fields": [],
-        "deduction_score": 100
+        "deduction_score": 90
       },
       "llm": {
         "format_ok": true,
@@ -1264,147 +1250,136 @@
     ],
     "items": 36,
     "ties": [
-      "H04 field:actions",
-      "H05 numeric_error",
-      "H05 field:owners",
-      "H07 rp2",
-      "H09 hallucination",
-      "H16 foreign_language",
-      "H16 awkward_sentence",
-      "H22 numeric_error",
-      "H25 awkward_sentence",
-      "H25 field:audience",
-      "H28 rp2",
-      "H28 field:changes",
-      "H30 field:follow_ups",
-      "H31 rp2",
-      "H32 field:prerequisites"
+      "H03 field:actions",
+      "H04 field:audience",
+      "H17 awkward_sentence",
+      "H23 rp3",
+      "H27 field:schedule",
+      "H31 awkward_sentence",
+      "H33 awkward_sentence",
+      "H36 awkward_sentence"
     ],
     "problems": [],
     "fleiss_kappa": {
-      "hallucination": 0.1358024691358025,
-      "numeric_error": 0.1826189078097469,
-      "foreign_language": 0.17739694302918055,
-      "field_error": 0.3869969040247677,
-      "awkward_sentence": 0.03225806451612827,
-      "usable": 0.14823914823914836
+      "hallucination": 0.6611764705882355,
+      "numeric_error": -0.03597122302158152,
+      "foreign_language": 1.0,
+      "field_error": 0.6041666666666666,
+      "awkward_sentence": 0.23333333333333287,
+      "usable": 0.5541795665634676
     },
     "rater_pabak": {
-      "hallucination": 0.35185185185185186,
-      "numeric_error": 0.7314814814814814,
-      "foreign_language": 0.6574074074074074,
-      "field_error": 0.38888888888888884,
-      "awkward_sentence": 0.537037037037037,
-      "usable": 0.39814814814814814
+      "hallucination": 0.8055555555555556,
+      "numeric_error": 0.8611111111111112,
+      "foreign_language": 1.0,
+      "field_error": 0.6481481481481481,
+      "awkward_sentence": 0.574074074074074,
+      "usable": 0.5555555555555556
     },
     "llm_vs_human": {
       "hallucination": {
-        "agreement": 0.9166666666666666,
-        "cohen_kappa": 0.5344827586206892,
-        "pabak": 0.8333333333333333
+        "agreement": 0.8888888888888888,
+        "cohen_kappa": 0.45454545454545403,
+        "pabak": 0.7777777777777777
       },
       "numeric_error": {
-        "agreement": 0.9166666666666666,
-        "cohen_kappa": 0.0,
-        "pabak": 0.8333333333333333
+        "agreement": 1.0,
+        "cohen_kappa": 1.0,
+        "pabak": 1.0
       },
       "foreign_language": {
-        "agreement": 0.9722222222222222,
-        "cohen_kappa": 0.6538461538461537,
-        "pabak": 0.9444444444444444
+        "agreement": 1.0,
+        "cohen_kappa": 1.0,
+        "pabak": 1.0
       },
       "field_error": {
-        "agreement": 0.9166666666666666,
-        "cohen_kappa": 0.8280254777070063,
-        "pabak": 0.8333333333333333
+        "agreement": 0.6944444444444444,
+        "cohen_kappa": 0.30281690140845074,
+        "pabak": 0.38888888888888884
       },
       "awkward_sentence": {
-        "agreement": 0.9444444444444444,
-        "cohen_kappa": 0.47826086956521785,
-        "pabak": 0.8888888888888888
+        "agreement": 0.8611111111111112,
+        "cohen_kappa": 0.25,
+        "pabak": 0.7222222222222223
       },
       "usable": {
-        "agreement": 0.8055555555555556,
-        "cohen_kappa": 0.625,
-        "pabak": 0.6111111111111112
+        "agreement": 0.6944444444444444,
+        "cohen_kappa": 0.3486842105263157,
+        "pabak": 0.38888888888888884
       },
-      "deduction_score_pearson": 0.6933792331778778
+      "deduction_score_pearson": 0.5916289587764304
     },
     "llm_trust_decision": {
-      "usable_positive_ratio": 0.5138888888888888,
+      "usable_positive_ratio": 0.625,
       "skewed": false,
       "criterion": "cohen_kappa",
-      "value": 0.625,
+      "value": 0.3486842105263157,
       "threshold": 0.7,
       "use_llm_scores": false,
-      "cohen_kappa": 0.625,
-      "pabak": 0.6111111111111112
+      "cohen_kappa": 0.3486842105263157,
+      "pabak": 0.38888888888888884
     }
   },
   "targets": {
     "qwen3-4b": {
       "n": 12,
-      "usable_rate": 0.4166666666666667,
-      "usable_reading_rate": 0.6666666666666666,
-      "coverage_mean": 0.9444444444444444,
-      "hallucination_rate": 0.25,
+      "usable_rate": 0.3333333333333333,
+      "usable_reading_rate": 0.5,
+      "coverage_mean": 0.9166666666666666,
+      "hallucination_rate": 0.3333333333333333,
       "numeric_error_rate": 0.0,
       "foreign_language_rate": 0.0,
-      "field_error_rate": 0.4166666666666667,
-      "field_accuracy_mean": 0.8472222222222222,
+      "field_error_rate": 0.5,
+      "field_accuracy_mean": 0.8402777777777778,
       "wrong_field_counts": {
+        "prerequisites": 2,
         "audience": 1,
-        "actions": 2,
-        "steps": 1,
-        "changes": 2,
+        "changes": 1,
+        "schedule": 1,
+        "decisions": 1,
         "follow_ups": 1
       },
-      "awkward_sentence_rate": 0.0,
-      "deduction_score_mean": 85.33333333333333,
+      "awkward_sentence_rate": 0.25,
+      "deduction_score_mean": 78.83333333333333,
       "format_fail_rate": 0.0
     },
     "openai": {
       "n": 12,
-      "usable_rate": 0.3333333333333333,
-      "usable_reading_rate": 0.5833333333333334,
-      "coverage_mean": 0.9861111111111112,
-      "hallucination_rate": 0.16666666666666666,
-      "numeric_error_rate": 0.16666666666666666,
-      "foreign_language_rate": 0.08333333333333333,
-      "field_error_rate": 0.5,
-      "field_accuracy_mean": 0.8402777777777778,
+      "usable_rate": 0.8333333333333334,
+      "usable_reading_rate": 0.9166666666666666,
+      "coverage_mean": 1.0,
+      "hallucination_rate": 0.08333333333333333,
+      "numeric_error_rate": 0.0,
+      "foreign_language_rate": 0.0,
+      "field_error_rate": 0.08333333333333333,
+      "field_accuracy_mean": 0.9791666666666666,
       "wrong_field_counts": {
-        "decisions": 1,
-        "owners": 1,
-        "follow_ups": 2,
-        "steps": 1,
-        "changes": 1,
-        "prerequisites": 1
+        "actions": 1
       },
-      "awkward_sentence_rate": 0.08333333333333333,
-      "deduction_score_mean": 81.33333333333333,
+      "awkward_sentence_rate": 0.16666666666666666,
+      "deduction_score_mean": 95,
       "format_fail_rate": 0.0
     },
     "qwen2.5-7b": {
       "n": 12,
-      "usable_rate": 0.5,
-      "usable_reading_rate": 0.75,
-      "coverage_mean": 0.9444444444444444,
-      "hallucination_rate": 0.0,
-      "numeric_error_rate": 0.08333333333333333,
+      "usable_rate": 0.75,
+      "usable_reading_rate": 0.8333333333333334,
+      "coverage_mean": 0.8611111111111112,
+      "hallucination_rate": 0.08333333333333333,
+      "numeric_error_rate": 0.0,
       "foreign_language_rate": 0.08333333333333333,
-      "field_error_rate": 0.4166666666666667,
-      "field_accuracy_mean": 0.8472222222222222,
+      "field_error_rate": 0.25,
+      "field_accuracy_mean": 0.8819444444444444,
       "wrong_field_counts": {
-        "actions": 3,
-        "changes": 2,
-        "prerequisites": 1,
-        "audience": 1
+        "actions": 2,
+        "audience": 1,
+        "steps": 1,
+        "cautions": 1
       },
-      "awkward_sentence_rate": 0.16666666666666666,
-      "deduction_score_mean": 86.16666666666667,
+      "awkward_sentence_rate": 0.08333333333333333,
+      "deduction_score_mean": 88.66666666666667,
       "format_fail_rate": 0.0
     }
   },
-  "updated_at": "2026-10-12T17:21:14+09:00"
+  "updated_at": "2026-10-16T12:17:07+09:00"
 }
