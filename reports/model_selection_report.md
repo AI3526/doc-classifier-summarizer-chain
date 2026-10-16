@@ -330,7 +330,7 @@ flowchart LR
 |---|---|---|---|---|
 | 정상: 분류만 | `/classify` | 200 | – | announcement, 확신도 0.97 |
 | 정상: 로컬 모델 지정 | `/summarize` qwen2.5-7b | 200 | – | 회의록 요약 |
-| 정상: 일반 문서 자동 | `/summarize` | 200 | – | 기본 모델(gpt-6-luna)로 매뉴얼 요약, "잠정 선택" 경고 |
+| 정상: 일반 문서 자동 | `/summarize` | 200 | – | 기본 모델(select 결과 qwen2.5-7b)로 매뉴얼 요약, 경고 없음 |
 | 라우팅: 기밀 문서 자동 | `/summarize` 기밀 | 200 | – | qwen2.5-7b로 공지 요약 |
 | 라우팅: 기밀 문서를 상용 모델로 지정 | `/summarize` 기밀 + openai | 422 | `confidential_requires_local` | 로컬 모델 목록 안내 |
 | 공백만 입력 | `/classify` | 422 | `invalid_request` | text: 공백만 입력할 수 없습니다 |
@@ -339,12 +339,10 @@ flowchart LR
 | text 누락 | `/summarize` | 422 | `invalid_request` | text: 필수 |
 | Ollama 연결 불가 (모델 지정) | `/summarize` qwen2.5-7b | 503 | `generation_unavailable` | 분류 결과와 시도 기록을 함께 돌려줌 |
 | 생성 시간 초과 (모델 지정) | `/summarize` qwen2.5-7b | 504 | `generation_timeout` | 분류 결과와 시도 기록을 함께 돌려줌 |
-| 대체 경로: 상용 모델 사용 불가 | `/summarize` | 200 | – | gpt-6-luna 실패 → **qwen2.5-7b로 자동 전환**, 경고 표시 |
+| 대체 경로: 기본 모델 응답 없음 | `/summarize` | 200 | – | qwen2.5-7b 연결 실패 → **qwen3-4b로 자동 전환**, 경고 표시(`routing.attempts`에 qwen2.5-7b ConnectError → qwen3-4b 성공) |
 | 대체 경로: 기밀 문서, 로컬 모두 불가 | `/summarize` 기밀 | 503 | `generation_unavailable` | qwen2.5-7b → qwen3-4b 모두 실패, 상용 모델로 넘기지 않음 |
 
-※ 위 요청 예시는 기본 생성 모델이 gpt-6-luna(잠정)였을 때 실행한 기록이다. `select`(2026-10-16) 이후 기본 모델은 qwen2.5-7b이고 자동 라우팅은 로컬 모델만 쓰므로, "일반 문서 자동"은 qwen2.5-7b가 처리하고 "상용 모델 사용 불가 → 로컬 전환" 경로는 기본 생성 모델이 상용일 때만 동작한다. 요청 예시는 다시 생성하지 않았다.
-
-실패 상황은 Ollama 주소를 닫힌 포트로 바꾸거나, 시간 제한을 0.001초로 줄이거나, API 키를 잠시 지워 재현했다(`scripts/api_examples.py`). 오류 메시지에는 비밀값이 섞이지 않도록 예외 종류와 줄인 메시지만 담는다.
+실패 상황은 Ollama 주소를 닫힌 포트로 바꾸거나, 시간 제한을 0.001초로 줄이거나, 기본 생성 모델(qwen2.5-7b)만 닫힌 포트로 연결하게 만들어 재현했다(`scripts/api_examples.py`). 요청 예시는 기본 생성 모델이 qwen2.5-7b로 바뀐 뒤(select, 2026-10-16) 다시 만들었다(상용 모델 호출 없음, 약 35초). 오류 메시지에는 비밀값이 섞이지 않도록 예외 종류와 줄인 메시지만 담는다.
 
 ### 6.4 분류기와 로컬 LLM을 함께 실행할 때의 자원
 

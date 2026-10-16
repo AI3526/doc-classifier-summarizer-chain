@@ -53,22 +53,22 @@
       "model": "qwen2.5:7b",
       "status": "SUCCESS",
       "summary": {
-        "summary": "기록 보관함 열쇠의 반납 창구가 다음 달부터 안내실로 변경되며, 야간 반납은 받지 않으므로 운영 시간 내에 방문해야 한다.",
+        "summary": "기록 보관함 열쇠의 반납 창구가 다음 달부터 안내실로 변경되며, 야간 반납은 받지 않으므로 운영 시간 내에 방문해야 합니다.",
         "audience": null,
         "schedule": "다음 달부터",
         "actions": [],
         "changes": "기록 보관함 열쇠의 반납 창구가 다음 달부터 안내실로 변경된다."
       },
       "format_valid": true,
-      "latency_sec": 2.0489736003801227,
-      "ttft_sec": 0.4009762001223862,
+      "latency_sec": 2.2376286000944674,
+      "ttft_sec": 0.08619910012930632,
       "prompt_tokens": 1046,
       "completion_tokens": 106,
       "api_cost_usd": 0.0
     },
     "warnings": [],
-    "elapsed_sec": 2.079577900003642
+    "elapsed_sec": 2.287985799834132
   },
   "note": "기밀 문서 → 로컬 모델로만 처리",
-  "recorded_at": "2026-10-13T13:05:57+09:00"
+  "recorded_at": "2026-10-16T12:52:56+09:00"
 }

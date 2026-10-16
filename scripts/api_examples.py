@@ -9,7 +9,6 @@ uv run python scripts/api_examples.py
 """
 
 import json
-import os
 import sys
 from pathlib import Path
 
@@ -17,14 +16,16 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "steps"))
 
 import lesson_settings as lesson
+import step08_connect_chain as chain_module
 from common.preprocess import document_layout
 from common.records import now_iso, write_json
 from fastapi.testclient import TestClient
 from step01_read_data import read_jsonl, read_rows
-from step10_serve_api import app
+from step10_serve_api import app, default_target
 
 OUTPUT = lesson.OUTPUT_ROOT / lesson.DATASET / "service" / "api_examples"
 REPORT = ROOT / "reports" / "generated" / "api_examples.md"
+DEFAULT_TARGET = default_target()[0]  # select 결과(generation_selected.json)의 기본 생성 모델
 
 
 def main():
@@ -93,14 +94,27 @@ def main():
                 "기밀 문서, 로컬 모델이 모두 응답하지 않음 → 상용 모델로 넘기지 않고 실패")
         finally:
             lesson.OLLAMA_URL, lesson.TIMEOUT_SECONDS = original_url, original_timeout
-        key = os.environ.pop("OPENAI_API_KEY", None)
+        # 기본 생성 모델(select 결과)만 응답하지 않는 상황: 그 모델을 부를 때만 닫힌 포트로 연결하게 한다.
+        real_call_model = chain_module.call_model
+
+        def call_model_with_default_down(target, *args, **kwargs):
+            alias = target if isinstance(target, str) else target["alias"]
+            if alias != DEFAULT_TARGET:
+                return real_call_model(target, *args, **kwargs)
+            saved = lesson.OLLAMA_URL
+            lesson.OLLAMA_URL = "http://127.0.0.1:9"
+            try:
+                return real_call_model(target, *args, **kwargs)
+            finally:
+                lesson.OLLAMA_URL = saved
+
+        chain_module.call_model = call_model_with_default_down
         try:
             run("route_fallback_to_local", "대체 경로", "POST", "/summarize",
                 {"text": by_label["minutes"]},
-                "일반 문서, 상용 모델 사용 불가(키 없음)를 재현 → 로컬 모델로 넘김")
+                f"일반 문서, 기본 생성 모델({DEFAULT_TARGET})만 응답하지 않음을 재현 → 다음 로컬 모델로 넘김")
         finally:
-            if key:
-                os.environ["OPENAI_API_KEY"] = key
+            chain_module.call_model = real_call_model
 
     lines = ["# API 요청 예시", "",
              (f"`scripts/api_examples.py`가 생성. 생성 시각 {now_iso()}. 각 응답 전문은 "

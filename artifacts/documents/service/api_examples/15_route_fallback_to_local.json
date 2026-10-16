@@ -33,56 +33,54 @@
       "mode": "auto",
       "confidential": false,
       "plan": [
-        "openai",
         "qwen2.5-7b",
         "qwen3-4b"
       ],
-      "used_target": "qwen2.5-7b",
+      "used_target": "qwen3-4b",
       "fallback_used": true,
       "attempts": [
         {
-          "target": "openai",
+          "target": "qwen2.5-7b",
           "status": "ERROR",
-          "error": "RuntimeError"
+          "error": "ConnectError"
         },
         {
-          "target": "qwen2.5-7b",
+          "target": "qwen3-4b",
           "status": "SUCCESS",
           "error": null
         }
       ]
     },
     "generation": {
-      "target": "qwen2.5-7b",
+      "target": "qwen3-4b",
       "provider": "ollama",
-      "model": "qwen2.5:7b",
+      "model": "qwen3:4b-instruct-2507-q4_K_M",
       "status": "SUCCESS",
       "summary": {
-        "summary": "공용 라운지 조명의 자동 소등이 대화를 끊는다는 의견이 나왔고, 상시 점등 제안은 전력 사용을 더 살펴보기로 했다. 우선 시설 담당이 소등 전 알림을 시험하고 이용자 반응을 모으기로 했다.",
+        "summary": "공용 라운지 조명의 자동 소등이 대화를 끊는다는 의견이 제기되었고, 상시 점등의 필요성은 전력 사용을 살핀 뒤 결정하기로 했다. 우선 시설 담당이 소등 전 알림을 시험하고 이용자 반응을 모으기로 합의했다.",
         "discussion": [
           "공용 라운지 조명의 자동 소등이 대화를 끊는다는 의견"
         ],
         "decisions": [
-          "상시 점등 제안은 전력 사용을 더 살펴보기로 했다.",
-          "소등 전 알림을 시험하고 이용자 반응을 모으기로 했다."
+          "상시 점등의 필요성은 전력 사용을 살핀 뒤 결정한다."
         ],
         "owners": [
-          "시설 담당: 소등 전 알림 시험 및 이용자 반응 모음 (마감 미기재)"
+          "시설 담당: 소등 전 알림을 시험하고 이용자 반응을 모으기 (마감 미기재)"
         ],
         "follow_ups": []
       },
       "format_valid": true,
-      "latency_sec": 3.2665162002667785,
-      "ttft_sec": 0.23523400025442243,
-      "prompt_tokens": 1081,
-      "completion_tokens": 204,
+      "latency_sec": 6.691510000266135,
+      "ttft_sec": 4.1014159000478685,
+      "prompt_tokens": 1060,
+      "completion_tokens": 190,
       "api_cost_usd": 0.0
     },
     "warnings": [
-      "openai이(가) 응답하지 않아 qwen2.5-7b(으)로 처리했습니다."
+      "qwen2.5-7b이(가) 응답하지 않아 qwen3-4b(으)로 처리했습니다."
     ],
-    "elapsed_sec": 3.3232367001473904
+    "elapsed_sec": 8.7969351997599
   },
-  "note": "일반 문서, 상용 모델 사용 불가(키 없음)를 재현 → 로컬 모델로 넘김",
-  "recorded_at": "2026-10-13T13:06:11+09:00"
+  "note": "일반 문서, 기본 생성 모델(qwen2.5-7b)만 응답하지 않음을 재현 → 다음 로컬 모델로 넘김",
+  "recorded_at": "2026-10-16T12:53:17+09:00"
 }

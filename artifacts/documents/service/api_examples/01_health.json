@@ -16,15 +16,14 @@
       "kind": "transformer",
       "device": "cpu"
     },
-    "default_target": "openai",
-    "default_target_status": "provisional",
+    "default_target": "qwen2.5-7b",
+    "default_target_status": "final",
     "routing_plans": {
       "confidential": [
         "qwen2.5-7b",
         "qwen3-4b"
       ],
       "normal": [
-        "openai",
         "qwen2.5-7b",
         "qwen3-4b"
       ]
@@ -42,5 +41,5 @@
     "openai_key_configured": true
   },
   "note": "",
-  "recorded_at": "2026-10-13T13:05:47+09:00"
+  "recorded_at": "2026-10-16T12:52:47+09:00"
 }
