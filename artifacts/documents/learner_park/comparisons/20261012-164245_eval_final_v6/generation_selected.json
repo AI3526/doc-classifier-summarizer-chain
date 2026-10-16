@@ -1,24 +1,33 @@
 {
-  "status": "provisional",
-  "quality_source": "llm",
-  "llm_trust_decision": null,
+  "status": "final",
+  "quality_source": "human",
+  "llm_trust_decision": {
+    "usable_positive_ratio": 0.625,
+    "skewed": false,
+    "criterion": "cohen_kappa",
+    "value": 0.3486842105263157,
+    "threshold": 0.7,
+    "use_llm_scores": false,
+    "cohen_kappa": 0.3486842105263157,
+    "pabak": 0.38888888888888884
+  },
   "comparison": "20261012-164245_eval_final_v6",
   "prompt_version": "document_summary_v6",
   "structured_output": true,
-  "selected": "openai",
-  "model_type": "cloud",
-  "reason": "품질 하한을 만족하는 로컬 모델이 없어 상용 모델 선택",
+  "selected": "qwen2.5-7b",
+  "model_type": "local",
+  "reason": "품질 하한을 만족하는 로컬 모델 중 사용 가능률 → 환각률 → 응답 시간 순",
   "cloud_reference": "openai",
   "local_checks": {
-    "qwen2.5-7b": {
-      "usable_gap": 0.16666666666666663,
-      "hallucination_gap": -0.04166666666666667,
+    "qwen3-4b": {
+      "usable_gap": 0.5,
+      "hallucination_gap": 0.25,
       "passes": false
     },
-    "qwen3-4b": {
-      "usable_gap": 0.2916666666666667,
-      "hallucination_gap": 0.125,
-      "passes": false
+    "qwen2.5-7b": {
+      "usable_gap": 0.08333333333333337,
+      "hallucination_gap": 0.0,
+      "passes": true
     }
   },
   "rule": {
@@ -26,74 +35,63 @@
     "local_max_hallucination_gap": 0.1
   },
   "targets": {
-    "qwen2.5-7b": {
-      "n": 48,
-      "usable_rate": 0.5833333333333334,
-      "usable_reading_rate": 0.8541666666666666,
-      "coverage_mean": 0.9375,
-      "hallucination_rate": 0.020833333333333332,
-      "numeric_error_rate": 0.0,
-      "foreign_language_rate": 0.020833333333333332,
-      "field_error_rate": 0.4166666666666667,
-      "field_accuracy_mean": 0.875,
-      "wrong_field_counts": {
-        "schedule": 2,
-        "changes": 4,
-        "audience": 2,
-        "actions": 6,
-        "prerequisites": 2,
-        "decisions": 2,
-        "owners": 2,
-        "steps": 1,
-        "follow_ups": 2
-      },
-      "awkward_sentence_rate": 0.0625,
-      "deduction_score_mean": 88.91666666666667,
-      "format_fail_rate": 0.0
-    },
     "qwen3-4b": {
-      "n": 48,
-      "usable_rate": 0.4583333333333333,
-      "usable_reading_rate": 0.7291666666666666,
-      "coverage_mean": 0.9618055555555556,
-      "hallucination_rate": 0.1875,
+      "n": 12,
+      "usable_rate": 0.3333333333333333,
+      "usable_reading_rate": 0.5,
+      "coverage_mean": 0.9305555555555556,
+      "hallucination_rate": 0.3333333333333333,
       "numeric_error_rate": 0.0,
       "foreign_language_rate": 0.0,
-      "field_error_rate": 0.4583333333333333,
-      "field_accuracy_mean": 0.8246527777777778,
+      "field_error_rate": 0.4166666666666667,
+      "field_accuracy_mean": 0.8611111111111112,
       "wrong_field_counts": {
-        "actions": 7,
-        "changes": 10,
-        "audience": 4,
-        "steps": 3,
         "prerequisites": 2,
+        "audience": 1,
+        "changes": 1,
         "decisions": 1,
-        "follow_ups": 5
+        "follow_ups": 1
       },
-      "awkward_sentence_rate": 0.041666666666666664,
-      "deduction_score_mean": 85.75,
+      "awkward_sentence_rate": 0.08333333333333333,
+      "deduction_score_mean": 82.5,
       "format_fail_rate": 0.0
     },
     "openai": {
-      "n": 48,
-      "usable_rate": 0.75,
-      "usable_reading_rate": 0.9375,
-      "coverage_mean": 0.9930555555555556,
-      "hallucination_rate": 0.0625,
+      "n": 12,
+      "usable_rate": 0.8333333333333334,
+      "usable_reading_rate": 0.9166666666666666,
+      "coverage_mean": 1.0,
+      "hallucination_rate": 0.08333333333333333,
       "numeric_error_rate": 0.0,
       "foreign_language_rate": 0.0,
-      "field_error_rate": 0.25,
-      "field_accuracy_mean": 0.9201388888888888,
+      "field_error_rate": 0.08333333333333333,
+      "field_accuracy_mean": 0.9791666666666666,
       "wrong_field_counts": {
-        "steps": 3,
-        "decisions": 3,
-        "follow_ups": 5,
-        "audience": 1,
-        "actions": 1,
-        "prerequisites": 1
+        "actions": 1
       },
       "awkward_sentence_rate": 0.0,
-      "deduction_score_mean": 93.58333333333333,
+      "deduction_score_mean": 96.66666666666667,
+      "format_fail_rate": 0.0
+    },
+    "qwen2.5-7b": {
+      "n": 12,
+      "usable_rate": 0.75,
+      "usable_reading_rate": 0.8333333333333334,
+      "coverage_mean": 0.8611111111111112,
+      "hallucination_rate": 0.08333333333333333,
+      "numeric_error_rate": 0.0,
+      "foreign_language_rate": 0.08333333333333333,
+      "field_error_rate": 0.25,
+      "field_accuracy_mean": 0.8541666666666666,
+      "wrong_field_counts": {
+        "actions": 2,
+        "audience": 1,
+        "prerequisites": 1,
+        "steps": 1,
+        "cautions": 1
+      },
+      "awkward_sentence_rate": 0.08333333333333333,
+      "deduction_score_mean": 88.66666666666667,
       "format_fail_rate": 0.0
     }
   },
@@ -168,5 +166,5 @@
       "energy_wh_total_estimate": null
     }
   },
-  "selected_at": "2026-10-12T16:54:07+09:00"
+  "selected_at": "2026-10-16T12:43:48+09:00"
 }
